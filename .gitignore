@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+build/
+.eggs/
+.pytest_cache/
+
+# Registry database (user-specific, auto-regenerated)
+*.db
+
+# Generated outputs from examples (scoped so config JSON/CSV assets stay tracked)
+examples/*.png
+examples/*.csv
+examples/*.json
+*.png
+nozzle_result.*
+sweep_*.csv
+sweep_*.json
+results.csv
+results.json
+
+# Dev scratch
+_probe_tmp.py
+
+# Saved canvases (user-specific work, created via the web UI)
+canvases/*.py
+
+# Web frontend (anvil_web / anvil_web_v1)
+node_modules/
+anvil_web/dist/
+anvil_web_v1/dist/
+*.tsbuildinfo
+.env
+.env.local
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

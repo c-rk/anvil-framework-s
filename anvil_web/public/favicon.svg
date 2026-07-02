@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Anvil">
+  <rect width="64" height="64" rx="10" fill="#ffffff"/>
+  <!--
+    Blacksmith's anvil silhouette, solid black on white.
+    Reads as: a flat top face with a pointed horn on the left, a square heel
+    on the right, a narrow waist, and a flared trapezoidal base/foot.
+    Deliberately NOT a hammer-and-sickle / communist emblem.
+  -->
+  <path fill="#0a0a0a" d="
+    M 6 21
+    C 13 18, 22 18, 28 21
+    L 54 21
+    L 54 27
+    L 44 27
+    C 42 31, 38 33, 32 33
+    L 38 33
+    L 38 37
+    L 26 37
+    L 26 33
+    L 20 33
+    L 20 27
+    L 10 27
+    C 8 26, 7 23, 6 21
+    Z" />
+  <!-- flared base / foot -->
+  <path fill="#0a0a0a" d="
+    M 23 39
+    L 41 39
+    L 41 42
+    L 50 50
+    L 50 53
+    L 14 53
+    L 14 50
+    L 23 42
+    Z" />
+</svg>
