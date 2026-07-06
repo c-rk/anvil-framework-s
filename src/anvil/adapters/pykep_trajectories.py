@@ -20,13 +20,8 @@ INSTALLATION:
 VERIFY:
     python -c "import pykep; print(pykep.__version__)"
 
-MOCK MODE:
-    pykep_propagate: exact analytical fallback using universal variable Lagrange
-                     coefficients (matches pykep for Keplerian motion).
-    pykep_planet_state: approximate fallback using mean orbital elements at J2000.
-                        Accuracy ~1% for inner planets over short arcs.
-    pykep_lambert: no mock -- the Lambert problem requires iterative solvers
-                   that are non-trivial to replicate cleanly. Install pykep.
+REAL ONLY -- NO MOCK MODE:
+    Requires pykep; missing package raises ImportError for every adapter.
 
 ALL UNITS:
     pykep uses SI throughout (m, m/s, s, m^3/s^2). Anvil adapters pass and
@@ -211,6 +206,26 @@ def _planet_state_approx(planet, epoch_mjd2000):
     return (rx_eq, ry_eq, rz_eq), (vx_eq, vy_eq, vz_eq)
 
 
+def _require_pykep():
+    """Import pykep or raise with install instructions."""
+    try:
+        import pykep  # noqa: F401
+    except ImportError as exc:
+        raise ImportError(
+            "pykep is not installed. Install with: pip install pykep\n"
+            "Docs: https://esa.github.io/pykep/"
+        ) from exc
+
+
+def is_available() -> bool:
+    """True when pykep can be imported."""
+    try:
+        import pykep  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 # ── Adapter 1: pykep_lambert ──────────────────────────────────────────────────
 
 def _lambert_call(r0_x, r0_y, r0_z, r1_x, r1_y, r1_z, tof,
@@ -222,13 +237,8 @@ def _lambert_call(r0_x, r0_y, r0_z, r1_x, r1_y, r1_z, tof,
     multi_revs: max multi-revolution solutions (0 = single rev only).
     pykep REQUIRED -- no analytical fallback for Lambert.
     """
-    try:
-        import pykep as pk
-    except ImportError:
-        raise ImportError(
-            "pykep is required for pykep_lambert. No analytical fallback exists.\n"
-            "  Install: pip install pykep\n"
-            "  Docs:    https://esa.github.io/pykep/")
+    _require_pykep()
+    import pykep as pk
 
     r0 = [r0_x, r0_y, r0_z]
     r1 = [r1_x, r1_y, r1_z]
@@ -287,12 +297,9 @@ def _prop_call(r_x, r_y, r_z, v_x, v_y, v_z, dt, mu=GM_EARTH):
     r0 = [r_x, r_y, r_z]
     v0 = [v_x, v_y, v_z]
 
-    try:
-        import pykep as pk
-        r1, v1 = pk.propagate_lagrangian(r0, v0, dt, mu)
-
-    except ImportError:
-        r1, v1 = _lagrange_propagate(r0, v0, dt, mu)
+    _require_pykep()
+    import pykep as pk
+    r1, v1 = pk.propagate_lagrangian(r0, v0, dt, mu)
 
     return {
         "r_x_f": Q(r1[0], "m"),   "r_y_f": Q(r1[1], "m"),   "r_z_f": Q(r1[2], "m"),
@@ -334,14 +341,11 @@ def _planet_call(planet="earth", epoch_mjd2000=0.0):
     planet: "mercury","venus","earth","mars","jupiter","saturn","uranus","neptune"
     epoch_mjd2000: days since 2000-01-01.5 (MJD2000).
     """
-    try:
-        import pykep as pk
-        body  = pk.planet.jpl_lp(planet.lower())
-        epoch = pk.epoch(epoch_mjd2000, "mjd2000")
-        r_m, v_ms = body.eph(epoch)
-
-    except ImportError:
-        r_m, v_ms = _planet_state_approx(planet, epoch_mjd2000)
+    _require_pykep()
+    import pykep as pk
+    body  = pk.planet.jpl_lp(planet.lower())
+    epoch = pk.epoch(epoch_mjd2000, "mjd2000")
+    r_m, v_ms = body.eph(epoch)
 
     r_mag = math.sqrt(sum(x**2 for x in r_m))
     v_mag = math.sqrt(sum(x**2 for x in v_ms))
@@ -387,7 +391,7 @@ def register():
 # ── Smoke test ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("pykep adapters -- smoke test (mock fallback if pykep not installed)")
+    print("pykep adapters -- smoke test (requires pykep installed)")
     print()
 
     # Earth state at J2000

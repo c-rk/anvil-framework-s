@@ -60,6 +60,7 @@ import {
   type SweepConfig,
 } from "../lib/canvasGraph";
 import { readAutosave, writeAutosave } from "../lib/canvasStore";
+import { layeredLayout } from "../lib/layout";
 import { triggerDownload } from "../lib/export";
 import { fmtNum } from "../lib/numbers";
 
@@ -624,6 +625,12 @@ function BuilderInner({ entries, dropRequest }: Props) {
     [wireQuantities, relationData],
   );
 
+  // Re-lay all blocks left-to-right by dependency depth, then refit the view.
+  const autoAlign = useCallback(() => {
+    setNodes((ns: Node[]) => layeredLayout(ns, edges));
+    window.setTimeout(() => rfInstance?.fitView({ padding: 0.15 }), 50);
+  }, [edges, rfInstance, setNodes]);
+
   // ------------------------------- solve -----------------------------------
   const buildRequest = useCallback(
     (
@@ -978,6 +985,8 @@ function BuilderInner({ entries, dropRequest }: Props) {
           setSavedSig("");
           setWarnings(r.warnings?.length ? r.warnings : null);
           setWarnNote(null);
+          // Foreign scripts carry no layout metadata; align once measured.
+          window.setTimeout(autoAlign, 300);
         })
         .catch((e) => setToast(`import failed: ${String(e?.message ?? e)}`));
     });
@@ -1051,6 +1060,8 @@ function BuilderInner({ entries, dropRequest }: Props) {
         setSavedSig("");
         setWarnings(r.warnings?.length ? r.warnings : null);
         setWarnNote(null);
+        // Repo example scripts carry no layout metadata; align once measured.
+        window.setTimeout(autoAlign, 300);
       })
       .catch((e) => setToast(`example failed: ${String(e?.message ?? e)}`));
   }
@@ -1241,6 +1252,14 @@ function BuilderInner({ entries, dropRequest }: Props) {
             title="Streams residuals live; falls back to plain HTTP automatically."
           >
             Solve
+          </button>
+          <button
+            className="ghost-btn toolbar-btn"
+            onClick={autoAlign}
+            disabled={nodes.length === 0}
+            title="Arrange all blocks left-to-right by dependency depth (no overlaps)"
+          >
+            Align
           </button>
 
           <span className="toolbar-sep" />

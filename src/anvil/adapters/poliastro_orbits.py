@@ -18,10 +18,10 @@ INSTALLATION:
 VERIFY:
     python -c "import poliastro; print(poliastro.__version__)"
 
-MOCK MODE:
-    All three adapters fall back to exact analytical two-body solutions when
-    poliastro is not installed. Results match poliastro for unperturbed
-    Keplerian motion. Replace the library when perturbations are needed.
+REAL ONLY -- NO MOCK MODE:
+    Requires poliastro + astropy; missing packages raise ImportError. The
+    equivalent closed-form two-body math lives in the native orbital RSQs
+    (anvil.R.hohmann_transfer, vis_viva, orbital_period, ...).
 
 USAGE:
     from anvil.adapters.poliastro_orbits import poliastro_orbit, poliastro_hohmann, poliastro_propagate
@@ -97,10 +97,33 @@ def _advance_nu(nu_0, a, ecc, mu, dt):
     )
 
 
+def _require_poliastro():
+    """Import poliastro or raise with install instructions."""
+    try:
+        import poliastro  # noqa: F401
+        from astropy import units  # noqa: F401
+    except ImportError as exc:
+        raise ImportError(
+            "poliastro is not installed. Install with: "
+            "pip install poliastro astropy"
+        ) from exc
+
+
+def is_available() -> bool:
+    """True when poliastro + astropy can be imported."""
+    try:
+        import poliastro  # noqa: F401
+        from astropy import units  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 # ── Adapter 1: poliastro_orbit ────────────────────────────────────────────────
 
 def _orbit_call(a, ecc, inc, raan, argp, nu, mu=MU_EARTH):
-    try:
+    _require_poliastro()
+    if True:
         from poliastro.twobody import Orbit
         from poliastro.bodies import Earth
         from astropy import units as u
@@ -121,12 +144,6 @@ def _orbit_call(a, ecc, inc, raan, argp, nu, mu=MU_EARTH):
         a_km = float(orbit.a.to(u.m).value)
         ecc_v = float(orbit.ecc.value)
         ra, rp = a_km * (1.0 + ecc_v), a_km * (1.0 - ecc_v)
-
-    except ImportError:
-        rx, ry, rz, vx, vy, vz = _kep2eci(a, ecc, inc, raan, argp, nu, mu)
-        T  = 2.0 * math.pi * math.sqrt(a**3 / mu)
-        ra = a * (1.0 + ecc)
-        rp = a * (1.0 - ecc)
 
     return {
         "r_x": Q(rx, "m"),   "r_y": Q(ry, "m"),   "r_z": Q(rz, "m"),
@@ -172,7 +189,8 @@ def _hohmann_call(a_i, a_f, mu=MU_EARTH):
     Hohmann transfer between two coplanar circular orbits.
     a_i, a_f: orbit radii (= SMA for circular), m.
     """
-    try:
+    _require_poliastro()
+    if True:
         from poliastro.twobody import Orbit
         from poliastro.bodies import Earth
         from poliastro.maneuver import Maneuver
@@ -188,16 +206,6 @@ def _hohmann_call(a_i, a_f, mu=MU_EARTH):
         dv1 = float(np.linalg.norm(man.impulses[0][1].to(u.m / u.s).value))
         dv2 = float(np.linalg.norm(man.impulses[1][1].to(u.m / u.s).value))
         dv_total = float(man.get_total_cost().to(u.m / u.s).value)
-
-    except ImportError:
-        a_t  = 0.5 * (a_i + a_f)
-        v_i  = math.sqrt(mu / a_i)
-        v_f  = math.sqrt(mu / a_f)
-        v_t1 = math.sqrt(mu * (2.0 / a_i - 1.0 / a_t))
-        v_t2 = math.sqrt(mu * (2.0 / a_f - 1.0 / a_t))
-        dv1      = abs(v_t1 - v_i)
-        dv2      = abs(v_f  - v_t2)
-        dv_total = dv1 + dv2
 
     a_t = 0.5 * (a_i + a_f)
     t_transfer = math.pi * math.sqrt(a_t**3 / mu)
@@ -235,7 +243,8 @@ poliastro_hohmann = Adapter("poliastro_hohmann",
 
 def _propagate_call(a, ecc, inc, raan, argp, nu, dt, mu=MU_EARTH):
     """Propagate Keplerian orbit by dt seconds; return new ECI state."""
-    try:
+    _require_poliastro()
+    if True:
         from poliastro.twobody import Orbit
         from poliastro.bodies import Earth
         from astropy import units as u
@@ -254,10 +263,6 @@ def _propagate_call(a, ecc, inc, raan, argp, nu, dt, mu=MU_EARTH):
         rx, ry, rz = [float(x) for x in r_vec.to(u.m).value]
         vx, vy, vz = [float(x) for x in v_vec.to(u.m / u.s).value]
         nu_f = float(orbit_f.nu.to(u.rad).value)
-
-    except ImportError:
-        nu_f = _advance_nu(nu, a, ecc, mu, dt)
-        rx, ry, rz, vx, vy, vz = _kep2eci(a, ecc, inc, raan, argp, nu_f, mu)
 
     return {
         "r_x": Q(rx, "m"),   "r_y": Q(ry, "m"),   "r_z": Q(rz, "m"),
@@ -303,7 +308,7 @@ def register():
 if __name__ == "__main__":
     R_E = 6371e3
 
-    print("poliastro adapters -- smoke test (mock mode if poliastro not installed)")
+    print("poliastro adapters -- smoke test (requires poliastro installed)")
     print()
 
     # ISS-like LEO orbit

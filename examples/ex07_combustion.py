@@ -1,19 +1,22 @@
 """
-Example 7: Combustion Chamber Analysis (Cantera-Style Adapter)
-==============================================================
+Example 7: Combustion Chamber Analysis (Custom Empirical Adapter)
+==================================================================
 
 Demonstrates:
-    - Writing an Adapter for a thermochemistry library
-    - Mock Cantera interface (works without Cantera installed)
+    - Writing your own Adapter around an empirical model (no external
+      library needed -- the model IS the curve fit)
     - Composition: combustion -> nozzle -> performance
     - Sensitivity analysis: which inputs drive Isp?
 
 Engineering context:
-    Model a rocket combustion chamber using equilibrium thermochemistry.
-    The combustion adapter computes gas properties (Tc, gamma, R_gas, MW)
-    which feed into the nozzle system for thrust and Isp.
+    Model a rocket combustion chamber using LOX/RP-1 curve fits derived
+    from published NASA CEA data. The combustion adapter computes gas
+    properties (Tc, gamma, R_gas, MW) which feed into the nozzle system
+    for thrust and Isp.
 
-    If you have Cantera installed, replace the mock with real calls.
+    For exact equilibrium thermochemistry use the real library adapters:
+    anvil.adapters.cantera_thermo (Cantera) or
+    anvil.adapters.nasa_cea_detonation (NASA CEA).
     See docs/ADAPTER_GUIDE.md for the full Cantera adapter template.
 """
 
@@ -28,27 +31,26 @@ print("  Example 7: Combustion + Nozzle Analysis")
 print("=" * 60)
 
 # =====================================================
-# Mock Cantera adapter (replace with real Cantera calls)
+# Empirical curve-fit adapter (LOX/RP-1, from NASA CEA data)
 # =====================================================
 
-def mock_equilibrium(Pc, OF, fuel_name="RP1", oxidizer_name="LOX"):
+def lox_rp1_curvefit(Pc, OF, fuel_name="RP1", oxidizer_name="LOX"):
     """
-    Mock combustion equilibrium. In production, this would call:
+    LOX/RP-1 equilibrium properties from curve fits of NASA CEA data.
+    Valid roughly for OF 1.5-4.0 and Pc 1-30 MPa.
+
+    For exact equilibrium chemistry use anvil.adapters.cantera_thermo:
         import cantera as ct
         gas = ct.Solution('gri30.yaml')
         gas.set_equivalence_ratio(1/OF, fuel, oxidizer)
         gas.TP = 300, Pc
         gas.equilibrate('HP')
-        return {"Tc": gas.T, "gamma": gas.cp/gas.cv, ...}
-
-    This mock uses curve fits for LOX/RP-1 performance.
     """
-    # Simplified curve fits (real Cantera would compute these exactly)
-    # Based on NASA CEA data for LOX/RP-1
+    # Curve fits based on NASA CEA data for LOX/RP-1
     OF_opt = 2.7  # optimal O/F ratio
     Tc_peak = 3670  # K at optimal O/F
 
-    # Temperature varies with O/F (parabolic approximation)
+    # Temperature vs O/F (parabolic approximation)
     Tc = Tc_peak * (1 - 0.15 * ((OF - OF_opt) / OF_opt)**2)
     # Slight pressure dependence
     Tc = Tc * (1 + 0.02 * np.log(Pc / 1e6))
@@ -72,7 +74,7 @@ def mock_equilibrium(Pc, OF, fuel_name="RP1", oxidizer_name="LOX"):
 
 combustion = Adapter("lox_rp1_equilibrium",
     backend="python",
-    call=mock_equilibrium,
+    call=lox_rp1_curvefit,
     inputs={
         "Pc":   {"unit": "Pa", "desc": "Chamber pressure"},
         "OF":   {"desc": "Oxidizer-to-fuel mass ratio", "default": 2.7},
@@ -86,8 +88,8 @@ combustion = Adapter("lox_rp1_equilibrium",
         "MW":     {"unit": "g/mol",  "desc": "Mean molecular weight"},
         "cstar":  {"unit": "m/s",    "desc": "Characteristic velocity"},
     },
-    desc="LOX/RP-1 equilibrium combustion (mock Cantera)",
-    tags=["combustion", "propulsion", "cantera"],
+    desc="LOX/RP-1 equilibrium combustion (empirical NASA CEA curve fits)",
+    tags=["combustion", "propulsion", "curve-fit"],
 )
 
 # --- Direct call ---

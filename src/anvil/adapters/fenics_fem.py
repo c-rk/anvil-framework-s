@@ -16,9 +16,9 @@ INSTALLATION:
 VERIFY:
     python -c "import dolfinx; print(dolfinx.__version__)"
 
-MOCK MODE:
-    Elasticity: Euler-Bernoulli beam theory (analytically exact for uniform beams).
-    Heat conduction: 1D Fourier's law with geometric correction factor.
+REAL ONLY -- NO MOCK MODE:
+    Requires FEniCSx (dolfinx + mpi4py, via conda-forge). If it is not
+    installed, calls raise ImportError with the install command.
 
 USAGE:
     from anvil.adapters.fenics_fem import fenics_linear_elasticity
@@ -37,55 +37,25 @@ from anvil import Adapter, Q
 import math
 
 
-# ── Mock: beam theory ─────────────────────────────────────────────────────────
+def _require_dolfinx():
+    """Import dolfinx or raise with install instructions."""
+    try:
+        import dolfinx  # noqa: F401
+        from mpi4py import MPI  # noqa: F401
+    except ImportError as exc:
+        raise ImportError(
+            "FEniCSx (dolfinx) is not installed. Install with:\n"
+            "  conda install -c conda-forge fenics-dolfinx mpi4py petsc4py"
+        ) from exc
 
-def _mock_elasticity(E, nu, Lx, Ly, Lz, F_distributed):
-    """
-    Cantilever beam (fixed at x=0, distributed load on top face).
-    Uses Euler-Bernoulli theory — exact for slender beams (Ly,Lz << Lx).
-    """
-    E=float(E); Lx=float(Lx); Ly=float(Ly); Lz=float(Lz)
-    q = float(F_distributed)                  # N/m^2 → N/m per unit depth
-    w = q * Lz                                # total load intensity [N/m]
-    I = Lz * Ly**3 / 12.0                    # second moment about bending axis
-
-    # Max tip deflection (UDL cantilever): δ = wL^4 / (8EI)
-    delta_max = w * Lx**4 / (8.0 * E * I)
-
-    # Max bending stress at root: σ = M*c/I = (wL^2/2)*(Ly/2)/I
-    M_max = w * Lx**2 / 2.0
-    sigma_bending = M_max * (Ly / 2.0) / I
-
-    # Shear stress at neutral axis: τ = 3V/(2bh) where V = wL
-    V_max = w * Lx
-    tau_max = 3 * V_max / (2 * Lz * Ly)
-
-    # Von Mises at root bottom fibre (pure bending, no shear)
-    von_mises_max = math.sqrt(sigma_bending**2 + 3 * tau_max**2)
-
-    return delta_max, von_mises_max, sigma_bending
-
-
-def _mock_heat(k, Lx, Ly, Lz, T_left, T_right, Q_vol=0.0):
-    """1D Fourier + volumetric source (exact for uniform rod)."""
-    dT = float(T_right) - float(T_left)
-    k_ = float(k); Lx_ = float(Lx)
-    A  = float(Ly) * float(Lz)
-    q_vol = float(Q_vol)
-
-    # With volumetric source: T(x) = T_left + dT/L*x + q_vol/(2k)*x*(L-x)
-    # Max temp at x = L/2 for symmetric heating
-    if abs(q_vol) > 0:
-        x_peak = Lx_/2.0 if dT == 0 else (
-            -k_ * dT / Lx_ / q_vol + Lx_ / 2.0)
-        x_peak = max(0.0, min(Lx_, x_peak))
-        T_max = float(T_left) + (dT/Lx_)*x_peak + q_vol/(2*k_)*x_peak*(Lx_-x_peak)
-    else:
-        T_max = max(float(T_left), float(T_right))
-        x_peak = 0.0 if float(T_right) > float(T_left) else Lx_
-
-    flux = k_ * A * abs(dT) / Lx_   # Fourier heat flux [W]
-    return T_max, flux
+def is_available() -> bool:
+    """True when dolfinx + mpi4py can be imported."""
+    try:
+        import dolfinx  # noqa: F401
+        from mpi4py import MPI  # noqa: F401
+        return True
+    except ImportError:
+        return False
 
 
 # ── FEniCSx linear elasticity ─────────────────────────────────────────────────
@@ -99,13 +69,14 @@ def _elasticity_call(E, nu, Lx, Ly, Lz, F_distributed,
     Ly_=float(Ly); Lz_=float(Lz); F_=float(F_distributed)
     nx_=int(nx); ny_=int(ny); nz_=int(nz)
 
-    try:
-        import dolfinx, dolfinx.fem as fem
-        import dolfinx.fem.petsc, ufl
-        from dolfinx.mesh import create_box, CellType
-        from mpi4py import MPI
-        import numpy as np
+    _require_dolfinx()
+    import dolfinx, dolfinx.fem as fem
+    import dolfinx.fem.petsc, ufl
+    from dolfinx.mesh import create_box, CellType
+    from mpi4py import MPI
+    import numpy as np
 
+    if True:
         mesh = create_box(
             MPI.COMM_WORLD,
             [[0.0, 0.0, 0.0], [Lx_, Ly_, Lz_]],
@@ -167,16 +138,7 @@ def _elasticity_call(E, nu, Lx, Ly, Lz, F_distributed,
             "source": "fenics",
         }
 
-    except (ImportError, Exception):
-        pass
 
-    # Analytical fallback
-    delta, vm, sigma_b = _mock_elasticity(E_, nu_, Lx_, Ly_, Lz_, F_)
-    return {
-        "max_displacement": Q(delta, "m"),
-        "max_von_mises":    Q(vm, "Pa"),
-        "source": "mock",
-    }
 
 
 fenics_linear_elasticity = Adapter(
@@ -197,7 +159,7 @@ fenics_linear_elasticity = Adapter(
     outputs={
         "max_displacement": {"unit": "m",   "desc": "Maximum nodal displacement magnitude"},
         "max_von_mises":    {"unit": "Pa",  "desc": "Maximum von Mises stress"},
-        "source":           {"desc": "fenics or mock"},
+        "source":           {"desc": "always 'fenics' (real run; no mock fallback)"},
     },
     desc="3D linear elasticity FEM via FEniCSx (dolfinx)",
     tags=["fenics", "FEM", "elasticity", "stress", "displacement"],
@@ -214,13 +176,14 @@ def _heat_call(k, Lx, Ly, Lz, T_left, T_right,
     k_=float(k); Lx_=float(Lx); Ly_=float(Ly); Lz_=float(Lz)
     TL=float(T_left); TR=float(T_right); Qv=float(Q_vol)
 
-    try:
-        import dolfinx, dolfinx.fem as fem
-        import dolfinx.fem.petsc, ufl
-        from dolfinx.mesh import create_box, CellType
-        from mpi4py import MPI
-        import numpy as np
+    _require_dolfinx()
+    import dolfinx, dolfinx.fem as fem
+    import dolfinx.fem.petsc, ufl
+    from dolfinx.mesh import create_box, CellType
+    from mpi4py import MPI
+    import numpy as np
 
+    if True:
         mesh = create_box(
             MPI.COMM_WORLD,
             [[0.0,0.0,0.0],[Lx_,Ly_,Lz_]],
@@ -251,11 +214,7 @@ def _heat_call(k, Lx, Ly, Lz, T_left, T_right,
         flux  = float(k_ * abs(T_arr.max() - T_arr.min()) / Lx_ * Ly_ * Lz_)
         return {"T_max": Q(T_max, "K"), "heat_flux": Q(flux, "W"), "source": "fenics"}
 
-    except (ImportError, Exception):
-        pass
 
-    T_max, flux = _mock_heat(k_, Lx_, Ly_, Lz_, TL, TR, Qv)
-    return {"T_max": Q(T_max, "K"), "heat_flux": Q(flux, "W"), "source": "mock"}
 
 
 fenics_heat_conduction = Adapter(
@@ -277,7 +236,7 @@ fenics_heat_conduction = Adapter(
     outputs={
         "T_max":     {"unit": "K", "desc": "Maximum temperature in domain"},
         "heat_flux": {"unit": "W", "desc": "Total heat flux through cross-section"},
-        "source":    {"desc": "fenics or mock"},
+        "source":    {"desc": "always 'fenics' (real run; no mock fallback)"},
     },
     desc="3D steady heat conduction FEM via FEniCSx (dolfinx)",
     tags=["fenics", "FEM", "heat", "conduction", "thermal"],

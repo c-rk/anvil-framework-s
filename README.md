@@ -148,7 +148,7 @@ wiki at `/wiki`, and the JSON/WebSocket API under `/api` and `/ws`. See
 - `docs/ANVIL_GUIDE.html` — Interactive guide (open in browser)
 - `docs/ANVIL_WIKI.html` — Complete reference wiki (open in browser, or served at `/wiki` by the backend)
 - `docs/wiki/` — Wiki source pages (Markdown)
-  - `09_builtin_rsqs.md` — All 87 RSQs with signatures and examples
+  - `09_builtin_rsqs.md` — All 101 RSQs with signatures and examples
   - `10_adapters.md` — Adapter pattern guide + all adapter reference
   - `19_signal_processing.md` — Signal processing RSQs reference
 

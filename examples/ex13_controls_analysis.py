@@ -19,6 +19,10 @@ Engineering context:
 """
 
 import sys, os
+
+# Windows consoles default to cp1252; this output uses Greek symbols.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import numpy as np
 
 

@@ -26,8 +26,9 @@ DESIGN:
     factory function (recommended) or re-uses the single instance (not
     thread-safe for parallel sweeps).
 
-MOCK MODE:
-    Each demo adapter has an analytical mock for testing without OpenMDAO.
+REAL ONLY -- NO MOCK MODE:
+    Requires OpenMDAO. Missing package raises ImportError with the install
+    command; there are no analytical fallbacks.
 
 USAGE:
     from anvil.adapters.openmdo_wrap import make_openmdo_adapter, openmdo_sellar
@@ -62,6 +63,25 @@ from anvil import Adapter, Q
 import math
 
 
+def _require_openmdao():
+    """Import openmdao or raise with install instructions."""
+    try:
+        import openmdao.api  # noqa: F401
+    except ImportError as exc:
+        raise ImportError(
+            "OpenMDAO is not installed. Install with: pip install openmdao"
+        ) from exc
+
+
+def is_available() -> bool:
+    """True when openmdao can be imported."""
+    try:
+        import openmdao.api  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 # ── Generic factory ───────────────────────────────────────────────────────────
 
 def make_openmdo_adapter(prob_factory, input_vars, output_vars,
@@ -93,13 +113,8 @@ def make_openmdo_adapter(prob_factory, input_vars, output_vars,
     tags = tags or ["openmdao", "MDO"]
 
     def _call(**kwargs):
-        try:
-            import openmdao.api as om
-        except ImportError:
-            raise ImportError(
-                "OpenMDAO not installed. pip install openmdao\n"
-                "This adapter has no mock fallback — install OpenMDAO to use it."
-            )
+        _require_openmdao()
+        import openmdao.api as om  # noqa: F401
         prob = prob_factory()
         # Set inputs
         for var_name, spec in input_vars.items():
@@ -151,16 +166,16 @@ def _sellar_call(x1, z1, z2):
     """
     Sellar (1996) coupled MDO problem.
     Two coupled disciplines (D1, D2), objective f and two constraints g1/g2.
-    Exact analytical solution available — used as mock.
     """
     for k, v in dict(x1=x1, z1=z1, z2=z2).items():
         if isinstance(v, Q): locals()[k] = float(v.si)
     x1=float(x1); z1=float(z1); z2=float(z2)
 
-    try:
-        import openmdao.api as om
-        import openmdao.test_suite.components.sellar as sellar
+    _require_openmdao()
+    import openmdao.api as om
+    import openmdao.test_suite.components.sellar as sellar
 
+    if True:
         prob = om.Problem()
         model = prob.model
         model.add_subsystem("d1", sellar.SellarDis1withDerivatives(),
@@ -184,25 +199,6 @@ def _sellar_call(x1, z1, z2):
         y2  = float(prob.get_val("y2"))
         return {"f": f, "g1": g1, "g2": g2, "y1": y1, "y2": y2,
                 "source": "openmdao"}
-    except (ImportError, Exception):
-        pass
-
-    # Analytical mock (Sellar equations)
-    # D1: y1 = z1^2 + z2 + x1 - 0.2*y2   (iterate)
-    # D2: y2 = sqrt(y1) + z1 + z2
-    y2 = 3.0; y1 = 1.0
-    for _ in range(50):
-        y1_new = z1**2 + z2 + x1 - 0.2 * y2
-        y2_new = max(y1_new, 1e-8)**0.5 + z1 + z2
-        if abs(y1_new - y1) + abs(y2_new - y2) < 1e-10:
-            y1, y2 = y1_new, y2_new
-            break
-        y1, y2 = y1_new, y2_new
-
-    f  = x1**2 + z2 + y1 + math.exp(-y2)
-    g1 = 3.16 - y1
-    g2 = y2 - 24.0
-    return {"f": f, "g1": g1, "g2": g2, "y1": y1, "y2": y2, "source": "mock"}
 
 
 openmdo_sellar = Adapter(
@@ -220,7 +216,7 @@ openmdo_sellar = Adapter(
         "g2": {"unit": "1", "desc": "Constraint 2 (≤ 0 for feasibility)"},
         "y1": {"unit": "1", "desc": "Coupling variable from discipline 1"},
         "y2": {"unit": "1", "desc": "Coupling variable from discipline 2"},
-        "source": {"desc": "openmdao or mock"},
+        "source": {"desc": "always openmdao (real run; no mock fallback)"},
     },
     desc="Sellar coupled MDO benchmark problem via OpenMDAO",
     tags=["openmdao", "MDO", "Sellar", "coupled", "benchmark"],
@@ -231,16 +227,17 @@ openmdo_sellar = Adapter(
 
 def _beam_call(F_tip, L_beam, E, b, h):
     """
-    Simple cantilever beam via OpenMDAO or analytical fallback.
+    Simple cantilever beam via OpenMDAO ExplicitComponent.
     Inputs: tip force, length, Young's modulus, cross-section b×h.
     """
     for k, v in {"F_tip": F_tip, "L_beam": L_beam, "E": E, "b": b, "h": h}.items():
         if isinstance(v, Q): locals()[k] = float(v.si)
     F=float(F_tip); L=float(L_beam); E_=float(E); b_=float(b); h_=float(h)
 
-    try:
-        import openmdao.api as om
+    _require_openmdao()
+    import openmdao.api as om
 
+    if True:
         class Beam(om.ExplicitComponent):
             def setup(self):
                 self.add_input("F",  val=1.0)
@@ -272,15 +269,6 @@ def _beam_call(F_tip, L_beam, E, b, h):
         I_val = float(prob.get_val("I_moment"))
         return {"deflection": Q(defl, "m"), "max_stress": Q(sigma, "Pa"),
                 "I_moment": Q(I_val, "m^4"), "source": "openmdao"}
-    except (ImportError, Exception):
-        pass
-
-    # Analytical
-    I      = b_ * h_**3 / 12.0
-    defl   = F * L**3 / (3 * E_ * I)
-    sigma  = F * L * (h_/2) / I
-    return {"deflection": Q(defl, "m"), "max_stress": Q(sigma, "Pa"),
-            "I_moment": Q(I, "m^4"), "source": "mock"}
 
 
 openmdo_beam = Adapter(
@@ -298,7 +286,7 @@ openmdo_beam = Adapter(
         "deflection": {"unit": "m",   "desc": "Tip deflection"},
         "max_stress": {"unit": "Pa",  "desc": "Maximum bending stress (root)"},
         "I_moment":   {"unit": "m^4", "desc": "Second moment of area"},
-        "source":     {"desc": "openmdao or mock"},
+        "source":     {"desc": "always openmdao (real run; no mock fallback)"},
     },
     desc="Cantilever beam structural analysis via OpenMDAO ExplicitComponent",
     tags=["openmdao", "structures", "beam", "FEA", "stress"],

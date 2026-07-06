@@ -5,11 +5,13 @@ Example 21: poliastro Adapter -- Orbit Design in Anvil
 Demonstrates the poliastro adapter for orbit state, Hohmann transfers,
 and propagation, all wired into Anvil Systems.
 
-poliastro is used automatically when installed; the adapters fall back
-to exact analytical two-body solutions otherwise.
+REAL ONLY -- NO MOCK MODE: requires poliastro + astropy installed; the
+example exits with install instructions otherwise. The equivalent
+closed-form two-body math lives in the native orbital RSQs
+(hohmann_transfer, vis_viva, orbital_period, ...).
 
 PREREQUISITES:
-    pip install poliastro astropy     (optional -- example runs without it)
+    pip install poliastro astropy
 
 WHAT THIS EXAMPLE DOES:
     1. Direct adapter calls -- LEO, GTO, polar orbit state
@@ -30,6 +32,7 @@ import numpy as np
 import anvil
 from anvil import Q
 
+from anvil.adapters import poliastro_orbits
 from anvil.adapters.poliastro_orbits import (
     poliastro_orbit, poliastro_hohmann, poliastro_propagate, register
 )
@@ -42,12 +45,13 @@ print("=" * W)
 print("  Example 21: poliastro Adapter")
 print("=" * W)
 
-try:
-    import poliastro
-    print(f"  poliastro {poliastro.__version__} found.")
-except ImportError:
-    print("  poliastro not installed -- running in analytical mock mode.")
+if not poliastro_orbits.is_available():
+    print("  poliastro not installed -- skipping example.")
+    print("  Install: pip install poliastro astropy")
+    raise SystemExit(0)
 
+import poliastro
+print(f"  poliastro {poliastro.__version__} found.")
 print()
 
 

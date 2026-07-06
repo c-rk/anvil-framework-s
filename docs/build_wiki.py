@@ -3,8 +3,12 @@ Build the Anvil wiki into a single self-contained HTML file.
 
 Usage:
     cd docs
-    python build_wiki.py          -> writes ANVIL_WIKI.html
+    python build_wiki.py          -> writes ANVIL_WIKI.html + index.html
     python build_wiki.py --open   -> build and open in browser
+
+ANVIL_WIKI.html is served at /wiki by anvil_server; index.html makes the
+docs/ folder directly deployable to a static host (Cloudflare Pages:
+output directory "docs", no build command).
 """
 
 import os
@@ -47,6 +51,8 @@ PAGES = [
     ("17",       "Abel Transform",         "wiki/17_abel.md"),
     ("18",       "CFD Solver",             "wiki/18_cfd.md"),
     ("19",       "Signal Processing",      "wiki/19_signal_processing.md"),
+    ("20",       "Web Workbench",          "wiki/20_workbench.md"),
+    ("21",       "Contributing",           "wiki/21_contributing.md"),
 ]
 
 # ── Markdown → HTML conversion ────────────────────────────────────────────────
@@ -83,7 +89,8 @@ SECTION_GROUPS = [
     ("Computation",      ["06", "07", "08"]),
     ("RSQs & Adapters",  ["09", "10"]),
     ("Analysis",         ["11", "12"]),
-    ("Reference",        ["13", "14", "15", "16", "17", "18"]),
+    ("Reference",        ["13", "14", "15", "16", "17", "18", "19"]),
+    ("Workbench & Dev",  ["20", "21"]),
 ]
 
 
@@ -443,12 +450,15 @@ def build():
             .replace("PAGES_PLACEHOLDER", pages_html)
             .replace("PAGES_DATA_PLACEHOLDER", pages_data))
 
+    # Write twice: ANVIL_WIKI.html (served at /wiki by anvil_server) and
+    # index.html (so docs/ deploys as-is to a static host, e.g. Cloudflare
+    # Pages with output directory "docs" and no build command).
     out = os.path.join(os.path.dirname(__file__), "ANVIL_WIKI.html")
-    with open(out, "w", encoding="utf-8") as f:
-        f.write(html)
-
-    size_kb = os.path.getsize(out) // 1024
-    print(f"Written: {out}  ({size_kb} KB)")
+    for target in (out, os.path.join(os.path.dirname(__file__), "index.html")):
+        with open(target, "w", encoding="utf-8") as f:
+            f.write(html)
+        size_kb = os.path.getsize(target) // 1024
+        print(f"Written: {target}  ({size_kb} KB)")
     return out
 
 

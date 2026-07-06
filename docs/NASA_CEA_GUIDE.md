@@ -213,19 +213,19 @@ print(f"CJ Pressure: {data.p:.4f} atm")
 
 ## Anvil Framework Integration
 
-### The Adapter (adapters/nasa_cea_detonation.py)
+### The Adapter (src/anvil/adapters/nasa_cea_detonation.py)
 
 This file wraps NASA CEA's DetonationSolver for use in Anvil Systems.
 It's ready to use -- just drop it in your adapters/ directory.
 
-See the adapter file at: `adapters/nasa_cea_detonation.py`
+See the adapter file at: `src/anvil/adapters/nasa_cea_detonation.py`
 
 ### Usage with Anvil
 
 ```python
 import anvil
 from anvil import System
-from adapters.nasa_cea_detonation import cea_detonation
+from anvil.adapters.nasa_cea_detonation import cea_detonation
 
 # Direct call: H2/O2 detonation
 result = cea_detonation(

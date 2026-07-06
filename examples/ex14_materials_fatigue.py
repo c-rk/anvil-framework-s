@@ -18,6 +18,10 @@ Engineering context:
 """
 
 import sys, os
+
+# Windows consoles default to cp1252; this output uses Greek symbols.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import numpy as np
 
 
@@ -294,12 +298,24 @@ struct_sys.add("KIc",              KIc)
 struct_sys.add("F_geometry",       1.12)
 struct_sys.use("fatigue_life_basquin")
 struct_sys.use("safety_factor")
-struct_sys.use("fracture_toughness_check")
+
+
+def fracture_check(sigma, a_crack, KIc, F_geometry):
+    """fracture_toughness_check with its safety_factor renamed so it doesn't
+    collide with the static safety_factor RSQ's output in the same system."""
+    r = dict(anvil.R.fracture_toughness_check(
+        sigma=sigma, a_crack=a_crack, KIc=KIc, F_geometry=F_geometry))
+    r["SF_fracture"] = r.pop("safety_factor")
+    return r
+
+
+struct_sys.use(fracture_check)
 
 r_final = struct_sys.solve_forward()
 print(f"\n  Integrated assessment at σ={design_stress/1e6:.0f} MPa:")
 print(f"    Fatigue life:     {_v(r_final['N_cycles']):.2e} cycles")
 print(f"    Static SF:        {_v(r_final['safety_factor']):.2f}")
+print(f"    Fracture SF:      {_v(r_final['SF_fracture']):.2f}")
 print(f"    Fracture KI/KIc:  {_v(r_final['KI'])/_v(r_final['KIc']):.3f}"
       f"  ({'CRITICAL' if bool(r_final['failed']) else 'safe'})")
 

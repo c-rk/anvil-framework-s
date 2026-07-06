@@ -497,9 +497,10 @@ _SEED_ENTRIES = [
          '        t_peak = np.pi / omega_d\n'
          '        t_settle = 4.0 / (zeta * omega_n)\n'
          '    t_rise = (1 - 0.4167 * zeta + 2.917 * zeta**2) / omega_n\n'
+         '    omega_d_out = omega_n * (1 - zeta**2)**0.5 if zeta < 1.0 else 0.0\n'
          '    return {"overshoot_pct": overshoot, "t_peak": t_peak,\n'
          '            "t_settle": t_settle, "t_rise": t_rise,\n'
-         '            "omega_d": omega_n * max((1 - zeta**2)**0.5, 0)}\n'
+         '            "omega_d": omega_d_out}\n'
          'export = second_order_metrics'
      )},
     {"name": "routh_hurwitz_2nd", "type": "R", "domain": "controls",

@@ -4,6 +4,10 @@ Anvil Adapter: Cantera Thermochemistry
 
 Wraps Cantera's equilibrium solver for combustion analysis.
 
+REAL ONLY -- NO MOCK MODE:
+    Requires Cantera; a missing package raises ImportError with the
+    install command.
+
 INSTALLATION:
   conda install -c cantera cantera     (recommended)
   pip install cantera                   (Linux/macOS)
@@ -14,6 +18,15 @@ Verify: python -c "import cantera; print(cantera.__version__)"
 
 from anvil import Adapter, Q
 import numpy as np
+
+
+def is_available() -> bool:
+    """True when Cantera can be imported."""
+    try:
+        import cantera  # noqa: F401
+        return True
+    except ImportError:
+        return False
 
 
 def _cea_rocket_call(fuel="H2", oxidizer="O2", OF=6.0, Pc=10e6, T_fuel=300, T_ox=90):

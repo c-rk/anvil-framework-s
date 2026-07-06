@@ -517,9 +517,14 @@ def minimize_global(func, bounds, method="differential_evolution", seed=None,
             func, bounds, seed=seed, maxiter=maxiter, callback=callback,
         )
     elif method == "shgo":
+        # Do NOT pass maxiter/maxfev here: any evaluation budget in shgo's
+        # options switches it into iterate-until-criteria mode, which loops
+        # indefinitely on multimodal functions (observed through scipy 1.15).
+        # The default single homology iteration terminates quickly; ftol is
+        # the only safe option to forward.
         result = _opt.shgo(
             func, bounds,
-            options={"maxiter": maxiter, "ftol": tol},
+            options={"ftol": tol},
             callback=callback,
         )
     elif method == "basinhopping":

@@ -1334,6 +1334,10 @@ textarea:focus-visible,
 .gnode-portlabel {
   color: var(--text);
   font-size: 0.74rem;
+  max-width: 118px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .gnode-port {
   width: 9px;

@@ -30,10 +30,9 @@ CASE TEMPLATE:
     and runs the solver. The mesh must already exist (blockMesh or snappyHexMesh
     already run).
 
-MOCK MODE:
-    Incompressible: lifting-line theory for CL, flat-plate drag polar for CD.
-    Compressible: Prandtl-Glauert compressible correction + wave drag approximation.
-    Not valid past stall or for heavily separated flows.
+REAL ONLY -- NO MOCK MODE:
+    Requires the OpenFOAM solver binaries on PATH and a prepared case
+    directory. Missing solver or case raises a RuntimeError.
 
 USAGE:
     from anvil.adapters.openfoam_cfd import openfoam_incompressible
@@ -51,34 +50,18 @@ from anvil import Adapter, Q
 import math, os, shutil, subprocess, tempfile, re as _re
 
 
-# ── Mock fallbacks ────────────────────────────────────────────────────────────
+def _require_solver(solver):
+    """Check the requested OpenFOAM solver binary is on PATH, or raise."""
+    if shutil.which(solver) is None:
+        raise RuntimeError(
+            f"OpenFOAM solver '{solver}' not found on PATH. Install OpenFOAM "
+            "(e.g. 'sudo apt install openfoam' on Ubuntu/WSL, or see "
+            "https://openfoam.org/download/) and source its environment."
+        )
 
-def _mock_incompressible(U_inf, alpha_deg, rho, nu, L_ref, A_ref):
-    alpha = math.radians(float(alpha_deg))
-    Re = float(U_inf) * float(L_ref) / float(nu)
-    CL = 2 * math.pi * alpha
-    CD_0 = 0.005 + 0.004 / max(Re / 1e6, 0.1) ** 0.2
-    CD   = CD_0 + CL**2 / (math.pi * 0.85 * 12.0)
-    CM   = -math.pi * 0.02 * math.cos(2 * alpha)   # camber contribution approximation
-    q    = 0.5 * float(rho) * float(U_inf)**2
-    F_lift = CL * q * float(A_ref)
-    F_drag = CD * q * float(A_ref)
-    return CL, CD, CM, F_lift, F_drag, Re
-
-def _mock_compressible(U_inf, alpha_deg, p_inf, T_inf, L_ref, A_ref, gamma=1.4):
-    R_air = 287.058
-    a_inf = math.sqrt(gamma * R_air * float(T_inf))
-    Mach  = float(U_inf) / a_inf
-    rho   = float(p_inf) / (R_air * float(T_inf))
-    beta  = math.sqrt(max(1.0 - Mach**2, 0.05))
-    alpha = math.radians(float(alpha_deg))
-    CL    = 2 * math.pi * alpha / beta
-    # Wave drag approximation (Küchemann)
-    CD_0  = 0.005 / beta
-    CD_wave = 0.0 if Mach < 0.8 else 20 * (Mach - 0.8)**2 * CL**2
-    CD    = CD_0 + CL**2 / (math.pi * 0.85 * 12.0 * beta) + CD_wave
-    q     = 0.5 * rho * float(U_inf)**2
-    return CL, CD, Mach, rho, q * float(A_ref) * CL, q * float(A_ref) * CD
+def is_available(solver="simpleFoam") -> bool:
+    """True when the given OpenFOAM solver binary is on PATH."""
+    return shutil.which(solver) is not None
 
 
 # ── OpenFOAM case patching utilities ─────────────────────────────────────────
@@ -173,35 +156,28 @@ def _incompressible_call(case_path, U_inf, alpha_deg,
     nu=float(nu); L_ref=float(L_ref); A_ref=float(A_ref)
     case_path = str(case_path) if not isinstance(case_path, str) else case_path
 
-    has_foam = shutil.which(solver) is not None
-    if has_foam and os.path.isdir(case_path):
-        _patch_U_file(case_path, U_inf, alpha_deg)
-        success = _run_solver(case_path, solver, int(n_cores))
-        if success:
-            res = _read_force_coefficients(case_path, solver)
-            if res is not None:
-                CL, CD, CM = res
-                q = 0.5 * rho * U_inf**2
-                return {
-                    "CL":     CL,
-                    "CD":     CD,
-                    "CM":     CM,
-                    "F_lift": Q(CL * q * A_ref, "N"),
-                    "F_drag": Q(CD * q * A_ref, "N"),
-                    "Re":     Q(U_inf * L_ref / nu, "1"),
-                    "source": "openfoam",
-                }
-
-    # Mock fallback
-    CL, CD, CM, FL, FD, Re = _mock_incompressible(U_inf, alpha_deg, rho, nu, L_ref, A_ref)
+    _require_solver(solver)
+    if not os.path.isdir(case_path):
+        raise RuntimeError(f"OpenFOAM case directory not found: {case_path}")
+    _patch_U_file(case_path, U_inf, alpha_deg)
+    if not _run_solver(case_path, solver, int(n_cores)):
+        raise RuntimeError(f"{solver} run failed; see log.solver in the case dir.")
+    res = _read_force_coefficients(case_path, solver)
+    if res is None:
+        raise RuntimeError(
+            "Solver finished but no force coefficients found under "
+            "postProcessing/ — add a forceCoeffs function object to controlDict."
+        )
+    CL, CD, CM = res
+    q = 0.5 * rho * U_inf**2
     return {
         "CL":     CL,
         "CD":     CD,
         "CM":     CM,
-        "F_lift": Q(FL, "N"),
-        "F_drag": Q(FD, "N"),
-        "Re":     Q(Re, "1"),
-        "source": "mock",
+        "F_lift": Q(CL * q * A_ref, "N"),
+        "F_drag": Q(CD * q * A_ref, "N"),
+        "Re":     Q(U_inf * L_ref / nu, "1"),
+        "source": "openfoam",
     }
 
 
@@ -227,7 +203,7 @@ openfoam_incompressible = Adapter(
         "F_lift": {"unit": "N", "desc": "Lift force"},
         "F_drag": {"unit": "N", "desc": "Drag force"},
         "Re":     {"unit": "1", "desc": "Reynolds number"},
-        "source": {"desc": "openfoam or mock"},
+        "source": {"desc": "always 'openfoam' (real run; no mock fallback)"},
     },
     desc="Incompressible external aerodynamics via OpenFOAM simpleFoam",
     tags=["openfoam", "CFD", "incompressible", "CL", "CD", "RANS"],
@@ -248,36 +224,30 @@ def _compressible_call(case_path, U_inf, alpha_deg,
     L_ref=float(L_ref); A_ref=float(A_ref)
     case_path = str(case_path) if not isinstance(case_path, str) else case_path
 
-    has_foam = shutil.which(solver) is not None
-    if has_foam and os.path.isdir(case_path):
-        _patch_U_file(case_path, U_inf, alpha_deg)
-        success = _run_solver(case_path, solver, int(n_cores))
-        if success:
-            res = _read_force_coefficients(case_path, solver)
-            if res is not None:
-                CL, CD, CM = res
-                R_air = 287.058
-                rho   = p_inf / (R_air * T_inf)
-                a     = math.sqrt(gamma * R_air * T_inf)
-                Mach  = U_inf / a
-                q     = 0.5 * rho * U_inf**2
-                return {
-                    "CL":   CL, "CD": CD, "CM": CM,
-                    "Mach": Q(Mach, "1"),
-                    "F_lift": Q(CL * q * A_ref, "N"),
-                    "F_drag": Q(CD * q * A_ref, "N"),
-                    "source": "openfoam",
-                }
-
-    # Mock fallback
-    CL, CD, Mach, rho, FL, FD = _mock_compressible(U_inf, alpha_deg, p_inf, T_inf,
-                                                      L_ref, A_ref, gamma)
+    _require_solver(solver)
+    if not os.path.isdir(case_path):
+        raise RuntimeError(f"OpenFOAM case directory not found: {case_path}")
+    _patch_U_file(case_path, U_inf, alpha_deg)
+    if not _run_solver(case_path, solver, int(n_cores)):
+        raise RuntimeError(f"{solver} run failed; see log.solver in the case dir.")
+    res = _read_force_coefficients(case_path, solver)
+    if res is None:
+        raise RuntimeError(
+            "Solver finished but no force coefficients found under "
+            "postProcessing/ — add a forceCoeffs function object to controlDict."
+        )
+    CL, CD, CM = res
+    R_air = 287.058
+    rho   = p_inf / (R_air * T_inf)
+    a     = math.sqrt(gamma * R_air * T_inf)
+    Mach  = U_inf / a
+    q     = 0.5 * rho * U_inf**2
     return {
-        "CL":     CL, "CD": CD, "CM": 0.0,
-        "Mach":   Q(Mach, "1"),
-        "F_lift": Q(FL, "N"),
-        "F_drag": Q(FD, "N"),
-        "source": "mock",
+        "CL":   CL, "CD": CD, "CM": CM,
+        "Mach": Q(Mach, "1"),
+        "F_lift": Q(CL * q * A_ref, "N"),
+        "F_drag": Q(CD * q * A_ref, "N"),
+        "source": "openfoam",
     }
 
 
@@ -304,7 +274,7 @@ openfoam_compressible = Adapter(
         "Mach":   {"unit": "1", "desc": "Freestream Mach number"},
         "F_lift": {"unit": "N", "desc": "Lift force"},
         "F_drag": {"unit": "N", "desc": "Drag force"},
-        "source": {"desc": "openfoam or mock"},
+        "source": {"desc": "always 'openfoam' (real run; no mock fallback)"},
     },
     desc="Compressible external aerodynamics via OpenFOAM rhoSimpleFoam",
     tags=["openfoam", "CFD", "compressible", "Mach", "transonic", "RANS"],

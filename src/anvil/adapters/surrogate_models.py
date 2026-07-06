@@ -21,11 +21,10 @@ VERIFY:
     python -c "import sklearn; print(sklearn.__version__)"
     python -c "import GPy; print(GPy.__version__)"
 
-MOCK MODE:
-    All adapters have fully functional mock modes using numpy/scipy only.
-    gaussian_process_1d mock: cubic spline interpolation (scipy).
-    polynomial_chaos_1d mock: numpy polyfit.
-    rbf_surrogate: always uses scipy (always available).
+REAL ONLY -- NO MOCK MODE:
+    GP adapters require scikit-learn; a missing package raises ImportError.
+    polynomial_chaos_1d (numpy polyfit) and rbf_surrogate (scipy RBF) are
+    real methods implemented directly on Anvil's core dependencies.
 
 USAGE:
     from anvil.adapters.surrogate_models import make_gp_adapter
@@ -51,18 +50,24 @@ import math
 import numpy as np
 
 
-# ── Mock fallbacks ────────────────────────────────────────────────────────────
+def _require_sklearn():
+    """Import scikit-learn or raise with install instructions."""
+    try:
+        import sklearn  # noqa: F401
+    except ImportError as exc:
+        raise ImportError(
+            "scikit-learn is not installed (needed for GP surrogates). "
+            "Install with: pip install scikit-learn"
+        ) from exc
 
-def _cubic_spline_predict(x_train, y_train, x_new):
-    """Minimal cubic spline without sklearn."""
-    from scipy.interpolate import CubicSpline
-    cs = CubicSpline(x_train, y_train)
-    y = float(cs(x_new))
-    # Rough uncertainty: distance to nearest training point × data std
-    dists = np.abs(x_train - x_new)
-    nearest_dist = float(dists.min())
-    y_std = float(np.std(y_train)) * min(nearest_dist / max(np.ptp(x_train), 1e-12), 1.0)
-    return y, y_std
+
+def is_available() -> bool:
+    """True when scikit-learn can be imported (GP surrogates usable)."""
+    try:
+        import sklearn  # noqa: F401
+        return True
+    except ImportError:
+        return False
 
 
 def _polyfit_predict(x_train, y_train, x_new, deg):
@@ -80,19 +85,15 @@ def _gp_1d_call(x, _X_train, _y_train, _gp_model=None, _x_scale=1.0, _y_scale=1.
     x_val = float(x)
     X_new = np.array([[x_val / _x_scale]])
 
-    if _gp_model is not None:
-        y_pred, y_std = _gp_model.predict(X_new, return_std=True)
-        return {
-            "y_pred": float(y_pred[0]) * _y_scale,
-            "y_std":  float(y_std[0]) * _y_scale,
-            "source": "sklearn_gp",
-        }
-
-    # Mock: cubic spline
-    x_tr = _X_train.ravel() * _x_scale
-    y_tr = _y_train.ravel() * _y_scale
-    y, y_std = _cubic_spline_predict(x_tr, y_tr, x_val)
-    return {"y_pred": y, "y_std": y_std, "source": "mock_spline"}
+    if _gp_model is None:
+        _require_sklearn()
+        raise RuntimeError("GP model was not fitted; rebuild via make_gp_adapter().")
+    y_pred, y_std = _gp_model.predict(X_new, return_std=True)
+    return {
+        "y_pred": float(y_pred[0]) * _y_scale,
+        "y_std":  float(y_std[0]) * _y_scale,
+        "source": "sklearn_gp",
+    }
 
 
 # ── Factory: GP surrogate from training data ──────────────────────────────────
@@ -131,45 +132,30 @@ def make_gp_adapter(X_train, y_train,
     X_n = X / x_scale
     y_n = y / y_scale
 
-    gp_model = None
-    try:
-        from sklearn.gaussian_process import GaussianProcessRegressor
-        from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
-        if kernel is None:
-            kernel = ConstantKernel(1.0) * RBF(1.0) + WhiteKernel(1e-2)
-        gp_model = GaussianProcessRegressor(kernel=kernel, normalize_y=normalize_y,
-                                            n_restarts_optimizer=5)
-        gp_model.fit(X_n, y_n if not normalize_y else y)
-        if not normalize_y:
-            gp_model._y_scale = y_scale
-    except (ImportError, Exception):
-        gp_model = None
+    _require_sklearn()
+    from sklearn.gaussian_process import GaussianProcessRegressor
+    from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
+    if kernel is None:
+        kernel = ConstantKernel(1.0) * RBF(1.0) + WhiteKernel(1e-2)
+    gp_model = GaussianProcessRegressor(kernel=kernel, normalize_y=normalize_y,
+                                        n_restarts_optimizer=5)
+    gp_model.fit(X_n, y_n if not normalize_y else y)
+    if not normalize_y:
+        gp_model._y_scale = y_scale
 
     def _call(**kwargs):
         x_val = float(kwargs.get(x_name, 0.0))
         if isinstance(kwargs.get(x_name), Q):
             x_val = float(kwargs[x_name].si)
 
-        if gp_model is not None:
-            X_new = np.array([[x_val / x_scale]])
-            try:
-                yp, ys = gp_model.predict(X_new, return_std=True)
-                y_pred = float(yp[0]) * y_scale
-                y_std  = float(ys[0]) * y_scale
-                return {
-                    y_name:         Q(y_pred, y_unit) if y_unit != "1" else y_pred,
-                    y_name + "_std": Q(y_std, y_unit) if y_unit != "1" else y_std,
-                    "source": "sklearn_gp",
-                }
-            except Exception:
-                pass
-
-        # Fallback: cubic spline
-        yp, ys = _cubic_spline_predict(X.ravel(), y, x_val)
+        X_new = np.array([[x_val / x_scale]])
+        yp, ys = gp_model.predict(X_new, return_std=True)
+        y_pred = float(yp[0]) * y_scale
+        y_std  = float(ys[0]) * y_scale
         return {
-            y_name:          Q(yp, y_unit) if y_unit != "1" else yp,
-            y_name + "_std": Q(ys, y_unit) if y_unit != "1" else ys,
-            "source": "mock_spline",
+            y_name:          Q(y_pred, y_unit) if y_unit != "1" else y_pred,
+            y_name + "_std": Q(y_std, y_unit) if y_unit != "1" else y_std,
+            "source": "sklearn_gp",
         }
 
     desc = desc or f"GP surrogate: {y_name} = f({x_name})"
@@ -179,7 +165,7 @@ def make_gp_adapter(X_train, y_train,
         outputs={
             y_name:          {"unit": y_unit, "desc": "GP mean prediction"},
             y_name + "_std": {"unit": y_unit, "desc": "GP predictive standard deviation"},
-            "source":        {"desc": "sklearn_gp or mock_spline"},
+            "source":        {"desc": "always sklearn_gp (real fit; no mock fallback)"},
         },
         desc=desc,
         tags=["surrogate", "GP", "regression", "sklearn"],
@@ -267,11 +253,11 @@ def make_rbf_adapter(X_train, y_train,
     function : str
         RBF kernel: "multiquadric", "gaussian", "linear", "cubic", "thin_plate".
     """
-    from scipy.interpolate import RBFInterpolant
-    X = np.asarray(X_train)
+    from scipy.interpolate import RBFInterpolator
+    X = np.asarray(X_train, dtype=float)
     if X.ndim == 1:
         X = X.reshape(-1, 1)
-    y = np.asarray(y_train).ravel()
+    y = np.asarray(y_train, dtype=float).ravel()
     n_feat = X.shape[1]
 
     if input_names is None:
@@ -279,15 +265,17 @@ def make_rbf_adapter(X_train, y_train,
     if input_units is None:
         input_units = ["1"] * n_feat
 
-    # Fit RBF
-    try:
-        rbf = RBFInterpolant(X, y, kernel=function)
-    except (ImportError, TypeError):
-        try:
-            from scipy.interpolate import Rbf
-            rbf = Rbf(*[X[:, i] for i in range(n_feat)], y, function=function)
-        except Exception:
-            rbf = None
+    # Fit RBF (scipy >= 1.7). Scale-dependent kernels need an epsilon; use
+    # the mean nearest-neighbour spacing of the training points.
+    kernel = {"thin_plate": "thin_plate_spline"}.get(function, function)
+    if kernel in ("multiquadric", "inverse_multiquadric",
+                  "inverse_quadratic", "gaussian"):
+        from scipy.spatial.distance import pdist
+        d = pdist(X)
+        eps = float(np.mean(d)) if d.size else 1.0
+        rbf = RBFInterpolator(X, y, kernel=kernel, epsilon=eps)
+    else:
+        rbf = RBFInterpolator(X, y, kernel=kernel)
 
     def _call(**kwargs):
         x_vals = []
@@ -299,20 +287,8 @@ def make_rbf_adapter(X_train, y_train,
                 v = float(v)
             x_vals.append(v)
 
-        if rbf is not None:
-            try:
-                X_new = np.array(x_vals).reshape(1, -1)
-                yp = float(rbf(X_new))
-            except Exception:
-                try:
-                    yp = float(rbf(*x_vals))
-                except Exception:
-                    # Nearest-neighbour fallback
-                    dists = np.linalg.norm(X - np.array(x_vals), axis=1)
-                    yp = float(y[np.argmin(dists)])
-        else:
-            dists = np.linalg.norm(X - np.array(x_vals), axis=1)
-            yp = float(y[np.argmin(dists)])
+        X_new = np.array(x_vals).reshape(1, -1)
+        yp = float(rbf(X_new)[0])
 
         return {
             y_name:  Q(yp, y_unit) if y_unit != "1" else yp,
@@ -347,22 +323,16 @@ def _demo_gp_call(x):
     X_tr = np.sort(rng.uniform(0, 2 * math.pi, 20))
     y_tr = np.sin(X_tr) + 0.05 * rng.standard_normal(20)
 
-    try:
-        from sklearn.gaussian_process import GaussianProcessRegressor
-        from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
-        kernel = ConstantKernel(1.0) * RBF(1.0) + WhiteKernel(1e-2)
-        gp = GaussianProcessRegressor(kernel=kernel, normalize_y=True,
-                                      n_restarts_optimizer=3)
-        gp.fit(X_tr.reshape(-1, 1), y_tr)
-        yp, ys = gp.predict([[x_val]], return_std=True)
-        return {"y_pred": float(yp[0]), "y_std": float(ys[0]),
-                "y_exact": math.sin(x_val), "source": "sklearn_gp"}
-    except (ImportError, Exception):
-        pass
-
-    yp, ys = _cubic_spline_predict(X_tr, y_tr, x_val)
-    return {"y_pred": yp, "y_std": ys,
-            "y_exact": math.sin(x_val), "source": "mock_spline"}
+    _require_sklearn()
+    from sklearn.gaussian_process import GaussianProcessRegressor
+    from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
+    kernel = ConstantKernel(1.0) * RBF(1.0) + WhiteKernel(1e-2)
+    gp = GaussianProcessRegressor(kernel=kernel, normalize_y=True,
+                                  n_restarts_optimizer=3)
+    gp.fit(X_tr.reshape(-1, 1), y_tr)
+    yp, ys = gp.predict([[x_val]], return_std=True)
+    return {"y_pred": float(yp[0]), "y_std": float(ys[0]),
+            "y_exact": math.sin(x_val), "source": "sklearn_gp"}
 
 
 gp_demo = Adapter(
@@ -374,9 +344,9 @@ gp_demo = Adapter(
         "y_pred":  {"unit": "1", "desc": "GP mean prediction"},
         "y_std":   {"unit": "1", "desc": "GP predictive std"},
         "y_exact": {"unit": "1", "desc": "Exact sin(x) for comparison"},
-        "source":  {"desc": "sklearn_gp or mock_spline"},
+        "source":  {"desc": "always sklearn_gp (real fit; no mock fallback)"},
     },
-    desc="Demo GP surrogate: noisy sin(x) training data (sklearn or mock)",
+    desc="Demo GP surrogate: noisy sin(x) training data (requires sklearn)",
     tags=["surrogate", "GP", "demo", "sklearn"],
 )
 

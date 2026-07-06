@@ -9,9 +9,10 @@ UNIT CONVENTION:
     This adapter converts Pa → bar internally before calling CEA.
 
 REQUIRES: pip install cea  (NASA CEA >= 3.0)
-If not installed, a physics-based mock using published CJ data is used.
+REAL ONLY -- NO MOCK MODE: if the cea package is not installed, calls raise
+ImportError with the install command.
 
-FULL OUTPUT (both real CEA and mock):
+FULL OUTPUT:
     Thermodynamic:    D_CJ, T_CJ, P_CJ, P_ratio, rho_CJ, gamma_CJ, MW_CJ, a_CJ
     Calorific:        cp_CJ, cv_CJ, e_CJ, h_CJ        [J/kg, J/kg/K]
     Transport:        mu_CJ [Pa*s], k_CJ [W/m/K], Pr_CJ [-]
@@ -37,11 +38,21 @@ def _cea_detonation(fuel="H2", oxidizer="O2", fuel_moles=2.0, ox_moles=1.0,
     """
     try:
         import cea as _cea
-        return _run_real_cea(_cea, fuel, oxidizer, fuel_moles,
-                             ox_moles, T1, P1, extra_species)
+    except ImportError as exc:
+        raise ImportError(
+            "NASA CEA is not installed. Install with: pip install cea"
+        ) from exc
+    return _run_real_cea(_cea, fuel, oxidizer, fuel_moles,
+                         ox_moles, T1, P1, extra_species)
+
+
+def is_available() -> bool:
+    """True when the NASA CEA python package can be imported."""
+    try:
+        import cea  # noqa: F401
+        return True
     except ImportError:
-        return _run_mock(fuel, oxidizer, fuel_moles, ox_moles, T1, P1,
-                         extra_species)
+        return False
 
 
 def _run_real_cea(cea, fuel, oxidizer, fuel_moles, ox_moles,
@@ -143,110 +154,6 @@ def _run_real_cea(cea, fuel, oxidizer, fuel_moles, ox_moles,
     return base
 
 
-def _run_mock(fuel, oxidizer, fuel_moles, ox_moles, T1, P1, extra_species):
-    """
-    Physics-based mock CJ detonation using published reference data.
-    Returns the same full output dict as the real CEA path.
-
-    P1 arrives in Pa (SI) from Anvil workspace.
-    """
-    P1_bar = float(P1) / 1e5
-    T1_K   = float(T1)
-
-    fuel_lower  = fuel.lower()
-    has_diluent = extra_species is not None and len(extra_species) > 0
-    diluent_ratio = (sum(extra_species.values()) / ox_moles
-                     if has_diluent and ox_moles > 0 else 0)
-
-    # Reference CJ data (stoichiometric, 300 K, 1 atm)
-    if fuel_lower in ("h2", "hydrogen"):
-        if has_diluent and diluent_ratio > 2:
-            D_ref, T_ref, P_rat_ref = 1968, 2949, 15.6
-            MW_ref, gamma_ref = 23.5, 1.163
-            species_ref = {"H2O": 0.42, "OH": 0.08, "H2": 0.28, "N2": 0.18, "H": 0.04}
-        else:
-            D_ref, T_ref, P_rat_ref = 2836, 3681, 18.7
-            MW_ref, gamma_ref = 14.6, 1.129
-            species_ref = {"H2O": 0.56, "OH": 0.12, "H": 0.08, "O": 0.05, "H2": 0.19}
-    elif fuel_lower in ("ch4", "methane"):
-        if has_diluent and diluent_ratio > 2:
-            D_ref, T_ref, P_rat_ref = 1801, 2784, 17.2
-            MW_ref, gamma_ref = 27.3, 1.161
-            species_ref = {"H2O": 0.28, "CO2": 0.18, "CO": 0.14, "N2": 0.32, "OH": 0.08}
-        else:
-            D_ref, T_ref, P_rat_ref = 2393, 3721, 29.6
-            MW_ref, gamma_ref = 22.4, 1.141
-            species_ref = {"H2O": 0.35, "CO2": 0.25, "CO": 0.20, "OH": 0.10, "H": 0.05, "O2": 0.05}
-    elif fuel_lower in ("c2h4", "ethylene"):
-        D_ref, T_ref, P_rat_ref = 2370, 3935, 33.7
-        MW_ref, gamma_ref = 24.1, 1.138
-        species_ref = {"H2O": 0.33, "CO2": 0.22, "CO": 0.25, "H2": 0.08, "OH": 0.09, "O": 0.03}
-    elif fuel_lower in ("c3h8", "propane"):
-        D_ref, T_ref, P_rat_ref = 2360, 3826, 30.5
-        MW_ref, gamma_ref = 25.2, 1.142
-        species_ref = {"H2O": 0.36, "CO2": 0.26, "CO": 0.22, "H2": 0.07, "OH": 0.07, "O": 0.02}
-    else:
-        D_ref, T_ref, P_rat_ref = 2200, 3500, 25.0
-        MW_ref, gamma_ref = 24.0, 1.15
-        species_ref = {"H2O": 0.35, "CO2": 0.25, "CO": 0.20, "OH": 0.10, "H": 0.10}
-
-    # Scale for initial conditions
-    T_factor = 1 + 0.0003 * (T1_K - 300)
-    P_factor = 1 + 0.01 * np.log(max(P1_bar, 0.01) / 1.01325)
-
-    D_CJ      = D_ref * T_factor
-    T_CJ      = T_ref * T_factor * P_factor
-    P_CJ_bar  = P1_bar * P_rat_ref * P_factor
-    P_CJ      = P_CJ_bar * 1e5
-    gamma_CJ  = gamma_ref
-    MW_CJ_gpm = MW_ref                        # g/mol
-    MW_CJ_kpm = MW_ref / 1000                 # kg/mol
-
-    R_spec = 8314.46 / MW_CJ_gpm             # J/(kg·K)
-    a_CJ   = np.sqrt(gamma_CJ * R_spec * T_CJ)
-    rho_CJ = P_CJ / (R_spec * T_CJ)
-    u_CJ   = D_CJ - a_CJ                     # particle velocity (CJ condition)
-
-    cp_CJ  = gamma_CJ * R_spec / (gamma_CJ - 1)
-    cv_CJ  = R_spec / (gamma_CJ - 1)
-    e_CJ   = cv_CJ * T_CJ
-    h_CJ   = cp_CJ * T_CJ
-
-    # Transport: Eucken's relation approximation
-    # μ ≈ 2.67e-6 * sqrt(MW[g/mol]) * T^0.6 / Omega  (very rough)
-    mu_CJ  = 2.67e-6 * MW_CJ_gpm**0.5 * T_CJ**0.6 / 1e5
-    k_CJ   = mu_CJ * cp_CJ * (9 * gamma_CJ - 5) / (4 * gamma_CJ)
-    Pr_CJ  = mu_CJ * cp_CJ / k_CJ
-
-    # Scale species fractions slightly for temperature/pressure
-    sp_scale = T_factor * P_factor
-    sp = {k: min(v * sp_scale / sum(species_ref.values()), 1.0)
-          for k, v in species_ref.items()}
-    # Renormalize to sum = 1
-    sp_total = sum(sp.values())
-    sp = {k: round(v / sp_total, 5) for k, v in sp.items()}
-
-    return {
-        "D_CJ":      Q(D_CJ,     "m/s"),
-        "T_CJ":      Q(T_CJ,     "K"),
-        "P_CJ":      Q(P_CJ,     "Pa"),
-        "P_ratio":   P_CJ_bar / P1_bar,
-        "rho_CJ":    Q(rho_CJ,   "kg/m^3"),
-        "gamma_CJ":  gamma_CJ,
-        "MW_CJ":     Q(MW_CJ_kpm, "kg/mol"),
-        "a_CJ":      Q(a_CJ,     "m/s"),
-        "u_CJ":      Q(u_CJ,     "m/s"),
-        "cp_CJ":     Q(cp_CJ,    "J/kg/K"),
-        "cv_CJ":     Q(cv_CJ,    "J/kg/K"),
-        "e_CJ":      Q(e_CJ,     "J/kg"),
-        "h_CJ":      Q(h_CJ,     "J/kg"),
-        "mu_CJ":     Q(mu_CJ,    "Pa*s"),
-        "k_CJ":      Q(k_CJ,     "W/m/K"),
-        "Pr_CJ":     Pr_CJ,
-        "species_CJ": sp,
-    }
-
-
 # ============================================================
 # Anvil Adapter declaration
 # ============================================================
@@ -288,7 +195,7 @@ cea_detonation = Adapter(
         # Species
         "species_CJ": {"desc": "Product mole fractions (dict: {species: fraction})"},
     },
-    desc="Chapman-Jouguet detonation via NASA CEA (or physics-based mock fallback)",
+    desc="Chapman-Jouguet detonation via NASA CEA (real only; no mock fallback)",
     tags=["detonation", "CJ", "CEA", "combustion", "Chapman-Jouguet"],
 )
 
@@ -311,9 +218,9 @@ if __name__ == "__main__":
 
     try:
         import cea
-        print(f"  NASA CEA {cea.__version__} found. Using real solver.\n")
+        print(f"  NASA CEA {cea.__version__} found.\n")
     except ImportError:
-        print("  NASA CEA not installed. Using physics-based mock.\n")
+        raise SystemExit("  NASA CEA not installed (pip install cea); cannot run test.")
 
     print("--- H2/O2 stoichiometric (1 atm, 300 K) ---")
     r = cea_detonation.func(fuel="H2", oxidizer="O2",

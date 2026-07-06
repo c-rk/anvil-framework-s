@@ -104,27 +104,44 @@ def _wrapper(r_x, r_y, r_z, v_x, v_y, v_z, dt, mu):
     return {"r_x_f": Q(r1[0], "m"), ...}
 ```
 
-### Mock mode pattern
+### Real-only availability pattern (NO mock fallbacks)
 
-When the external library is optional, wrap the import in `try/except ImportError` and fall back to an analytical or simplified implementation. This lets code using the adapter run — and lets Systems, sweeps, and tests execute — without the dependency installed.
+**Policy: adapters are real-only.** An adapter's result must always come from the actual tool it wraps. If the tool is missing, the adapter raises a clear error with install instructions — it never silently substitutes an approximation. If you want the closed-form physics, use the native RSQs (e.g. `anvil.R.hohmann_transfer` instead of `poliastro_hohmann`).
+
+Every built-in adapter module follows this two-function pattern:
 
 ```python
-def _wrapper(P, T):
+def _require_coolprop():
+    """Import CoolProp or raise with install instructions."""
     try:
-        import CoolProp.CoolProp as CP
-        rho = CP.PropsSI('D', 'P', P, 'T', T, 'Water')
-    except ImportError:
-        # Ideal gas fallback: not accurate but prevents ImportError at runtime
-        rho = P / (461.5 * T)   # water vapour approximation
+        import CoolProp  # noqa: F401
+    except ImportError as exc:
+        raise ImportError(
+            "CoolProp is not installed. Install with: pip install CoolProp"
+        ) from exc
 
+
+def is_available() -> bool:
+    """True when CoolProp can be imported."""
+    try:
+        import CoolProp  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def _wrapper(P, T):
+    _require_coolprop()
+    import CoolProp.CoolProp as CP
+    rho = CP.PropsSI('D', 'P', P, 'T', T, 'Water')
     return {"rho": Q(rho, "kg/m^3")}
 ```
 
-**Rules for good mock mode:**
-- Import the external library **inside** the wrapper function (lazy import). This way the adapter file loads and the adapter object is created even when the library is missing.
-- If an exact analytical fallback exists (e.g., vis-viva for Hohmann, Lagrange coefficients for Keplerian propagation), use it — the mock then returns physically correct values.
-- If no clean fallback exists (e.g., Lambert's problem), raise `ImportError` with a clear install message rather than returning wrong values silently.
-- Document which adapters have mocks and which require the library.
+**Rules:**
+- Import the external library **inside** the wrapper function (lazy import). The adapter file loads and the adapter object is created even when the library is missing; the error surfaces at call time.
+- `is_available()` lets callers (examples, UIs, tests) check up front and skip gracefully: `if not module.is_available(): ...skip with install hint...`.
+- CLI-backed adapters (XFOIL, SU2, NASTRAN) check for the binary on PATH the same way and raise `RuntimeError` with a download link when absent.
+- Never return placeholder values — a wrong number that looks real is worse than a clear error.
 
 ### How outputs are processed
 
@@ -284,7 +301,8 @@ Use this as a recipe when asking an LLM or writing an adapter from scratch.
 1. Write the wrapper function
    - Name it _call or _<adapter_name>_call (private, one per adapter)
    - Import the external library INSIDE the wrapper (lazy import)
-   - Add try/except ImportError with fallback or clear install message
+   - Add a _require_<lib>() helper raising ImportError with the install
+     command, plus a module-level is_available() -> bool (NO mock fallbacks)
    - Inputs arrive as SI floats for numeric params; strings/booleans pass through unchanged
    - Convert to tool's native units inside the wrapper (e.g., m -> km for poliastro)
    - Return a dict of {key: Q(value, "unit")} for all outputs
@@ -343,7 +361,7 @@ Outputs: `T_ad [K]`, `gamma`, `MW [kg/mol]`, `rho [kg/m³]`
 register()   # pushes cea_rocket and equilibrium_flame under domain "propulsion.combustion"
 ```
 
-**Mock mode:** The adapters detect whether Cantera is installed. If not, they return physically plausible placeholder values so code that uses them can be tested without Cantera. See `examples/ex09_cantera_cea.py`.
+**Real only:** requires Cantera; calls raise `ImportError` with install instructions when it is missing. Check `cantera_thermo.is_available()` first. See `examples/ex09_cantera_cea.py`.
 
 ---
 
@@ -454,8 +472,7 @@ def _wrapper(T):   # T arrives in Kelvin (SI)
 
 ## poliastro Adapter (Orbital Mechanics)
 
-Located in `anvil/adapters/poliastro_orbits.py`. Require `pip install poliastro astropy`.
-All three adapters fall back to exact analytical two-body solutions when poliastro is not installed.
+Located in `anvil/adapters/poliastro_orbits.py`. Requires `pip install poliastro astropy` — real only, no mock fallback (`is_available()` to check). The equivalent closed-form two-body math lives in the native orbital RSQs (`hohmann_transfer`, `vis_viva`, `orbital_period`, ...).
 
 ```python
 from anvil.adapters.poliastro_orbits import poliastro_orbit, poliastro_hohmann, poliastro_propagate, register
@@ -507,9 +524,7 @@ See `examples/ex21_poliastro_adapter.py` for a full demonstration including Syst
 
 ## pykep Adapter (Trajectory Design)
 
-Located in `anvil/adapters/pykep_trajectories.py`. Require `pip install pykep`.
-`pykep_propagate` and `pykep_planet_state` have analytical mock fallbacks.
-`pykep_lambert` requires pykep (no clean fallback for Lambert's problem).
+Located in `anvil/adapters/pykep_trajectories.py`. Requires `pip install pykep` — real only, no mock fallback; every adapter raises `ImportError` when pykep is missing (`is_available()` to check).
 
 ```python
 from anvil.adapters.pykep_trajectories import pykep_lambert, pykep_propagate, pykep_planet_state, register
@@ -563,8 +578,7 @@ See `examples/ex22_pykep_adapter.py` for a full demonstration including Lambert 
 
 ## XFOIL Adapter (2D Airfoil)
 
-Located in `anvil/adapters/xfoil_airfoil.py`. Requires XFOIL binary on PATH (`xfoil` or `xfoil.exe`).
-Mock mode: thin-airfoil theory with Prandtl-Glauert compressibility correction.
+Located in `anvil/adapters/xfoil_airfoil.py`. Requires the XFOIL binary on PATH (`xfoil` or `xfoil.exe`) — real only, no mock fallback; a missing binary raises `RuntimeError` with the download link (`is_available()` to check). Get XFOIL: https://web.mit.edu/drela/Public/web/xfoil/
 
 ```python
 from anvil.adapters.xfoil_airfoil import xfoil_polar, xfoil_alpha_sweep, register
@@ -572,24 +586,25 @@ from anvil.adapters.xfoil_airfoil import xfoil_polar, xfoil_alpha_sweep, registe
 
 ### `xfoil_polar` — Single operating point
 
-Inputs: `AoA_deg`, `Re`, `Mach`, `airfoil` (name or .dat path), `n_panels`, `n_iter`, `xtr_top`, `xtr_bot`
-Outputs: `CL`, `CD`, `CDp`, `CM`, `Top_Xtr`, `Bot_Xtr`, `source`
+Inputs: `airfoil` (NACA designation like "NACA2412", or .dat path), `Re`, `alpha_deg`, `Mach`, `Ncrit`
+Outputs: `CL`, `CD`, `CM`, `xtr_top`, `xtr_bot`
 
 ```python
-r = xfoil_polar(AoA_deg=4.0, Re=1e6, Mach=0.1)
+r = xfoil_polar(airfoil="NACA2412", Re=1e6, alpha_deg=4.0, Mach=0.1)
 print(r["CL"], r["CD"], r["CM"])
-# CL ≈ 0.439   CD ≈ 0.00626   source: mock
 ```
 
 ### `xfoil_alpha_sweep` — Full polar
 
-Inputs: `alpha_start`, `alpha_end`, `alpha_step`, `Re`, `Mach`, `airfoil`, `n_panels`, `n_iter`
-Outputs: `CL_list`, `CD_list`, `CM_list`, `AoA_list`, `CL_max`, `AoA_LD_max`, `LD_max`, `n_points`, `source`
+Inputs: `airfoil`, `Re`, `alpha_min`, `alpha_max`, `alpha_step`, `Mach`, `Ncrit`
+Outputs: `alpha_array`, `CL_array`, `CD_array`, `CM_array`, `CL_max`, `LD_max`, `n_converged`
+
+Non-converged alphas are skipped (`alpha_array` holds only converged points); if nothing converges the adapter raises `RuntimeError`.
 
 ```python
-r = xfoil_alpha_sweep(alpha_start=-4, alpha_end=14, alpha_step=2, Re=1.5e6)
-print(f"L/D max = {r['LD_max']:.1f} at {r['AoA_LD_max']:.1f}°")
-# L/D max ≈ 63.4 at 4.0°
+r = xfoil_alpha_sweep(airfoil="NACA2412", Re=1.5e6,
+                      alpha_min=-4, alpha_max=14, alpha_step=2)
+print(f"L/D max = {r['LD_max']:.1f}   CL_max = {r['CL_max']:.3f}")
 ```
 
 ### `register()` — domain `aero.xfoil`
@@ -598,8 +613,7 @@ print(f"L/D max = {r['LD_max']:.1f} at {r['AoA_LD_max']:.1f}°")
 
 ## OpenFOAM CFD Adapter
 
-Located in `anvil/adapters/openfoam_cfd.py`. Requires OpenFOAM installed and solver on PATH.
-Mock mode: lifting-line theory + Küchemann wave drag.
+Located in `anvil/adapters/openfoam_cfd.py`. Requires OpenFOAM installed with the solver on PATH — real only, no mock fallback; a missing solver or case directory raises a clear error (`is_available()` to check).
 
 ```python
 from anvil.adapters.openfoam_cfd import openfoam_incompressible, openfoam_compressible, register
@@ -613,7 +627,6 @@ Outputs: `CL`, `CD`, `CM`, `F_lift [N]`, `F_drag [N]`, `Re`, `source`
 ```python
 r = openfoam_incompressible(case_path="./my_case", U_inf=50.0, alpha_deg=5.0)
 print(r["CL"], r["CD"], r["F_lift"])
-# CL ≈ 0.548   CD ≈ 0.0062   source: mock (or openfoam if case exists)
 ```
 
 **Case requirements:** prepared OpenFOAM case with mesh (blockMesh or snappyHexMesh already run), `0/U`, `0/p`, `system/controlDict` with `forceCoeffs` function object.
@@ -635,8 +648,7 @@ print(r["CL"], r["Mach"])
 
 ## SU2 CFD Adapter
 
-Located in `anvil/adapters/su2_aero.py`. Requires `SU2_CFD` on PATH.
-Mock mode: Prandtl-Glauert lift + Prandtl-Schlichting skin friction.
+Located in `anvil/adapters/su2_aero.py`. Requires `SU2_CFD` on PATH plus a `.cfg` template and `.su2` mesh — real only, no mock fallback; missing binary or files raise clear errors (`is_available()` to check).
 
 ```python
 from anvil.adapters.su2_aero import su2_euler, su2_rans, register
@@ -674,8 +686,7 @@ print(r["CL"], r["CD"])
 
 ## OpenMDAO MDO Adapter
 
-Located in `anvil/adapters/openmdo_wrap.py`. Requires `pip install openmdao`.
-Mock mode: analytical Sellar equations (iterative coupling), Euler-Bernoulli beam.
+Located in `anvil/adapters/openmdo_wrap.py`. Requires `pip install openmdao` — real only, no mock fallback (`is_available()` to check).
 
 ```python
 from anvil.adapters.openmdo_wrap import make_openmdo_adapter, openmdo_sellar, openmdo_beam, register
@@ -729,8 +740,7 @@ print(r["deflection"], r["max_stress"])
 
 ## FEniCSx FEM Adapter
 
-Located in `anvil/adapters/fenics_fem.py`. Requires `conda install -c conda-forge fenics-dolfinx mpi4py`.
-Mock mode: Euler-Bernoulli beam (elasticity), 1D Fourier + volumetric source (heat).
+Located in `anvil/adapters/fenics_fem.py`. Requires `conda install -c conda-forge fenics-dolfinx mpich` — real only, no mock fallback; missing dolfinx raises `ImportError` (`is_available()` to check).
 
 ```python
 from anvil.adapters.fenics_fem import fenics_linear_elasticity, fenics_heat_conduction, register
@@ -769,9 +779,7 @@ print(r["T_max"], r["heat_flux"])
 
 ## pyNASTRAN / NASTRAN Adapter
 
-Located in `anvil/adapters/pynastran_fem.py`. Requires `pip install pyNASTRAN`.
-NASTRAN binary auto-detected: MYSTRAN (free), MSC NASTRAN, NX NASTRAN, Optistruct.
-Mock mode: Euler-Bernoulli static + analytical cantilever frequencies (βₙL values).
+Located in `anvil/adapters/pynastran_fem.py`. Requires `pip install pyNastran` AND a NASTRAN-compatible solver binary on PATH (MYSTRAN free, MSC NASTRAN, NX NASTRAN, Optistruct auto-detected) — real only, no mock fallback; missing either raises a clear error (`is_available()` to check).
 
 ```python
 from anvil.adapters.pynastran_fem import nastran_linear_static, nastran_normal_modes, register
@@ -779,24 +787,22 @@ from anvil.adapters.pynastran_fem import nastran_linear_static, nastran_normal_m
 
 ### `nastran_linear_static` — SOL 101
 
-Inputs: `bdf_path`, `load_case_id`, `E_fallback [Pa]`, `I_fallback [m⁴]`, `L_fallback [m]`, `F_fallback [N]`, `nastran_bin`
+Inputs: `bdf_path`, `load_case_id`, `nastran_bin` (None = auto-detect)
 Outputs: `max_displacement [m]`, `max_stress [Pa]`, `source`
 
 ```python
 r = nastran_linear_static(bdf_path="my_model.bdf", load_case_id=1)
 print(r["max_displacement"], r["max_stress"])
-# max_displacement ≈ 8.0e-5 m (or from OP2 if NASTRAN runs)
 ```
 
 ### `nastran_normal_modes` — SOL 103
 
-Inputs: `bdf_path`, `n_modes`, `E_fallback`, `I_fallback`, `L_fallback`, `rho_fallback`, `A_fallback`, `nastran_bin`
+Inputs: `bdf_path`, `n_modes`, `nastran_bin`
 Outputs: `frequencies [list of Q]`, `f1 [Hz]`, `f2 [Hz]`, `n_modes`, `source`
 
 ```python
 r = nastran_normal_modes(bdf_path="my_model.bdf", n_modes=6)
 print(r["f1"], r["frequencies"])
-# f1 ≈ 14.3 Hz   (1st bending mode of steel cantilever, L=1m, 50×50mm)
 ```
 
 **MYSTRAN (free solver):** Download from `https://github.com/dr-bill-c/MYSTRAN`. Add `mystran.exe` to PATH. The adapter auto-detects it.
@@ -807,7 +813,7 @@ print(r["f1"], r["frequencies"])
 
 ## Surrogate / Metamodel Adapters
 
-Located in `anvil/adapters/surrogate_models.py`. Requires `pip install scikit-learn` for GP. Polynomial and RBF work with numpy/scipy only.
+Located in `anvil/adapters/surrogate_models.py`. GP surrogates require `pip install scikit-learn` — real only, no spline fallback (`is_available()` to check). Polynomial (`numpy.polyfit`) and RBF (`scipy.interpolate.RBFInterpolator`) are real methods built on Anvil's core dependencies and always work.
 
 ```python
 from anvil.adapters.surrogate_models import (
@@ -832,7 +838,7 @@ r = gp(x=3.14)
 print(r["y_pred"], r["y_pred_std"])   # mean prediction + uncertainty
 ```
 
-Falls back to cubic spline (scipy) when sklearn is not installed.
+Requires scikit-learn; raises `ImportError` with the install command when missing.
 
 ### `make_poly_adapter` — Polynomial chaos / polyfit
 
@@ -879,21 +885,49 @@ sweep = sys_.sweep("AoA_deg", np.linspace(-4, 14, 10))
 
 ---
 
+## Other Bundled Adapters
+
+Brief entries — see each module's docstring for full I/O specs. All are real-only with `is_available()`.
+
+### `coolprop_props.py` — Fluid properties (`fluid.coolprop`)
+
+`coolprop_props(fluid, T, P)` → `rho`, `cp`, `mu`, `k`, ... via CoolProp. `pip install CoolProp`.
+
+### `meshing_geom.py` — Mesh generation (`geometry.meshing`)
+
+`mesh_box(Lx, Ly, Lz, elem_size)` and `mesh_cylinder(radius, height, elem_size)` → element/node counts + mesh file, via gmsh. `pip install gmsh`.
+
+### `rocket_cea.py` — Rocket performance (`propulsion.rocketcea`)
+
+`rocket_cea(oxidizer, fuel, OF, Pc, ...)` → `Isp`, `cstar`, `Tc`, ... via RocketCEA (`pip install rocketcea`); `rocketpy_flight(thrust, burn_time, dry_mass, ...)` → apogee/velocity via RocketPy (`pip install rocketpy`).
+
+### `uq_surrogate.py` — Monte Carlo UQ (`uq.montecarlo`)
+
+`uq_montecarlo(model, a_mean, a_std, ...)` → mean/std/quantiles + surrogate R². The Monte Carlo path is native numpy and always runs (this is NOT a mock — numpy is a core dependency); only `surrogate="sklearn"` needs scikit-learn.
+
+---
+
 ## Adapter Comparison
 
-| Adapter file | Library | Mock? | Domain | Best for |
-|---|---|---|---|---|
-| `cantera_thermo.py` | Cantera | Yes (curve fits) | `propulsion.combustion` | Combustion, flame temperature |
-| `nasa_cea_detonation.py` | NASA CEA CLI | CLI | `propulsion.detonation` | Detonation products |
-| `poliastro_orbits.py` | poliastro | Yes (analytical) | `orbital.poliastro` | Orbit design, Hohmann transfers |
-| `pykep_trajectories.py` | pykep | Partial | `trajectory.pykep` | Lambert arcs, interplanetary trajectory |
-| `xfoil_airfoil.py` | XFOIL CLI | Yes (thin-airfoil) | `aero.xfoil` | 2D airfoil polars, viscous drag |
-| `openfoam_cfd.py` | OpenFOAM | Yes (lifting-line) | `cfd.openfoam` | 3D CFD, incompressible/compressible |
-| `su2_aero.py` | SU2_CFD | Yes (Prandtl-Glauert) | `cfd.su2` | Euler/RANS, adjoint-ready |
-| `openmdo_wrap.py` | OpenMDAO | Yes (analytical) | `mdo.openmdao` | MDO problems, coupled systems |
-| `fenics_fem.py` | FEniCSx | Yes (beam theory) | `fem.fenics` | FEM elasticity, heat conduction |
-| `pynastran_fem.py` | pyNASTRAN | Yes (beam theory) | `fem.nastran` | NASTRAN SOL 101/103, OP2 post-proc |
-| `surrogate_models.py` | scikit-learn | Yes (spline/poly) | `surrogate.demo` | Data-driven surrogates, metamodels |
+All adapters are **real-only** — the Requires column must be satisfied or calls raise with install instructions.
+
+| Adapter file | Requires | Domain | Best for |
+|---|---|---|---|
+| `cantera_thermo.py` | Cantera | `propulsion.combustion` | Combustion, flame temperature |
+| `nasa_cea_detonation.py` | NASA CEA (`pip install cea`) | `propulsion.detonation` | Detonation products |
+| `poliastro_orbits.py` | poliastro + astropy | `orbital.poliastro` | Orbit design, Hohmann transfers |
+| `pykep_trajectories.py` | pykep | `trajectory.pykep` | Lambert arcs, interplanetary trajectory |
+| `xfoil_airfoil.py` | XFOIL binary on PATH | `aero.xfoil` | 2D airfoil polars, viscous drag |
+| `openfoam_cfd.py` | OpenFOAM solvers on PATH | `cfd.openfoam` | 3D CFD, incompressible/compressible |
+| `su2_aero.py` | SU2_CFD on PATH | `cfd.su2` | Euler/RANS, adjoint-ready |
+| `openmdo_wrap.py` | OpenMDAO | `mdo.openmdao` | MDO problems, coupled systems |
+| `fenics_fem.py` | FEniCSx (dolfinx) | `fem.fenics` | FEM elasticity, heat conduction |
+| `pynastran_fem.py` | pyNastran + NASTRAN binary | `fem.nastran` | NASTRAN SOL 101/103, OP2 post-proc |
+| `surrogate_models.py` | scikit-learn (GP only) | `surrogate.demo` | Data-driven surrogates, metamodels |
+| `coolprop_props.py` | CoolProp | `fluid.coolprop` | Thermophysical fluid properties |
+| `meshing_geom.py` | gmsh | `geometry.meshing` | Parametric box/cylinder meshes |
+| `rocket_cea.py` | RocketCEA / RocketPy | `propulsion.rocketcea` | Engine performance, flight sim |
+| `uq_surrogate.py` | — (numpy core) | `uq.montecarlo` | Monte Carlo uncertainty propagation |
 
 ---
 

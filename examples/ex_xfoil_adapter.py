@@ -1,56 +1,62 @@
 """
-Example: XFOIL 2D Airfoil Adapter
-===================================
-Demonstrates xfoil_polar and xfoil_alpha_sweep.
-Mock mode (thin-airfoil + Prandtl-Glauert) is used when XFOIL is not on PATH.
+Example: XFOIL 2D Airfoil Adapter (real only -- requires XFOIL on PATH)
+========================================================================
+Demonstrates xfoil_polar and xfoil_alpha_sweep against a real XFOIL binary.
+There is no mock mode: if XFOIL is not installed the example exits with
+install instructions.
+
+Get XFOIL: https://web.mit.edu/drela/Public/web/xfoil/
 """
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-import numpy as np
 import anvil
+from anvil.adapters import xfoil_airfoil
 from anvil.adapters.xfoil_airfoil import xfoil_polar, xfoil_alpha_sweep, register
 
+if not xfoil_airfoil.is_available():
+    print("XFOIL binary not found on PATH -- skipping example.")
+    print("Install: https://web.mit.edu/drela/Public/web/xfoil/")
+    print("(put xfoil.exe / xfoil on your PATH, then re-run)")
+    raise SystemExit(0)
+
 # ── Single operating point ────────────────────────────────────────────────────
-print("=== Single operating point (AoA = 4°, Re = 1e6) ===")
-r = xfoil_polar(AoA_deg=4.0, Re=1e6, Mach=0.1, n_panels=160)
+print("=== NACA2412: single point (alpha = 4 deg, Re = 1e6) ===")
+r = xfoil_polar(airfoil="NACA2412", Re=1e6, alpha_deg=4.0, Mach=0.1)
 print(f"  CL   = {r['CL']:.4f}")
 print(f"  CD   = {r['CD']:.5f}")
 print(f"  CM   = {r['CM']:.4f}")
 print(f"  L/D  = {r['CL']/r['CD']:.1f}")
-print(f"  source: {r['source']}")
+print(f"  transition (top/bot): {r['xtr_top']:.3f} / {r['xtr_bot']:.3f}")
 
 # ── Polar sweep ───────────────────────────────────────────────────────────────
-print("\n=== Alpha sweep (-4° to 12°, Re = 1.5e6) ===")
-r = xfoil_alpha_sweep(
-    alpha_start=-4.0, alpha_end=12.0, alpha_step=2.0,
-    Re=1.5e6, Mach=0.15,
-)
-print(f"  Points computed: {r['n_points']}")
-print(f"  CL range: [{min(r['CL_list']):.3f}, {max(r['CL_list']):.3f}]")
-print(f"  Best L/D = {r['LD_max']:.1f}  at AoA = {r['AoA_LD_max']:.1f}°")
+print("\n=== Alpha sweep (-4 to 12 deg, Re = 1.5e6) ===")
+r = xfoil_alpha_sweep(airfoil="NACA2412", Re=1.5e6,
+                      alpha_min=-4.0, alpha_max=12.0, alpha_step=2.0,
+                      Mach=0.15)
+print(f"  Converged points: {r['n_converged']}")
+print(f"  CL range: [{r['CL_array'].min():.3f}, {r['CL_array'].max():.3f}]")
+best = (r['CL_array'] / r['CD_array']).argmax()
+print(f"  Best L/D = {r['LD_max']:.1f} at alpha = {r['alpha_array'][best]:.1f} deg")
 print(f"  CL_max   = {r['CL_max']:.3f}")
-print(f"  source: {r['source']}")
 
-# ── Sweep over Mach with Anvil System ────────────────────────────────────────
-print("\n=== Compressibility effect: CL vs Mach (AoA=5°) ===")
-sys_ = anvil.system("xfoil_mach_study")
-sys_.add("AoA_deg", 5.0)
-sys_.add("Re",     2e6)
-sys_.add("Mach",   0.0)   # placeholder
-sys_.add("n_panels", 160)
+# ── Reynolds sweep with an Anvil System ──────────────────────────────────────
+print("\n=== Reynolds effect on drag (alpha = 4 deg) ===")
+sys_ = anvil.system("xfoil_re_study")
+sys_.add("airfoil",   "NACA2412")
+sys_.add("alpha_deg", 4.0)
+sys_.add("Mach",      0.1)
+sys_.add("Re",        1e6)   # placeholder; swept below
 sys_.use(xfoil_polar)
 
-sweep = sys_.sweep("Mach", np.linspace(0.05, 0.70, 8))
-machs  = sweep.table["Mach"].tolist()
-cls    = sweep.table["CL"].tolist()
-print(f"  {'Mach':>6}  {'CL':>7}")
-for m, cl in zip(machs, cls):
-    print(f"  {m:6.2f}  {cl:7.4f}")
-print("  (CL rises with Mach due to Prandtl-Glauert β = √(1-M²) in denominator)")
+sweep = sys_.sweep("Re", [2e5, 5e5, 1e6, 2e6, 5e6])
+print(f"  {'Re':>10}  {'CL':>7}  {'CD':>8}")
+for i in range(len(sweep.table)):
+    row = sweep.table.iloc[i]
+    print(f"  {row['Re']:10.1e}  {row['CL']:7.4f}  {row['CD']:8.5f}")
+print("  (CD drops with Re: thinner boundary layer, later transition)")
 
 # ── Register in project ───────────────────────────────────────────────────────
-print("\n=== Register in project ===")
-proj = anvil.project("airfoil_study", path="./work_xfoil")
+print("\n=== Register in global registry ===")
 register()
-print("  Global registry: xfoil_polar, xfoil_alpha_sweep  → domain aero.xfoil")
+print("  xfoil_polar, xfoil_alpha_sweep -> domain aero.xfoil")

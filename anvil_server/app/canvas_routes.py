@@ -896,8 +896,11 @@ def _example_entry(p: Path) -> Optional[Dict[str, str]]:
     try:
         script = p.read_text(encoding="utf-8")
         graph, _warnings = parse_script(script)
-        n_nodes = len(graph.quantities) + len(graph.relations) + len(graph.blocks)
-        if n_nodes > 0:
+        # Only list scripts that convert into a *solvable* canvas: at least
+        # one relation wired to at least one quantity. Quantity-only parses
+        # (e.g. adapter demos whose relations are adapter objects the parser
+        # cannot resolve) load as inert canvases and are omitted.
+        if graph.relations and graph.quantities:
             entry = {"id": p.name, "title": _first_doc_line(script) or p.name}
     except Exception:  # noqa: BLE001 - unparseable script -> omit from menu
         entry = None

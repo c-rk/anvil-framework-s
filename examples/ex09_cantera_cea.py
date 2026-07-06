@@ -5,14 +5,13 @@ Example 9: Cantera Combustion + Nozzle Design
 A complete rocket engine analysis using Cantera for combustion
 thermochemistry and Anvil's built-in nozzle system for performance.
 
+REAL ONLY -- NO MOCK MODE: requires Cantera installed; the example
+exits with install instructions otherwise.
+
 PREREQUISITES:
     conda install -c cantera cantera
     -- OR --
     pip install cantera
-
-If Cantera is not installed, this example uses a built-in mock
-so you can see the full workflow. Replace USE_MOCK = False when
-Cantera is available.
 
 WHAT THIS EXAMPLE DOES:
     1. Compute combustion products at equilibrium (like NASA CEA)
@@ -31,71 +30,24 @@ import anvil
 from anvil import Q, System, Adapter
 
 # =====================================================
-# Check if Cantera is available
+# Require Cantera (real only -- no mock)
 # =====================================================
-USE_MOCK = True
-try:
-    import cantera as ct
-    USE_MOCK = False
-    print(f"  Cantera {ct.__version__} found. Using real thermochemistry.")
-except ImportError:
-    print("  Cantera not installed. Using built-in mock data.")
-    print("  To install: conda install -c cantera cantera")
-    print()
+from anvil.adapters import cantera_thermo
+
+if not cantera_thermo.is_available():
+    print("  Cantera not installed -- skipping example.")
+    print("  Install: conda install -c cantera cantera")
+    print("  Or:      pip install cantera")
+    raise SystemExit(0)
+
+import cantera as ct
+print(f"  Cantera {ct.__version__} found.")
 
 print("=" * 60)
 print("  Example 9: Cantera Combustion + Nozzle Design")
 print("=" * 60)
 
-
-# =====================================================
-# Combustion adapter (real or mock)
-# =====================================================
-
-if not USE_MOCK:
-    # Real Cantera adapter
-    from anvil.adapters.cantera_thermo import cea_rocket
-else:
-    # Mock adapter using curve fits (same interface as real)
-    def _mock_cea(fuel="H2", oxidizer="O2", OF=6.0, Pc=10e6, **kw):
-        """Mock CEA using published data for H2/O2 and CH4/O2."""
-        fuel_lower = fuel.lower()
-        if fuel_lower in ("h2", "hydrogen"):
-            # H2/O2: Tc peaks near O/F=4, Isp peaks near O/F=4-5
-            OF_opt, Tc_peak = 4.0, 3250
-            gamma_base, R_base, MW_base = 1.14, 530, 15.7
-        elif fuel_lower in ("ch4", "methane"):
-            # CH4/O2: Tc peaks near O/F=3.5
-            OF_opt, Tc_peak = 3.5, 3530
-            gamma_base, R_base, MW_base = 1.13, 355, 23.4
-        else:
-            OF_opt, Tc_peak = 3.0, 3400
-            gamma_base, R_base, MW_base = 1.15, 380, 21.9
-
-        Tc = Tc_peak * (1 - 0.12 * ((OF - OF_opt) / OF_opt)**2)
-        Tc *= (1 + 0.015 * np.log(max(Pc, 1e5) / 1e6))
-        gamma = gamma_base + 0.02 * (OF / OF_opt - 1)
-        MW = MW_base + 1.5 * (OF - OF_opt)
-        R_gas = 8314.46 / MW
-        cstar = np.sqrt(gamma * R_gas * Tc) / (
-            gamma * np.sqrt((2 / (gamma + 1))**((gamma + 1) / (gamma - 1))))
-
-        return {
-            "Tc": Q(Tc, "K"), "gamma_c": gamma,
-            "R_gas_c": Q(R_gas, "J/kg/K"), "MW_c": Q(MW / 1000, "kg/mol"),
-            "rho_c": Q(Pc / (R_gas * Tc), "kg/m^3"),
-            "cstar": Q(cstar, "m/s"),
-        }
-
-    cea_rocket = Adapter("cea_rocket_mock",
-        backend="python", call=_mock_cea,
-        inputs={"fuel": {"default": "H2"}, "oxidizer": {"default": "O2"},
-                "OF": {"default": 6.0}, "Pc": {"unit": "Pa", "default": 10e6}},
-        outputs={"Tc": {"unit": "K"}, "gamma_c": {}, "R_gas_c": {"unit": "J/kg/K"},
-                 "MW_c": {"unit": "kg/mol"}, "rho_c": {"unit": "kg/m^3"},
-                 "cstar": {"unit": "m/s"}},
-        desc="Mock CEA combustion (replace with real Cantera)",
-        tags=["combustion", "mock"])
+from anvil.adapters.cantera_thermo import cea_rocket
 
 
 # =====================================================

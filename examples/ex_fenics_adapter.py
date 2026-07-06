@@ -1,17 +1,27 @@
 """
-Example: FEniCSx FEM Adapter
-==============================
+Example: FEniCSx FEM Adapter (real only -- requires dolfinx)
+=============================================================
 Demonstrates fenics_linear_elasticity and fenics_heat_conduction.
-Mock mode (Euler-Bernoulli beam, 1D Fourier) runs without FEniCSx installed.
+There is no mock mode: if FEniCSx (dolfinx) is not installed the
+example exits with install instructions.
+
+Install (conda is the supported route):
+    conda install -c conda-forge fenics-dolfinx mpich pyvista
 """
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import numpy as np
 import anvil
+from anvil.adapters import fenics_fem
 from anvil.adapters.fenics_fem import (
     fenics_linear_elasticity, fenics_heat_conduction, register
 )
+
+if not fenics_fem.is_available():
+    print("FEniCSx (dolfinx) not installed -- skipping example.")
+    print("Install: conda install -c conda-forge fenics-dolfinx mpich")
+    raise SystemExit(0)
 
 # ── Linear elasticity: cantilever box ────────────────────────────────────────
 print("=== FEniCSx linear elasticity: cantilever box ===")

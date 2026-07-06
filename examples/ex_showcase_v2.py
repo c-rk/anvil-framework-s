@@ -701,7 +701,14 @@ except Exception as e:
 # =========================================================================
 section("13. NASA CEA -- Chapman-Jouguet Detonation")
 
+from anvil.adapters import nasa_cea_detonation
 from anvil.adapters.nasa_cea_detonation import cea_detonation
+
+if not nasa_cea_detonation.is_available():
+    print("\n  NASA CEA not installed (pip install cea) -- section skipped.")
+    print("\n" + "=" * 70)
+    print("  Done (CEA sections skipped).")
+    raise SystemExit(0)
 
 # Single call -- full output
 print("\n--- H2/O2 stoichiometric at 1 atm, 300 K ---")

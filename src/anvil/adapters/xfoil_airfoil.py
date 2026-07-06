@@ -20,11 +20,10 @@ VERIFY:
     which xfoil   (Linux/macOS)
     xfoil.exe     (Windows — place on PATH)
 
-MOCK MODE:
-    Falls back to thin-airfoil theory (CL = 2π·α) with Prandtl-Glauert
-    compressibility correction and a simple drag polar. Accurate to ~5%
-    for thin airfoils at low α. Stall and separation effects are NOT
-    modelled in mock mode.
+REAL ONLY -- NO MOCK MODE:
+    Requires the XFOIL binary on PATH. If it is missing, calls raise a
+    RuntimeError with install instructions. When a result is returned it
+    always came from a real XFOIL run.
 
 USAGE:
     from anvil.adapters.xfoil_airfoil import xfoil_polar, xfoil_alpha_sweep
@@ -43,49 +42,22 @@ from anvil import Adapter, Q
 import math, os, tempfile, subprocess, shutil
 
 
-# ── Mock: thin-airfoil theory ────────────────────────────────────────────────
+def _find_xfoil():
+    """Locate the XFOIL binary or raise with install instructions."""
+    exe = shutil.which("xfoil") or shutil.which("xfoil.exe")
+    if exe is None:
+        raise RuntimeError(
+            "XFOIL binary not found on PATH. Install it first:\n"
+            "  Linux/WSL:  sudo apt install xfoil\n"
+            "  macOS:      brew install xfoil\n"
+            "  Windows:    https://web.mit.edu/drela/Public/web/xfoil/ "
+            "(place xfoil.exe on PATH)"
+        )
+    return exe
 
-def _mock_polar(airfoil_str, Re, alpha_deg, Mach=0.0):
-    """
-    Thin-airfoil theory with Prandtl-Glauert correction + empirical drag polar.
-    Returns (CL, CD, CM).
-    """
-    alpha_rad = math.radians(alpha_deg)
-
-    # Camber from NACA 4-digit (first digit / 100)
-    camber = 0.0
-    if airfoil_str.upper().startswith("NACA") and len(airfoil_str) >= 8:
-        try:
-            camber = int(airfoil_str[4]) / 100.0
-        except ValueError:
-            pass
-
-    # Lift curve slope with PG correction
-    beta = math.sqrt(max(1.0 - Mach**2, 0.01))
-    CL_alpha = 2.0 * math.pi / beta
-    CL_0     = CL_alpha * camber * 2.0          # zero-lift contribution from camber
-    CL       = CL_alpha * alpha_rad + CL_0
-
-    # Drag: profile drag + induced (simple polar)
-    thickness = 0.12
-    if airfoil_str.upper().startswith("NACA") and len(airfoil_str) >= 8:
-        try:
-            thickness = int(airfoil_str[-2:]) / 100.0
-        except ValueError:
-            pass
-
-    CD_min = 0.006 + 0.004 * thickness / 0.12           # scales with thickness
-    if Re > 0:
-        CD_min *= (1e6 / Re) ** 0.2                      # Re scaling
-    e_oswald = 0.85
-    AR_eff   = 10.0                                      # 2D: infinite AR assumption
-    CD_i     = CL**2 / (math.pi * e_oswald * AR_eff)
-    CD       = CD_min + CD_i
-
-    # Pitching moment about c/4 (thin-airfoil: CM_c4 ≈ -π/2·camber)
-    CM = -0.5 * math.pi * camber
-
-    return CL, CD, CM
+def is_available() -> bool:
+    """True when the XFOIL binary is on PATH."""
+    return (shutil.which("xfoil") or shutil.which("xfoil.exe")) is not None
 
 
 def _run_xfoil(airfoil, Re, alpha_deg, Mach=0.0, Ncrit=9, xfoil_exe="xfoil"):
@@ -166,7 +138,7 @@ def _run_xfoil(airfoil, Re, alpha_deg, Mach=0.0, Ncrit=9, xfoil_exe="xfoil"):
 # ── Adapter: single operating point ─────────────────────────────────────────
 
 def _xfoil_polar_call(airfoil, Re, alpha_deg, Mach=0.0, Ncrit=9.0):
-    xfoil_exe = shutil.which("xfoil") or shutil.which("xfoil.exe") or "xfoil"
+    xfoil_exe = _find_xfoil()
     if isinstance(alpha_deg, Q):
         alpha_deg = float(alpha_deg.to("deg").value)
     if isinstance(Re,    Q): Re    = float(Re.si)
@@ -176,25 +148,19 @@ def _xfoil_polar_call(airfoil, Re, alpha_deg, Mach=0.0, Ncrit=9.0):
 
     result = _run_xfoil(str(airfoil), float(Re), float(alpha_deg),
                         float(Mach), float(Ncrit), xfoil_exe)
-    if result is not None:
-        CL, CD, CM, xtr_top, xtr_bot = result
-        return {
-            "CL":      CL,
-            "CD":      CD,
-            "CM":      CM,
-            "xtr_top": xtr_top,
-            "xtr_bot": xtr_bot,
-            "source":  "xfoil",
-        }
-    # Mock fallback
-    CL, CD, CM = _mock_polar(str(airfoil), float(Re), float(alpha_deg), float(Mach))
+    if result is None:
+        raise RuntimeError(
+            f"XFOIL run failed or did not converge for {airfoil} at "
+            f"alpha={float(alpha_deg):g} deg, Re={float(Re):g}, Mach={float(Mach):g}."
+        )
+    CL, CD, CM, xtr_top, xtr_bot = result
     return {
         "CL":      CL,
         "CD":      CD,
         "CM":      CM,
-        "xtr_top": 0.10,  # approximate for turbulent flow
-        "xtr_bot": 0.10,
-        "source":  "mock",
+        "xtr_top": xtr_top,
+        "xtr_bot": xtr_bot,
+        "source":  "xfoil",
     }
 
 
@@ -216,7 +182,7 @@ xfoil_polar = Adapter(
         "CM":      {"unit": "1",  "desc": "Pitching moment coefficient about c/4"},
         "xtr_top": {"unit": "1",  "desc": "Upper surface transition location (x/c)"},
         "xtr_bot": {"unit": "1",  "desc": "Lower surface transition location (x/c)"},
-        "source":  {"desc": "xfoil (real) or mock (fallback)"},
+        "source":  {"desc": "always 'xfoil' (real run; no mock fallback)"},
     },
     desc="2D airfoil CL, CD, CM via XFOIL viscous panel method",
     tags=["xfoil", "airfoil", "2D", "viscous", "transition"],
@@ -241,16 +207,21 @@ def _xfoil_sweep_call(airfoil, Re, alpha_min, alpha_max, alpha_step=1.0,
     Ncrit     = float(Ncrit)
 
     alphas    = np.arange(alpha_min, alpha_max + 0.5*alpha_step, alpha_step)
-    CL_arr, CD_arr, CM_arr = [], [], []
+    a_conv, CL_arr, CD_arr, CM_arr = [], [], [], []
 
-    xfoil_exe = shutil.which("xfoil") or shutil.which("xfoil.exe") or "xfoil"
+    xfoil_exe = _find_xfoil()
     for a in alphas:
         res = _run_xfoil(airfoil, Re, a, Mach, Ncrit, xfoil_exe)
         if res is not None:
+            a_conv.append(a)
             CL_arr.append(res[0]); CD_arr.append(res[1]); CM_arr.append(res[2])
-        else:
-            cl, cd, cm = _mock_polar(airfoil, Re, a, Mach)
-            CL_arr.append(cl); CD_arr.append(cd); CM_arr.append(cm)
+        # non-converged points are skipped; n_converged reports how many ran
+
+    if not CL_arr:
+        raise RuntimeError(
+            f"XFOIL did not converge at any alpha in "
+            f"[{alpha_min:g}, {alpha_max:g}] deg for {airfoil} (Re={Re:g})."
+        )
 
     CL_arr = np.array(CL_arr)
     CD_arr = np.array(CD_arr)
@@ -259,7 +230,7 @@ def _xfoil_sweep_call(airfoil, Re, alpha_min, alpha_max, alpha_step=1.0,
     CL_max = float(np.max(CL_arr))
 
     return {
-        "alpha_array": alphas,
+        "alpha_array": np.array(a_conv),
         "CL_array":    CL_arr,
         "CD_array":    CD_arr,
         "CM_array":    CM_arr,

@@ -24,9 +24,9 @@ SU2 CONFIG TEMPLATE:
     The adapter patches: MACH_NUMBER, AOA, SIDESLIP_ANGLE, REYNOLDS_NUMBER.
     All other settings (numerics, convergence, BCs) come from the template.
 
-MOCK MODE:
-    Euler: linearised supersonic theory + Prandtl-Glauert for subsonic.
-    RANS:  adds viscous drag approximation (flat-plate boundary layer).
+REAL ONLY -- NO MOCK MODE:
+    Requires the SU2_CFD binary on PATH plus a real .cfg template and .su2
+    mesh. Missing binary or files raise a RuntimeError with instructions.
 
 USAGE:
     from anvil.adapters.su2_aero import su2_euler, su2_rans
@@ -42,25 +42,25 @@ from anvil import Adapter, Q
 import math, os, shutil, subprocess, tempfile, re as _re
 
 
-# ── Mock aerodynamics ─────────────────────────────────────────────────────────
+def _require_su2():
+    """Locate SU2_CFD or raise with install instructions."""
+    su2 = shutil.which("SU2_CFD") or shutil.which("SU2_CFD.exe")
+    if su2 is None:
+        raise RuntimeError(
+            "SU2_CFD binary not found on PATH. Download from "
+            "https://su2code.github.io/ and place SU2_CFD on PATH."
+        )
+    return su2
 
-def _mock_euler(Mach, AoA_deg, alpha0_deg=0.0):
-    alpha = math.radians(float(AoA_deg) - float(alpha0_deg))
-    beta  = math.sqrt(max(1.0 - float(Mach)**2, 0.05))
-    CL    = 2 * math.pi * alpha / beta
-    CD_w  = 0.0 if Mach < 0.8 else 0.01 * (Mach - 0.8)**1.5  # wave drag onset
-    CD    = CL**2 / (math.pi * 0.95 * 50.0) + CD_w   # aspect ratio ≈ 50 for 2D
-    return CL, CD, -0.05 * CL
+def is_available() -> bool:
+    """True when the SU2_CFD binary is on PATH."""
+    return (shutil.which("SU2_CFD") or shutil.which("SU2_CFD.exe")) is not None
 
-def _mock_rans(Mach, AoA_deg, Re, alpha0_deg=0.0):
-    CL, CD_inv, CM = _mock_euler(Mach, AoA_deg, alpha0_deg)
-    # Flat-plate skin friction
-    if Re > 0:
-        Cf = 0.455 / math.log10(Re)**2.58  # turbulent Prandtl-Schlichting
-    else:
-        Cf = 0.003
-    CD_visc = 2 * Cf  # wetted area factor ≈ 2× chord for double-sided airfoil
-    return CL, CD_inv + CD_visc, CM, Cf
+def _require_files(cfg_template, mesh):
+    if not os.path.exists(cfg_template):
+        raise RuntimeError(f"SU2 config template not found: {cfg_template}")
+    if not os.path.exists(mesh):
+        raise RuntimeError(f"SU2 mesh file not found: {mesh}")
 
 
 # ── SU2 config patching ───────────────────────────────────────────────────────
@@ -130,29 +130,28 @@ def _euler_call(cfg_template, mesh, Mach, AoA_deg,
     Mach=float(Mach); AoA=float(AoA_deg); ss=float(sideslip_deg)
     cfg_template=str(cfg_template); mesh=str(mesh)
 
-    has_su2 = shutil.which("SU2_CFD") is not None
-    if has_su2 and os.path.exists(cfg_template) and os.path.exists(mesh):
-        with tempfile.TemporaryDirectory() as work:
-            dst_cfg  = os.path.join(work, "run.cfg")
-            dst_mesh = os.path.join(work, os.path.basename(mesh))
-            shutil.copy(mesh, dst_mesh)
-            _patch_cfg(cfg_template, dst_cfg, Mach, AoA, ss)
-            # Also patch mesh filename in cfg
-            with open(dst_cfg) as f: content = f.read()
-            content = _re.sub(r'MESH_FILENAME\s*=.*',
-                               f'MESH_FILENAME= {os.path.basename(mesh)}', content)
-            with open(dst_cfg, "w") as f: f.write(content)
+    _require_su2()
+    _require_files(cfg_template, mesh)
+    with tempfile.TemporaryDirectory() as work:
+        dst_cfg  = os.path.join(work, "run.cfg")
+        dst_mesh = os.path.join(work, os.path.basename(mesh))
+        shutil.copy(mesh, dst_mesh)
+        _patch_cfg(cfg_template, dst_cfg, Mach, AoA, ss)
+        # Also patch mesh filename in cfg
+        with open(dst_cfg) as f: content = f.read()
+        content = _re.sub(r'MESH_FILENAME\s*=.*',
+                           f'MESH_FILENAME= {os.path.basename(mesh)}', content)
+        with open(dst_cfg, "w") as f: f.write(content)
 
-            if _run_su2(dst_cfg, work):
-                hist = os.path.join(work, "history.csv")
-                res = _parse_su2_history(hist)
-                if res:
-                    CL, CD, CM = res
-                    return {"CL": CL, "CD": CD, "CM": CM,
-                            "Mach": Q(Mach,"1"), "source": "su2"}
-
-    CL, CD, CM = _mock_euler(Mach, AoA, alpha0_deg)
-    return {"CL": CL, "CD": CD, "CM": CM, "Mach": Q(Mach,"1"), "source": "mock"}
+        if not _run_su2(dst_cfg, work):
+            raise RuntimeError("SU2_CFD run failed; see su2.log in the work dir.")
+        hist = os.path.join(work, "history.csv")
+        res = _parse_su2_history(hist)
+        if not res:
+            raise RuntimeError("SU2 finished but history.csv had no CL/CD/CM.")
+        CL, CD, CM = res
+        return {"CL": CL, "CD": CD, "CM": CM,
+                "Mach": Q(Mach,"1"), "source": "su2"}
 
 
 su2_euler = Adapter(
@@ -165,14 +164,14 @@ su2_euler = Adapter(
         "Mach":         {"unit": "1",   "desc": "Freestream Mach number"},
         "AoA_deg":      {"unit": "deg", "desc": "Angle of attack"},
         "sideslip_deg": {"unit": "deg", "desc": "Sideslip angle", "default": 0.0},
-        "alpha0_deg":   {"unit": "deg", "desc": "Zero-lift AoA (mock only)", "default": 0.0},
+        "alpha0_deg":   {"unit": "deg", "desc": "Zero-lift AoA (unused; kept for signature compatibility)", "default": 0.0},
     },
     outputs={
         "CL":     {"unit": "1",  "desc": "Lift coefficient"},
         "CD":     {"unit": "1",  "desc": "Drag coefficient (wave + induced)"},
         "CM":     {"unit": "1",  "desc": "Pitching moment coefficient"},
         "Mach":   {"unit": "1",  "desc": "Freestream Mach (echo)"},
-        "source": {"desc": "su2 or mock"},
+        "source": {"desc": "always 'su2' (real run; no mock fallback)"},
     },
     desc="Inviscid Euler aerodynamics via SU2_CFD",
     tags=["su2", "euler", "inviscid", "CL", "CD", "compressible"],
@@ -188,28 +187,26 @@ def _rans_call(cfg_template, mesh, Mach, AoA_deg,
     Mach=float(Mach); AoA=float(AoA_deg); Re=float(Reynolds); ss=float(sideslip_deg)
     cfg_template=str(cfg_template); mesh=str(mesh)
 
-    has_su2 = shutil.which("SU2_CFD") is not None
-    if has_su2 and os.path.exists(cfg_template) and os.path.exists(mesh):
-        with tempfile.TemporaryDirectory() as work:
-            dst_cfg  = os.path.join(work, "run.cfg")
-            dst_mesh = os.path.join(work, os.path.basename(mesh))
-            shutil.copy(mesh, dst_mesh)
-            _patch_cfg(cfg_template, dst_cfg, Mach, AoA, ss, Re)
-            with open(dst_cfg) as f: content = f.read()
-            content = _re.sub(r'MESH_FILENAME\s*=.*',
-                               f'MESH_FILENAME= {os.path.basename(mesh)}', content)
-            with open(dst_cfg, "w") as f: f.write(content)
-            if _run_su2(dst_cfg, work):
-                hist = os.path.join(work, "history.csv")
-                res = _parse_su2_history(hist)
-                if res:
-                    CL, CD, CM = res
-                    return {"CL": CL, "CD": CD, "CM": CM,
-                            "Mach": Q(Mach,"1"), "Re": Q(Re,"1"), "source": "su2"}
-
-    CL, CD, CM, Cf = _mock_rans(Mach, AoA, Re, alpha0_deg)
-    return {"CL": CL, "CD": CD, "CM": CM, "Mach": Q(Mach,"1"), "Re": Q(Re,"1"),
-            "source": "mock"}
+    _require_su2()
+    _require_files(cfg_template, mesh)
+    with tempfile.TemporaryDirectory() as work:
+        dst_cfg  = os.path.join(work, "run.cfg")
+        dst_mesh = os.path.join(work, os.path.basename(mesh))
+        shutil.copy(mesh, dst_mesh)
+        _patch_cfg(cfg_template, dst_cfg, Mach, AoA, ss, Re)
+        with open(dst_cfg) as f: content = f.read()
+        content = _re.sub(r'MESH_FILENAME\s*=.*',
+                           f'MESH_FILENAME= {os.path.basename(mesh)}', content)
+        with open(dst_cfg, "w") as f: f.write(content)
+        if not _run_su2(dst_cfg, work):
+            raise RuntimeError("SU2_CFD run failed; see su2.log in the work dir.")
+        hist = os.path.join(work, "history.csv")
+        res = _parse_su2_history(hist)
+        if not res:
+            raise RuntimeError("SU2 finished but history.csv had no CL/CD/CM.")
+        CL, CD, CM = res
+        return {"CL": CL, "CD": CD, "CM": CM,
+                "Mach": Q(Mach,"1"), "Re": Q(Re,"1"), "source": "su2"}
 
 
 su2_rans = Adapter(
@@ -223,7 +220,7 @@ su2_rans = Adapter(
         "AoA_deg":      {"unit": "deg", "desc": "Angle of attack"},
         "Reynolds":     {"unit": "1",   "desc": "Reynolds number", "default": 1e6},
         "sideslip_deg": {"unit": "deg", "desc": "Sideslip angle", "default": 0.0},
-        "alpha0_deg":   {"unit": "deg", "desc": "Zero-lift AoA (mock)", "default": 0.0},
+        "alpha0_deg":   {"unit": "deg", "desc": "Zero-lift AoA (unused; kept for signature compatibility)", "default": 0.0},
     },
     outputs={
         "CL":     {"unit": "1", "desc": "Lift coefficient"},
@@ -231,7 +228,7 @@ su2_rans = Adapter(
         "CM":     {"unit": "1", "desc": "Pitching moment"},
         "Mach":   {"unit": "1", "desc": "Freestream Mach"},
         "Re":     {"unit": "1", "desc": "Reynolds number"},
-        "source": {"desc": "su2 or mock"},
+        "source": {"desc": "always 'su2' (real run; no mock fallback)"},
     },
     desc="Turbulent RANS aerodynamics via SU2_CFD (Spalart-Allmaras)",
     tags=["su2", "RANS", "turbulent", "viscous", "CL", "CD"],

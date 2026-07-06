@@ -9,7 +9,8 @@ Demonstrates:
     - System composition: detonation system feeding into PDE nozzle
     - Parametric sweeps with correct unit display
 
-Falls back to published reference data if NASA CEA is not installed.
+REAL ONLY -- NO MOCK MODE: requires NASA CEA (pip install cea); the
+example exits with install instructions otherwise.
 """
 
 import os
@@ -19,12 +20,18 @@ import numpy as np
 
 
 import anvil
+from anvil.adapters import nasa_cea_detonation
 from anvil.adapters.nasa_cea_detonation import cea_detonation
 from anvil import Q, System
 
 print("=" * 60)
 print("  Example 10: Chapman-Jouguet Detonation")
 print("=" * 60)
+
+if not nasa_cea_detonation.is_available():
+    print("  NASA CEA not installed -- skipping example.")
+    print("  Install: pip install cea")
+    raise SystemExit(0)
 
 # =====================================================
 # 1. Direct detonation calls (inputs in SI)
