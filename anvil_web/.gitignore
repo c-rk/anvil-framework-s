@@ -1,5 +1,6 @@
 node_modules/
-dist/
+# dist/ is intentionally committed: end users clone without Node/npm and the
+# FastAPI backend serves this prebuilt bundle. Rebuild with `npm run build`.
 .env
 .env.local
 *.local

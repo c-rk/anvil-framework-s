@@ -5,9 +5,14 @@ __pycache__/
 *.pyd
 .Python
 *.egg-info/
+anvil_framework.egg-info/
 build/
 .eggs/
 .pytest_cache/
+
+# Virtual environments (start_anvil.py creates .venv)
+.venv/
+venv/
 
 # Registry database (user-specific, auto-regenerated)
 *.db
@@ -31,9 +36,12 @@ canvases/*.py
 
 # Web frontend (anvil_web / anvil_web_v1)
 node_modules/
-anvil_web/dist/
 anvil_web_v1/dist/
 *.tsbuildinfo
+# anvil_web/dist IS committed so users without Node can run the workbench.
+# Re-include it explicitly, overriding the global *.png rule above.
+!anvil_web/dist/
+!anvil_web/dist/**
 .env
 .env.local
 

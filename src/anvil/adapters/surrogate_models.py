@@ -71,7 +71,7 @@ def is_available() -> bool:
 
 
 def _polyfit_predict(x_train, y_train, x_new, deg):
-    """Polynomial fallback."""
+    """Real polynomial least-squares fit (numpy.polyfit) on user training data."""
     coeffs = np.polyfit(x_train, y_train, deg)
     y = float(np.polyval(coeffs, x_new))
     resid = y_train - np.polyval(coeffs, x_train)

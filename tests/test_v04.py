@@ -3,12 +3,16 @@ import sys, os, traceback, tempfile
 import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-passed = failed = 0
+passed = failed = skipped = 0
 errors = []
 
-def check(name):
+def check(name, skip=False):
     def dec(fn):
-        global passed, failed
+        global passed, failed, skipped
+        if skip:
+            print(f"  SKIP  {name}")
+            skipped += 1
+            return
         try:
             fn()
             print(f"  PASS  {name}")
@@ -201,9 +205,15 @@ def _():
 
 # ============================================================
 print("\n=== Monitor: visualization (non-interactive) ===")
-from anvil.monitor import plot_convergence, plot_variables, plot_sweep, plot_system
+try:
+    import matplotlib  # noqa: F401
+    from anvil.monitor import plot_convergence, plot_variables, plot_sweep, plot_system
+    HAS_MPL = True
+except ImportError:
+    HAS_MPL = False
+    print("  (matplotlib not installed -- plot tests skipped; pip install matplotlib)")
 
-@check("plot_convergence saves file")
+@check("plot_convergence saves file", skip=not HAS_MPL)
 def _():
     def f1(x, y): return {"z": (x+y)/2}
     def f2(z): return {"y": z*0.9}
@@ -218,7 +228,7 @@ def _():
     finally:
         os.unlink(path)
 
-@check("plot_variables saves file")
+@check("plot_variables saves file", skip=not HAS_MPL)
 def _():
     def f1(x, y): return {"z": (x+y)/2}
     def f2(z): return {"y": z*0.9}
@@ -233,7 +243,7 @@ def _():
     finally:
         os.unlink(path)
 
-@check("plot_sweep saves file")
+@check("plot_sweep saves file", skip=not HAS_MPL)
 def _():
     def sq(x): return {"y": x**2}
     s = System("sw"); s.add("x", 1); s.use(sq)
@@ -247,7 +257,7 @@ def _():
     finally:
         os.unlink(path)
 
-@check("plot_system saves file")
+@check("plot_system saves file", skip=not HAS_MPL)
 def _():
     def add(a, b): return {"c": a+b}
     def dbl(c): return {"d": c*2}
@@ -386,7 +396,7 @@ def _():
 
 # ============================================================
 print(f"\n{'='*50}")
-print(f"Results: {passed} passed, {failed} failed")
+print(f"Results: {passed} passed, {failed} failed" + (f", {skipped} skipped" if skipped else ""))
 if errors:
     print(f"\nFailed:")
     for n, e in errors: print(f"  {n}: {e}")

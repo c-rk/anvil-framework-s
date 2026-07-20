@@ -1563,7 +1563,7 @@ duration:     1.0 s</div>
 <h2>Adapters</h2>
 <p>Adapters wrap external Python libraries or CLI tools as native Anvil Relations. Once wrapped, they plug into Systems, sweeps, and sensitivity analysis identically to plain functions.</p>
 
-<div class="insight"><strong>AI-friendly by design.</strong> The adapter pattern is fully specified in this guide. Any LLM or AI coding agent can write a complete, working adapter for any package given two inputs: (1) this adapter guide section, and (2) the target package's documentation. The pattern is unambiguous — input/output spec, backend type, unit declarations, mock fallback — so the agent has no design decisions to make. Paste this section + the package docs into your agent and ask it to write the adapter.</div>
+<div class="insight"><strong>AI-friendly by design.</strong> The adapter pattern is fully specified in this guide. Any LLM or AI coding agent can write a complete, working adapter for any package given two inputs: (1) this adapter guide section, and (2) the target package's documentation. The pattern is unambiguous — input/output spec, backend type, unit declarations, real-only error handling — so the agent has no design decisions to make. Paste this section + the package docs into your agent and ask it to write the adapter.</div>
 
 <pre><span class="kw">from</span> anvil <span class="kw">import</span> Adapter, Q
 
@@ -1647,7 +1647,7 @@ r = poliastro_propagate(a=<span class="nu">6778e3</span>, ecc=<span class="nu">0
     pykep_lambert, pykep_propagate, pykep_planet_state
 )
 
-<span class="cm"># Planet ephemeris (mock fallback if pykep not installed)</span>
+<span class="cm"># Planet ephemeris (requires pykep: pip install pykep)</span>
 r_earth = pykep_planet_state(planet=<span class="st">"earth"</span>, epoch_mjd2000=<span class="nu">0</span>)
 r_mars  = pykep_planet_state(planet=<span class="st">"mars"</span>,  epoch_mjd2000=<span class="nu">200</span>)
 
@@ -1687,16 +1687,16 @@ r = equilibrium_flame(fuel=<span class="st">"CH4"</span>, oxidizer=<span class="
 <span class="kw">print</span>(r[<span class="st">"T_ad"</span>])   <span class="cm"># Q(≈2230, "K")</span>
 <span class="lang-label">python</span></pre>
 
-<div class="note"><strong>Install Cantera:</strong> <code>conda install -c cantera cantera</code> or <code>pip install cantera</code>. Both adapters have mock fallbacks — code using them runs without Cantera installed.</div>
+<div class="note"><strong>Install Cantera:</strong> <code>conda install -c cantera cantera</code> or <code>pip install cantera</code>. Both adapters are real-only — calling them without Cantera installed raises an <code>ImportError</code> with the install command; there is no mock fallback.</div>
 </section>
 
 <section id="adapters-aero">
 <h3>Aerodynamics Adapters (XFOIL, SU2, OpenFOAM)</h3>
 <pre><span class="kw">from</span> anvil.adapters.xfoil_airfoil <span class="kw">import</span> xfoil_polar, xfoil_alpha_sweep
 
-<span class="cm"># 2D airfoil: single point (thin-airfoil mock if XFOIL not on PATH)</span>
+<span class="cm"># 2D airfoil: single point (requires XFOIL on PATH; raises RuntimeError otherwise)</span>
 r = xfoil_polar(AoA_deg=<span class="nu">4.0</span>, Re=<span class="nu">1e6</span>, Mach=<span class="nu">0.1</span>)
-<span class="kw">print</span>(r[<span class="st">"CL"</span>], r[<span class="st">"CD"</span>])   <span class="cm"># CL≈0.439  CD≈0.0063  source: mock</span>
+<span class="kw">print</span>(r[<span class="st">"CL"</span>], r[<span class="st">"CD"</span>])   <span class="cm"># CL≈0.439  CD≈0.0063  source: xfoil (real run)</span>
 
 <span class="cm"># Polar sweep: returns CL_list, CD_list, CL_max, LD_max, AoA_LD_max</span>
 r = xfoil_alpha_sweep(alpha_start=<span class="nu">-4</span>, alpha_end=<span class="nu">14</span>, alpha_step=<span class="nu">2</span>, Re=<span class="nu">1.5e6</span>)
@@ -1705,20 +1705,20 @@ r = xfoil_alpha_sweep(alpha_start=<span class="nu">-4</span>, alpha_end=<span cl
 <span class="lang-label">python</span></pre>
 <pre><span class="kw">from</span> anvil.adapters.su2_aero <span class="kw">import</span> su2_euler, su2_rans
 
-<span class="cm"># Inviscid Euler (no friction; mock if SU2_CFD not on PATH)</span>
+<span class="cm"># Inviscid Euler (requires SU2_CFD on PATH; raises RuntimeError otherwise)</span>
 r = su2_euler(cfg_template=<span class="st">"naca0012.cfg"</span>, mesh=<span class="st">"naca0012.su2"</span>,
               Mach=<span class="nu">0.3</span>, AoA_deg=<span class="nu">4.0</span>)
-<span class="kw">print</span>(r[<span class="st">"CL"</span>], r[<span class="st">"CD"</span>])   <span class="cm"># CL≈0.439  CD≈0.00129  source: mock</span>
+<span class="kw">print</span>(r[<span class="st">"CL"</span>], r[<span class="st">"CD"</span>])   <span class="cm"># CL≈0.439  CD≈0.00129  source: su2 (real run)</span>
 
-<span class="cm"># RANS (viscous; adds flat-plate skin friction in mock)</span>
+<span class="cm"># RANS (viscous, real Spalart-Allmaras run)</span>
 r = su2_rans(cfg_template=<span class="st">"naca0012_sa.cfg"</span>, mesh=<span class="st">"naca0012.su2"</span>,
              Mach=<span class="nu">0.3</span>, AoA_deg=<span class="nu">4.0</span>, Reynolds=<span class="nu">3e6</span>)
-<span class="kw">print</span>(r[<span class="st">"CL"</span>], r[<span class="st">"CD"</span>])   <span class="cm"># CL≈0.439  CD≈0.00589  source: mock</span>
+<span class="kw">print</span>(r[<span class="st">"CL"</span>], r[<span class="st">"CD"</span>])   <span class="cm"># CL≈0.439  CD≈0.00589  source: su2 (real run)</span>
 <span class="cm"># Difference (CD_RANS - CD_Euler) ≈ 0.0046 = skin friction drag</span>
 <span class="lang-label">python</span></pre>
 <pre><span class="kw">from</span> anvil.adapters.openfoam_cfd <span class="kw">import</span> openfoam_incompressible, openfoam_compressible
 
-<span class="cm"># simpleFoam — low-speed (mock if OpenFOAM not installed)</span>
+<span class="cm"># simpleFoam — low-speed (requires OpenFOAM installed; raises RuntimeError otherwise)</span>
 r = openfoam_incompressible(case_path=<span class="st">"./my_case"</span>, U_inf=<span class="nu">50.0</span>, alpha_deg=<span class="nu">5.0</span>)
 <span class="kw">print</span>(r[<span class="st">"CL"</span>], r[<span class="st">"F_lift"</span>])   <span class="cm"># CL≈0.548  F_lift≈Q(816, "N")</span>
 
@@ -1726,7 +1726,7 @@ r = openfoam_incompressible(case_path=<span class="st">"./my_case"</span>, U_inf
 r = openfoam_compressible(case_path=<span class="st">"./transonic"</span>, U_inf=<span class="nu">272.0</span>, alpha_deg=<span class="nu">3.0</span>)
 <span class="kw">print</span>(r[<span class="st">"Mach"</span>])   <span class="cm"># Q(0.80, "1")</span>
 <span class="lang-label">python</span></pre>
-<div class="note">All three aerodynamics adapters have analytical mock fallbacks. When the binary is not on PATH or the case directory does not exist, thin-airfoil / Prandtl-Glauert theory is used. Results are physically reasonable for preliminary design sweeps.</div>
+<div class="note"><strong>Real-only:</strong> all three aerodynamics adapters require their solver binary (XFOIL / SU2_CFD / OpenFOAM) on PATH. If the binary is missing or the case directory does not exist, the call raises a <code>RuntimeError</code> naming the tool and how to install it — there is no analytical fallback, so every returned result comes from a real solver run. Run <code>anvil doctor</code> to see which are available on this machine.</div>
 </section>
 
 <section id="adapters-fem">
@@ -1737,7 +1737,7 @@ r = openfoam_compressible(case_path=<span class="st">"./transonic"</span>, U_inf
 r = fenics_linear_elasticity(E=<span class="nu">200e9</span>, nu=<span class="nu">0.3</span>,
     Lx=<span class="nu">1.0</span>, Ly=<span class="nu">0.05</span>, Lz=<span class="nu">0.05</span>,
     F_distributed=<span class="nu">1e4</span>)   <span class="cm"># N/m²</span>
-<span class="kw">print</span>(r[<span class="st">"max_displacement"</span>])   <span class="cm"># Q(1.15e-4, "m") — mock: Euler-Bernoulli</span>
+<span class="kw">print</span>(r[<span class="st">"max_displacement"</span>])   <span class="cm"># Q(1.15e-4, "m") — real FEniCSx solve (requires fenics-dolfinx)</span>
 <span class="kw">print</span>(r[<span class="st">"max_von_mises"</span>])      <span class="cm"># Q(2.4e6, "Pa")</span>
 
 <span class="cm"># 3D steady heat conduction</span>
@@ -1747,15 +1747,12 @@ r = fenics_heat_conduction(k=<span class="nu">205.0</span>, Lx=<span class="nu">
 <span class="lang-label">python</span></pre>
 <pre><span class="kw">from</span> anvil.adapters.pynastran_fem <span class="kw">import</span> nastran_linear_static, nastran_normal_modes
 
-<span class="cm"># SOL 101 static — runs NASTRAN/MYSTRAN if .bdf found; else Euler-Bernoulli mock</span>
-r = nastran_linear_static(bdf_path=<span class="st">"my_model.bdf"</span>, load_case_id=<span class="nu">1</span>,
-    E_fallback=<span class="nu">200e9</span>, I_fallback=<span class="nu">4.167e-6</span>, L_fallback=<span class="nu">1.0</span>, F_fallback=<span class="nu">1000.0</span>)
-<span class="kw">print</span>(r[<span class="st">"max_displacement"</span>])   <span class="cm"># Q(8.0e-5, "m")  source: mock</span>
+<span class="cm"># SOL 101 static — runs NASTRAN/MYSTRAN on the .bdf (raises if solver not found)</span>
+r = nastran_linear_static(bdf_path=<span class="st">"my_model.bdf"</span>, load_case_id=<span class="nu">1</span>)
+<span class="kw">print</span>(r[<span class="st">"max_displacement"</span>])   <span class="cm"># Q(8.0e-5, "m")  source: nastran (real run)</span>
 
-<span class="cm"># SOL 103 normal modes — analytical cantilever frequencies if no NASTRAN</span>
-r = nastran_normal_modes(bdf_path=<span class="st">"my_model.bdf"</span>, n_modes=<span class="nu">6</span>,
-    E_fallback=<span class="nu">200e9</span>, I_fallback=<span class="nu">4.167e-6</span>, L_fallback=<span class="nu">1.0</span>,
-    rho_fallback=<span class="nu">7800.0</span>, A_fallback=<span class="nu">0.0025</span>)
+<span class="cm"># SOL 103 normal modes — real modal solve from the .bdf</span>
+r = nastran_normal_modes(bdf_path=<span class="st">"my_model.bdf"</span>, n_modes=<span class="nu">6</span>)
 <span class="kw">print</span>(r[<span class="st">"f1"</span>])   <span class="cm"># Q(14.3, "Hz") — 1st bending mode</span>
 <span class="kw">print</span>([<span class="kw">round</span>(f.si, <span class="nu">1</span>) <span class="kw">for</span> f <span class="kw">in</span> r[<span class="st">"frequencies"</span>]])
 <span class="cm"># [14.3, 89.6, 250.7, 491.1, 811.3, 1210.5]  — 6 cantilever bending frequencies</span>
@@ -1767,7 +1764,7 @@ r = nastran_normal_modes(bdf_path=<span class="st">"my_model.bdf"</span>, n_mode
 <h3>OpenMDAO MDO Adapter</h3>
 <pre><span class="kw">from</span> anvil.adapters.openmdo_wrap <span class="kw">import</span> openmdo_sellar, openmdo_beam, make_openmdo_adapter
 
-<span class="cm"># Sellar coupled MDO benchmark (analytical mock if OpenMDAO not installed)</span>
+<span class="cm"># Sellar coupled MDO benchmark (requires OpenMDAO; raises ImportError otherwise)</span>
 r = openmdo_sellar(x1=<span class="nu">1.0</span>, z1=<span class="nu">5.0</span>, z2=<span class="nu">2.0</span>)
 <span class="kw">print</span>(r[<span class="st">"f"</span>], r[<span class="st">"g1"</span>], r[<span class="st">"g2"</span>])
 <span class="cm"># f≈28.6  g1≈-22.4 (feasible)  g2≈-12.1 (feasible)</span>

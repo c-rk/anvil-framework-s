@@ -354,7 +354,7 @@ register()   # pushes both adapters to global registry under propulsion.combusti
 
 ### Full engine example
 
-See `examples/ex09_cantera_cea.py` for a complete H2/O2 and CH4/O2 engine analysis. The example works with or without Cantera installed (uses a mock if not available).
+See `examples/ex09_cantera_cea.py` for a complete H2/O2 and CH4/O2 engine analysis. The example requires Cantera (`conda install -c cantera cantera` or `pip install cantera`); without it, the example prints a clear "not installed" message and exits — there is no mock fallback.
 
 ---
 

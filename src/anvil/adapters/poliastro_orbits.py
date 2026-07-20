@@ -39,64 +39,6 @@ import math
 MU_EARTH = 3.986004418e14   # m^3/s^2
 
 
-# ── Shared analytical helpers (used in mock fallbacks) ───────────────────────
-
-def _kep2eci(a, ecc, inc, raan, argp, nu, mu):
-    """
-    Keplerian elements (SI: m, rad) -> ECI Cartesian (m, m/s).
-    Uses the standard 3-1-3 perifocal rotation.
-    """
-    p     = a * (1.0 - ecc**2)
-    r_mag = p / (1.0 + ecc * math.cos(nu))
-    sqmup = math.sqrt(mu / p)
-
-    rx_pf = r_mag * math.cos(nu)
-    ry_pf = r_mag * math.sin(nu)
-    vx_pf = -sqmup * math.sin(nu)
-    vy_pf =  sqmup * (ecc + math.cos(nu))
-
-    co, so = math.cos(raan), math.sin(raan)
-    ci, si = math.cos(inc),  math.sin(inc)
-    cw, sw = math.cos(argp), math.sin(argp)
-
-    Qxx = co*cw - so*sw*ci;  Qxy = -co*sw - so*cw*ci
-    Qyx = so*cw + co*sw*ci;  Qyy = -so*sw + co*cw*ci
-    Qzx = sw*si;             Qzy =  cw*si
-
-    rx = Qxx*rx_pf + Qxy*ry_pf;  vx = Qxx*vx_pf + Qxy*vy_pf
-    ry = Qyx*rx_pf + Qyy*ry_pf;  vy = Qyx*vx_pf + Qyy*vy_pf
-    rz = Qzx*rx_pf + Qzy*ry_pf;  vz = Qzx*vx_pf + Qzy*vy_pf
-
-    return rx, ry, rz, vx, vy, vz
-
-
-def _kepler_E(M, ecc, tol=1e-12):
-    """Solve Kepler's equation M = E - e*sin(E) via Newton-Raphson."""
-    E = M + ecc * math.sin(M)
-    for _ in range(50):
-        dE = (M - E + ecc * math.sin(E)) / (1.0 - ecc * math.cos(E))
-        E += dE
-        if abs(dE) < tol:
-            break
-    return E
-
-
-def _advance_nu(nu_0, a, ecc, mu, dt):
-    """Return true anomaly after dt seconds of Keplerian propagation."""
-    n   = math.sqrt(mu / a**3)
-    E_0 = 2.0 * math.atan2(
-        math.sqrt(1.0 - ecc) * math.sin(nu_0 / 2.0),
-        math.sqrt(1.0 + ecc) * math.cos(nu_0 / 2.0),
-    )
-    M_0 = E_0 - ecc * math.sin(E_0)
-    M_f = (M_0 + n * dt) % (2.0 * math.pi)
-    E_f = _kepler_E(M_f, ecc)
-    return 2.0 * math.atan2(
-        math.sqrt(1.0 + ecc) * math.sin(E_f / 2.0),
-        math.sqrt(1.0 - ecc) * math.cos(E_f / 2.0),
-    )
-
-
 def _require_poliastro():
     """Import poliastro or raise with install instructions."""
     try:

@@ -1,0 +1,167 @@
+/* ============================================================
+   Anvil RSQ Workbench — design tokens.
+   Glass / minimal theme. Dark-first with a light theme.
+   Pure CSS variables — no runtime, no external fonts.
+
+   Layers:
+     --bg .......... page canvas (behind everything, carries ambient glow)
+     --surface-1 ... translucent chrome panels (topbar, side panels) — MAY blur
+     --surface-2 ... cards / wells sitting ON panels — never blur
+     --surface-3 ... hover / raised state of surface-2
+     --glass-* ..... floating overlays (spotlight, sheets) — blur allowed
+     nodes ......... near-opaque translucent fills, NO backdrop-filter
+                     (canvas nodes can number in the dozens; blur is GPU-costly)
+   ============================================================ */
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* ---- page ---- */
+  --bg: #0a0c10;
+  --bg-glow-1: rgba(34, 211, 238, 0.07); /* ambient accent glow, top-left   */
+  --bg-glow-2: rgba(125, 145, 255, 0.05); /* faint cool counter-glow, right */
+
+  /* ---- surfaces ---- */
+  --surface-1: rgba(21, 25, 33, 0.72); /* chrome panels (glass) */
+  --surface-2: rgba(255, 255, 255, 0.045); /* cards on panels */
+  --surface-3: rgba(255, 255, 255, 0.085); /* hover / raised */
+  --glass-bg: rgba(17, 20, 27, 0.78); /* floating overlays */
+  --overlay: rgba(5, 7, 11, 0.5); /* modal scrim */
+  --node-bg: rgba(21, 25, 33, 0.94); /* canvas nodes: solid-ish, cheap */
+  --input-bg: rgba(0, 0, 0, 0.32);
+
+  /* ---- lines ---- */
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.17);
+  --edge-highlight: rgba(255, 255, 255, 0.06); /* 1px inner top sheen */
+
+  /* ---- ink ---- */
+  --text: #e9edf2;
+  --text-dim: #aab3bf;
+  --muted: #77818e;
+
+  /* ---- accent: machined cyan, used sparingly ---- */
+  --accent: #2fd0e8;
+  --accent-soft: rgba(47, 208, 232, 0.35);
+  --accent-tint: rgba(47, 208, 232, 0.1);
+  --on-accent: #04252c;
+  --ok: #4ade80;
+  --err: #ff7070;
+
+  /* ---- shadows ---- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 10px 28px -10px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 24px 64px -16px rgba(0, 0, 0, 0.65);
+  --shadow: var(--shadow-md); /* legacy alias */
+
+  /* ---- charts (accent-led, then neutrals) ---- */
+  --chart-1: #2fd0e8;
+  --chart-2: #9aa0a8;
+  --chart-3: #c9cdd3;
+  --chart-4: #6b7178;
+  --chart-5: #e0e2e6;
+  --chart-6: #818790;
+
+  /* ---- canvas ---- */
+  --canvas-dot: rgba(255, 255, 255, 0.13);
+
+  /* ---- legacy surface aliases (kept so older rules keep working) ---- */
+  --bg-elev: var(--surface-1);
+  --bg-elev-1: var(--surface-1);
+  --bg-elev-2: var(--surface-2);
+  --bg-elev-3: var(--surface-3);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #eef1f5;
+  --bg-glow-1: rgba(8, 145, 178, 0.07);
+  --bg-glow-2: rgba(99, 116, 255, 0.05);
+
+  --surface-1: rgba(255, 255, 255, 0.66);
+  --surface-2: rgba(15, 23, 42, 0.04);
+  --surface-3: rgba(15, 23, 42, 0.08);
+  --glass-bg: rgba(252, 253, 255, 0.8);
+  --overlay: rgba(15, 23, 42, 0.32);
+  --node-bg: rgba(255, 255, 255, 0.94);
+  --input-bg: rgba(255, 255, 255, 0.75);
+
+  --border: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.2);
+  --edge-highlight: rgba(255, 255, 255, 0.65);
+
+  --text: #131820;
+  --text-dim: #4b5563;
+  --muted: #6f7883;
+
+  --accent: #0e7d95;
+  --accent-soft: rgba(14, 125, 149, 0.35);
+  --accent-tint: rgba(14, 125, 149, 0.09);
+  --on-accent: #ffffff;
+  --ok: #15803d;
+  --err: #c4302b;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 10px 28px -12px rgba(15, 23, 42, 0.18);
+  --shadow-lg: 0 24px 64px -20px rgba(15, 23, 42, 0.25);
+  --shadow: var(--shadow-md);
+
+  --chart-1: #0e7d95;
+  --chart-2: #5a606a;
+  --chart-3: #3a3e45;
+  --chart-4: #8b9099;
+  --chart-5: #26282d;
+  --chart-6: #717783;
+
+  --canvas-dot: rgba(15, 23, 42, 0.16);
+
+  --bg-elev: var(--surface-1);
+  --bg-elev-1: var(--surface-1);
+  --bg-elev-2: var(--surface-2);
+  --bg-elev-3: var(--surface-3);
+}
+
+:root {
+  /* ---- radii ---- */
+  --r-xs: 5px;
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --r-full: 999px;
+
+  /* ---- blur (use sparingly: chrome + overlays only, never nodes) ---- */
+  --blur-sm: 8px;
+  --blur-md: 14px;
+  --blur-lg: 22px;
+
+  /* ---- spacing scale ---- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+
+  /* ---- type ---- */
+  --font-ui:
+    -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  --font-mono:
+    ui-monospace, "Cascadia Code", "SF Mono", Consolas, "Liberation Mono",
+    Menlo, monospace;
+  /* Legacy alias: older rules say --font-serif; the UI face is now a clean sans. */
+  --font-serif: var(--font-ui);
+
+  --fs-xs: 0.72rem;
+  --fs-sm: 0.8rem;
+  --fs-md: 0.875rem;
+  --fs-lg: 1rem;
+  --fs-xl: 1.2rem;
+
+  /* ---- motion: fast, transform/opacity/color only ---- */
+  --t-fast: 100ms ease;
+  --t-med: 150ms ease;
+}

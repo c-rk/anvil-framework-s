@@ -1,3 +1,6 @@
+# Mirrors the `server` extra in pyproject.toml ([project.optional-dependencies]).
+# Preferred install: pip install -e ".[server]"  (or just run start_anvil.py).
+# Keep this file in sync with that extra.
 fastapi>=0.110
 uvicorn[standard]>=0.27
 pydantic>=2.5

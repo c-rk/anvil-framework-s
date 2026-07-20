@@ -1,26 +1,30 @@
 # Anvil Framework
 
-**From equations to engineering tools.**
+**From equations to engineering tools.** Write physics as plain Python functions, wire them into solvable systems, and get results with automatic unit tracking — in a library or in a browser workbench.
 
-Anvil is a computation framework for engineering and scientific research. Write physics as plain Python functions, wire them into solvable systems, and get results with automatic unit tracking.
+## Quick start
 
-## Install
+1. Download / clone this repo.
+2. Run `python start_anvil.py` (or double-click `start_anvil.bat` on Windows, `./start_anvil.sh` on Linux/macOS).
+3. Your browser opens the Anvil workbench at http://127.0.0.1:8000 — calculator, node-graph canvas, and offline docs at `/wiki`.
 
-After downloading the repo, refer `ANVIL_GUIDE.html` inside /docs to get started.
+That's it. The script creates a `.venv`, installs everything it needs (first run only), starts the server, and opens the browser. Stop with Ctrl+C. Options: `--port`, `--host`, `--project`, `--no-browser`.
+
+### Library-only install
+
+Prefer Anvil as a plain Python library? Skip the workbench:
 
 ```bash
-pip install -e .                      # core (numpy + scipy)
+pip install -e .                      # core (numpy + scipy only)
+pip install -e ".[server]"            # + web workbench backend (FastAPI + uvicorn)
 pip install -e ".[viz]"               # + matplotlib
 pip install -e ".[surrogate]"         # + scikit-learn (GP/poly surrogates)
 pip install -e ".[nastran]"           # + pyNASTRAN (FEM post-processing)
 pip install -e ".[openmdao]"          # + OpenMDAO (MDO problems)
-pip install -e ".[all]"               # numpy, scipy, matplotlib, pyNASTRAN, openmdao, scikit-learn
+pip install -e ".[all]"               # everything pip-installable above
 ```
 
-XFOIL, SU2, and OpenFOAM adapters require the respective binaries on PATH, no pip package.
-FEniCSx requires `conda install -c conda-forge fenics-dolfinx mpi4py`.
-
-## Quick Start
+Then:
 
 ```python
 import anvil
@@ -53,6 +57,29 @@ result.to_csv("results.csv")
 result.to_json("results.json")
 ```
 
+For a guided tour, open `docs/ANVIL_GUIDE.html` in a browser.
+
+### CLI
+
+An `anvil` command is installed with the package:
+
+```bash
+anvil version                # installed version
+anvil doctor                 # environment health: core deps, every adapter
+                             # (AVAILABLE/MISSING + install hint), server, web UI
+anvil serve [--port 8000]    # start the workbench server (needs the [server] extra)
+```
+
+There is also a stdlib-only HTTP client for talking to a running server from
+any Python (scripts, notebooks — no dependencies needed):
+
+```python
+from anvil import AnvilClient
+c = AnvilClient()                              # http://127.0.0.1:8000
+c.call("isentropic_ratios", M=2.0, gamma=1.4)  # {'T0_T': 1.8, 'P0_P': 7.82, ...}
+c.sweep("isentropic_ratios", param="M", values=[1.5, 2.0, 2.5])
+```
+
 ## Features
 
 - **Three primitives**: `Q` (Quantity with units), `Relation` (physics function), `System` (solvable graph)
@@ -67,16 +94,16 @@ result.to_json("results.json")
 - **Adapter layer**: wrap any Python library or CLI tool as a native Anvil Relation
 - **Signal processing RSQs**: `fft_spectrum`, `welch_psd`, `stft_spectrogram`, `bandpass_filter`, `envelope_detection`, `cross_correlation`, `signal_statistics`
 - **Decomposition RSQs**: `pod_analysis`, `dmd_analysis`, `abel_inverse`, `abel_forward`
-- **Engineering adapters** (all with analytical mock fallbacks):
+- **Engineering adapters** — each wraps a real external tool and requires that tool to be installed (run `anvil doctor` to see what's available on your machine and how to install what's missing):
   - Aerodynamics: XFOIL (2D airfoil polars), SU2 (Euler/RANS), OpenFOAM (simpleFoam/rhoSimpleFoam)
   - FEM: FEniCSx (linear elasticity, heat conduction), pyNASTRAN (SOL 101/103, MYSTRAN support)
   - MDO: OpenMDAO (factory wrapper + Sellar benchmark)
   - Surrogates: Gaussian Process, polynomial chaos, RBF interpolation (scikit-learn / scipy)
   - Propulsion: Cantera (equilibrium combustion), NASA CEA (detonation), RocketCEA (performance)
   - Orbital: poliastro (Keplerian elements, Hohmann transfers), pykep (Lambert arcs)
-  - Fluid properties: CoolProp (real-fluid thermophysical properties; real-only, no mock)
-  - Meshing: gmsh geometry/mesh generation (real-only, no mock)
-  - UQ: Monte-Carlo uncertainty propagation over any RSQ (real-only, no mock)
+  - Fluid properties: CoolProp (real-fluid thermophysical properties)
+  - Meshing: gmsh geometry/mesh generation
+  - UQ: Monte-Carlo uncertainty propagation over any RSQ (native numpy, always available)
 - **Visualization**: convergence plots, sweep charts, dependency graphs, POD energy, DMD spectrum
 - **Jupyter rich display**: HTML tables for all result types
 
@@ -133,11 +160,21 @@ result.to_json("results.json")
 
 ## Web Workbench
 
+The easy way (bootstraps everything, opens the browser):
+
 ```bash
-pip install -r anvil_server/requirements.txt
-cd anvil_web && npm install && npm run build && cd ..
-python -m anvil_server.run          # serves UI + API + docs at http://127.0.0.1:8000
+python start_anvil.py
 ```
+
+Manual equivalent, if you manage your own environment:
+
+```bash
+pip install -e ".[server]"          # FastAPI + uvicorn (or: pip install -r anvil_server/requirements.txt)
+anvil serve                          # or: python -m anvil_server.run
+```
+
+The frontend is pre-built in `anvil_web/dist`; rebuild it only if you change the
+frontend source: `cd anvil_web && npm install && npm run build`.
 
 One origin serves everything: the calculator/canvas UI at `/`, the reference
 wiki at `/wiki`, and the JSON/WebSocket API under `/api` and `/ws`. See
@@ -157,6 +194,7 @@ wiki at `/wiki`, and the JSON/WebSocket API under `/api` and `/ws`. See
 - Python 3.10+
 - NumPy >= 1.24
 - SciPy >= 1.11
+- fastapi / uvicorn (optional, `[server]` extra; for the web workbench)
 - matplotlib >= 3.7 (optional, for visualization)
 - scikit-learn >= 1.3 (optional, for GP surrogate adapter)
 - pyNASTRAN >= 1.3 (optional, for NASTRAN FEM adapter)

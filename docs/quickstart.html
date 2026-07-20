@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick start — Anvil</title>
+<meta name="description" content="From a fresh clone to solving real engineering systems with Anvil in about ten minutes.">
+<style>
+:root{
+  --bg:#0b0c0e; --panel:rgba(24,25,28,.55); --panel-solid:#141519;
+  --line:rgba(236,231,221,.13); --line-soft:rgba(236,231,221,.07);
+  --ink:#ece7dd; --ink-2:#d3cdc1; --muted:#928c81; --faint:#5c574f;
+  --accent:#f5f0e7; --code-bg:#08090b; --radius:2px;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,"Cascadia Code",Menlo,Consolas,"Liberation Mono",monospace;
+}
+:root[data-theme="light"]{
+  --bg:#f2efe9; --panel:rgba(255,255,255,.62); --panel-solid:#fbf9f5;
+  --line:rgba(23,21,15,.16); --line-soft:rgba(23,21,15,.08);
+  --ink:#17150f; --ink-2:#332f26; --muted:#6b6459; --faint:#a49d90;
+  --accent:#0a0906; --code-bg:#111114;
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f2efe9; --panel:rgba(255,255,255,.62); --panel-solid:#fbf9f5;
+    --line:rgba(23,21,15,.16); --line-soft:rgba(23,21,15,.08);
+    --ink:#17150f; --ink-2:#332f26; --muted:#6b6459; --faint:#a49d90;
+    --accent:#0a0906; --code-bg:#111114;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:19px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.mono{font-family:var(--mono)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 40px}
+@media(max-width:640px){.wrap{padding:0 22px}}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(70% 45% at 50% -5%,rgba(236,231,221,.05),transparent 60%)}
+.lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+
+header{position:sticky;top:0;z-index:40;backdrop-filter:blur(18px) saturate(1.1);-webkit-backdrop-filter:blur(18px) saturate(1.1);
+  background:color-mix(in srgb,var(--bg) 72%,transparent);border-bottom:1px solid var(--line)}
+.mast{display:flex;align-items:center;gap:30px;height:70px;max-width:1120px;margin:0 auto;padding:0 40px}
+@media(max-width:640px){.mast{padding:0 22px}}
+.brand{display:flex;align-items:center;gap:11px;color:var(--ink)}
+.brand svg{width:24px;height:24px;display:block;color:var(--ink)}
+.brand .name{font-family:var(--mono);font-size:16px;letter-spacing:.16em;text-transform:uppercase;font-weight:500}
+nav{margin-left:auto;display:flex;align-items:center;gap:28px}
+nav a{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);transition:color .16s}
+nav a:hover,nav a[aria-current]{color:var(--ink)}
+nav a[aria-current]{color:var(--accent)}
+.tgl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  background:none;border:1px solid var(--line);border-radius:2px;padding:6px 10px;cursor:pointer;transition:color .16s,border-color .16s}
+.tgl:hover{color:var(--ink);border-color:var(--accent)}
+@media(max-width:760px){nav a.opt{display:none}}
+
+.head{position:relative;z-index:1;padding:70px 0 40px;border-bottom:1px solid var(--line)}
+.head .lbl{margin-bottom:26px}
+.head h1{font-size:clamp(40px,7vw,74px);line-height:1;letter-spacing:-.025em;font-weight:600;text-wrap:balance;max-width:17ch}
+.head h1 em{font-style:italic}
+.head .row{display:grid;grid-template-columns:1.4fr 1fr;gap:40px;margin-top:34px;align-items:end}
+@media(max-width:760px){.head .row{grid-template-columns:1fr;gap:20px}}
+.head .lede{font-size:21px;line-height:1.5;color:var(--ink-2)}
+.head .facts{font-family:var(--mono);font-size:13px;display:grid;grid-template-columns:auto 1fr;gap:8px 18px}
+.head .facts dt{color:var(--faint);text-transform:uppercase;letter-spacing:.08em}
+.head .facts dd{color:var(--ink-2);text-align:right}
+
+/* steps as two-column editorial rows */
+.step{position:relative;z-index:1;display:grid;grid-template-columns:200px 1fr;gap:44px;
+  padding:52px 0;border-bottom:1px solid var(--line)}
+@media(max-width:820px){.step{grid-template-columns:1fr;gap:20px;padding:44px 0}}
+.step .rail{position:sticky;top:100px;align-self:start}
+@media(max-width:820px){.step .rail{position:static}}
+.step .idx{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--accent)}
+.step .rail h2{font-size:28px;line-height:1.08;letter-spacing:-.015em;margin-top:14px;font-weight:600}
+.step .body p{color:var(--ink-2);font-size:18px;margin:0 0 18px}
+.step .body p.note{color:var(--muted);font-size:16px}
+.step .body code{font-family:var(--mono);font-size:.82em;color:var(--accent);border:1px solid var(--line);padding:1px 7px;border-radius:2px}
+.step .body a{color:var(--accent);border-bottom:1px solid var(--line);transition:border-color .16s}
+.step .body a:hover{border-color:var(--accent)}
+
+.glass{background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:var(--radius)}
+.code{margin:20px 0}
+.code .fname{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);
+  padding:13px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.code pre{margin:0;padding:22px 20px;background:var(--code-bg);font-family:var(--mono);font-size:13.5px;
+  line-height:1.8;color:#c7c0b3;overflow-x:auto;border-radius:0 0 var(--radius) var(--radius)}
+pre .kw{color:#ece7dd}pre .fn{color:#ece7dd}pre .st{color:#9d968a}pre .nu{color:#bdb6a9}pre .cm{color:#5f5a51}pre .pr{color:#ece7dd}pre .out{color:#6c6760}
+.aside-note{border-left:2px solid var(--accent);padding:4px 0 4px 20px;margin:20px 0;color:var(--ink-2);font-size:16.5px}
+.aside-note b{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+
+.next{display:grid;grid-template-columns:repeat(2,1fr);gap:0;margin-top:4px}
+@media(max-width:560px){.next{grid-template-columns:1fr}}
+.next a{padding:24px 26px;border:1px solid var(--line);margin:-0.5px 0 0 -0.5px;transition:background .16s}
+.next a:hover{background:var(--panel)}
+.next .t{font-size:21px;font-weight:600;letter-spacing:-.01em}
+.next .t .arw{color:var(--faint);font-family:var(--mono)}
+.next a:hover .t .arw{color:var(--accent)}
+.next .d{color:var(--muted);font-size:15px;margin-top:6px}
+
+footer{position:relative;z-index:1;padding:40px 0 60px}
+.foot{display:flex;flex-wrap:wrap;gap:26px;align-items:baseline}
+.foot .sig{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.foot nav{margin-left:auto}
+.foot a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.foot a:hover{color:var(--accent)}
+:focus-visible{outline:1px solid var(--accent);outline-offset:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="mast">
+    <a class="brand" href="index.html" aria-label="Anvil home">
+      <svg viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
+        <path d="M 6 21 C 13 18, 22 18, 28 21 L 54 21 L 54 27 L 44 27 C 42 31, 38 33, 32 33 L 38 33 L 38 37 L 26 37 L 26 33 L 20 33 L 20 27 L 10 27 C 8 26, 7 23, 6 21 Z"/>
+        <path d="M 23 39 L 41 39 L 41 42 L 50 50 L 50 53 L 14 53 L 14 50 L 23 42 Z"/>
+      </svg>
+      <span class="name">Anvil</span>
+    </a>
+    <nav>
+      <a class="opt" href="quickstart.html" aria-current="page">Quick start</a>
+      <a class="opt" href="ANVIL_GUIDE.html">Guide</a>
+      <a class="opt" href="wiki.html">Wiki</a>
+      <a href="https://github.com/c-rk/anvil-framework-s">GitHub</a>
+      <button class="tgl" id="theme" aria-label="Toggle theme">Theme</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="head">
+    <div class="lbl">Quick start</div>
+    <h1>From a fresh clone to real results in <em>ten minutes.</em></h1>
+    <div class="row">
+      <p class="lede">You'll install Anvil, run a built-in relation, track units, solve a coupled system, sweep a parameter, and open the web workbench.</p>
+      <dl class="facts">
+        <dt>Time</dt><dd>~10 min</dd>
+        <dt>Needs</dt><dd>Python 3.10 +</dd>
+        <dt>Core</dt><dd>numpy · scipy</dd>
+      </dl>
+    </div>
+  </div>
+
+  <section class="step">
+    <div class="rail"><div class="idx">01</div><h2>Install</h2></div>
+    <div class="body">
+      <p>The fastest path — one command from the cloned repo. It creates a virtual environment, installs Anvil plus the web server, launches it, and opens the workbench in your browser. No Node, no npm.</p>
+      <div class="code glass"><div class="fname mono"><span>terminal</span><span>bash</span></div>
+<pre><span class="pr">$</span> python start_anvil.py</pre></div>
+      <p class="note">Prefer the library only, without the server? Install with pip and skip to step 02:</p>
+      <div class="code glass"><div class="fname mono"><span>terminal</span><span>bash</span></div>
+<pre><span class="pr">$</span> pip install -e .            <span class="cm"># core (numpy + scipy)</span>
+<span class="pr">$</span> pip install -e ".[server]"  <span class="cm"># + web workbench</span></pre></div>
+      <div class="aside-note"><b>Tip</b>Run <code>anvil doctor</code> any time to see which optional adapters (XFOIL, Cantera, CoolProp …) are available on your machine, with the exact install command for each.</div>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="rail"><div class="idx">02</div><h2>Your first calculation</h2></div>
+    <div class="body">
+      <p>Every built-in relation lives under <code>anvil.R</code>. Call one directly — here, isentropic flow ratios for Mach 2 air:</p>
+      <div class="code glass"><div class="fname mono"><span>python</span><span>&gt;&gt;&gt;</span></div>
+<pre><span class="kw">import</span> anvil
+
+anvil.R.<span class="fn">isentropic_ratios</span>(M=<span class="nu">2.0</span>, gamma=<span class="nu">1.4</span>)
+<span class="out"># {'T0_T': 1.8, 'P0_P': 7.824, 'rho0_rho': 4.347}</span></pre></div>
+      <p class="note">There are 101 relations across aero, propulsion, structures, heat transfer, orbital, thermo, controls, combustion, and signal processing. Browse them in the <a href="wiki.html">Wiki</a> or the workbench's spotlight search.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="rail"><div class="idx">03</div><h2>Quantities carry units</h2></div>
+    <div class="body">
+      <p>Wrap values in <code>Q</code> and dimensions follow through every operation — conversions, arithmetic, even offset temperatures like degrees Celsius. Unit mistakes surface as errors instead of silent wrong answers.</p>
+      <div class="code glass"><div class="fname mono"><span>python</span><span>&gt;&gt;&gt;</span></div>
+<pre><span class="kw">from</span> anvil <span class="kw">import</span> Q
+
+P = Q(<span class="nu">101325</span>, <span class="st">"Pa"</span>)
+P.<span class="fn">to</span>(<span class="st">"psi"</span>)          <span class="out"># 14.696 psi</span>
+
+rho = Q(<span class="nu">1.225</span>, <span class="st">"kg/m^3"</span>)
+V   = Q(<span class="nu">50</span>, <span class="st">"m/s"</span>)
+q   = <span class="nu">0.5</span> * rho * V**<span class="nu">2</span>   <span class="out"># 1531.25 Pa  (units derived)</span></pre></div>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="rail"><div class="idx">04</div><h2>Build and solve a system</h2></div>
+    <div class="body">
+      <p>A <code>System</code> is a graph of quantities and relations. Add your knowns, pull in relations with <code>use()</code>, and solve. Anvil orders the computation; when variables depend on each other in a cycle, it detects the coupling and switches to an iterative solver automatically.</p>
+      <div class="code glass"><div class="fname mono"><span>heat_exchanger.py</span><span>python</span></div>
+<pre><span class="kw">from</span> anvil <span class="kw">import</span> System
+
+hx = System(<span class="st">"counter_flow_hx"</span>)
+hx.<span class="fn">add</span>(<span class="st">"T_hot_in"</span>,  <span class="nu">600</span>, <span class="st">"K"</span>)
+hx.<span class="fn">add</span>(<span class="st">"T_cold_in"</span>, <span class="nu">290</span>, <span class="st">"K"</span>)
+hx.<span class="fn">add</span>(<span class="st">"UA"</span>, <span class="nu">2000</span>, <span class="st">"W"</span>)
+hx.<span class="fn">add</span>(<span class="st">"mdot_hot"</span>, <span class="nu">0.8</span>, <span class="st">"kg/s"</span>); hx.<span class="fn">add</span>(<span class="st">"mdot_cold"</span>, <span class="nu">0.5</span>, <span class="st">"kg/s"</span>)
+
+hx.<span class="fn">use</span>(<span class="st">"hx_heat_rate"</span>); hx.<span class="fn">use</span>(<span class="st">"hx_cold_out"</span>)
+hx.<span class="fn">use</span>(<span class="st">"hx_hot_out"</span>);  hx.<span class="fn">use</span>(<span class="st">"hx_effectiveness"</span>)
+
+result = hx.<span class="fn">solve_gauss_seidel</span>(monitor=<span class="kw">True</span>)
+result.<span class="fn">summary</span>()      <span class="out"># ~33 iterations, effectiveness ~ 0.806</span></pre></div>
+      <p class="note">Other solvers: <code>solve_forward()</code> for acyclic systems and <code>solve_newton()</code> for stiff coupling. For ODE/BVP/PDE, reach into <code>anvil.solvers</code>.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="rail"><div class="idx">05</div><h2>Sweep and analyze</h2></div>
+    <div class="body">
+      <p>Vary a parameter across a range — in parallel if you like — then rank which inputs move your outputs the most.</p>
+      <div class="code glass"><div class="fname mono"><span>python</span><span>python</span></div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+sweep = hx.<span class="fn">sweep</span>(<span class="st">"UA"</span>, np.<span class="fn">linspace</span>(<span class="nu">500</span>, <span class="nu">5000</span>, <span class="nu">6</span>), parallel=<span class="nu">4</span>)
+sweep.<span class="fn">summary</span>(outputs=[<span class="st">"effectiveness"</span>, <span class="st">"Q_dot"</span>])
+sweep.<span class="fn">to_csv</span>(<span class="st">"hx_sweep.csv"</span>)
+
+hx.<span class="fn">sensitivity</span>(outputs=[<span class="st">"effectiveness"</span>]).<span class="fn">summary</span>()</pre></div>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="rail"><div class="idx">06</div><h2>Open the workbench — call it anywhere</h2></div>
+    <div class="body">
+      <p>If you started with <code>python start_anvil.py</code>, the workbench is already running at <code>http://127.0.0.1:8000</code>: a calculator with spotlight search over every relation, and a node-graph canvas where you wire systems visually and watch solver residuals live. Canvases save as runnable Python.</p>
+      <p>The same running server is a REST API, so any code can drive it. From Python, use the built-in client:</p>
+      <div class="code glass"><div class="fname mono"><span>python</span><span>python</span></div>
+<pre><span class="kw">from</span> anvil.client <span class="kw">import</span> AnvilClient
+
+srv = AnvilClient(<span class="st">"http://127.0.0.1:8000"</span>)
+srv.<span class="fn">health</span>()                       <span class="out"># {'status': 'ok', 'rsq_count': 108, ...}</span>
+srv.<span class="fn">call</span>(<span class="st">"isentropic_ratios"</span>, M=<span class="nu">2.0</span>, gamma=<span class="nu">1.4</span>)</pre></div>
+    </div>
+  </section>
+
+  <section class="step" style="border-bottom:0">
+    <div class="rail"><div class="idx">07</div><h2>Where to go next</h2></div>
+    <div class="body">
+      <div class="next">
+        <a href="ANVIL_GUIDE.html"><div class="t">The Guide <span class="arw">→</span></div><div class="d">The full walkthrough: adapters, registries, solvers, worked examples.</div></a>
+        <a href="wiki.html"><div class="t">The Wiki <span class="arw">→</span></div><div class="d">Reference for every relation, unit, and API, searchable by domain.</div></a>
+        <a href="https://github.com/c-rk/anvil-framework-s"><div class="t">GitHub <span class="arw">→</span></div><div class="d">Source, the example gallery, and issues.</div></a>
+        <a href="index.html"><div class="t">Overview <span class="arw">→</span></div><div class="d">Back to the landing page and the feature tour.</div></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="sig">Anvil — from equations to engineering tools</span>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="ANVIL_GUIDE.html">Guide</a>
+      <a href="wiki.html">Wiki</a>
+      <a href="https://github.com/c-rk/anvil-framework-s">GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var root=document.documentElement, key="anvil-docs-theme", s=localStorage.getItem(key);
+  if(s)root.setAttribute("data-theme",s);
+  document.getElementById("theme").addEventListener("click",function(){
+    var c=root.getAttribute("data-theme");
+    if(!c)c=matchMedia("(prefers-color-scheme:light)").matches?"light":"dark";
+    var n=c==="dark"?"light":"dark";root.setAttribute("data-theme",n);localStorage.setItem(key,n);
+  });
+})();
+</script>
+</body>
+</html>

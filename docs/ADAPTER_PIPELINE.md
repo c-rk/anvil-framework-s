@@ -32,33 +32,42 @@ reference: `src/anvil/adapters/xfoil_airfoil.py`):
 """
 Anvil Adapter: <TOOL> — <what it computes>.
 Install: <pip/conda/binary instructions>.
-Falls back to <analytical model> when <TOOL> is unavailable.
+REAL ONLY — NO MOCK MODE: a missing tool raises a clear error naming the
+dependency and the exact install command.
 """
 from anvil import Adapter, Q
 import math, shutil, subprocess   # NO module-level import of the external tool
 
-# 1) Analytical MOCK fallback — runs when the real tool is missing.
-def _mock_polar(airfoil, Re, alpha_deg, Mach=0.0):
-    ...                      # simplified physics
-    return CL, CD, CM
+# 1) Availability gate — locate the tool or raise with install instructions.
+def _require_tool():
+    exe = shutil.which("xfoil") or shutil.which("xfoil.exe")
+    if exe is None:
+        raise RuntimeError(
+            "XFOIL binary not found on PATH. Install it first:\n"
+            "  Linux/WSL:  sudo apt install xfoil\n"
+            "  Windows:    https://web.mit.edu/drela/Public/web/xfoil/"
+        )
+    return exe
 
-# 2) Real-tool invocation — returns None on any failure (signals fallback).
-def _run_tool(...):
-    try:
-        exe = shutil.which("xfoil")
-        # write inputs, subprocess.run(..., timeout=T), parse outputs
-        return (CL, CD, CM)
-    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
-        return None
+def is_available() -> bool:
+    """True when the tool is installed (never raises)."""
+    return (shutil.which("xfoil") or shutil.which("xfoil.exe")) is not None
+
+# 2) Real-tool invocation — write inputs, run, parse outputs.
+def _run_tool(exe, ...):
+    # subprocess.run(..., timeout=T), parse output files
+    return (CL, CD, CM)
 
 # 3) Wrapper — Anvil passes inputs as SI floats; return a dict of outputs.
+#    The availability check happens at CALL time, never at import time, so
+#    `import anvil` always succeeds even with zero adapter deps installed.
 def _polar_call(airfoil, Re, alpha_deg, Mach=0.0):
-    res = _run_tool(airfoil, Re, alpha_deg, Mach)
-    if res is not None:
-        CL, CD, CM = res
-        return {"CL": CL, "CD": CD, "CM": CM, "source": "xfoil"}
-    CL, CD, CM = _mock_polar(airfoil, Re, alpha_deg, Mach)
-    return {"CL": CL, "CD": CD, "CM": CM, "source": "mock"}
+    exe = _require_tool()                      # raises if tool missing
+    res = _run_tool(exe, airfoil, Re, alpha_deg, Mach)
+    if res is None:
+        raise RuntimeError("XFOIL run failed or did not converge ...")
+    CL, CD, CM = res
+    return {"CL": CL, "CD": CD, "CM": CM, "source": "xfoil"}
 
 # 4) Adapter declaration.
 xfoil_polar = Adapter(
@@ -71,7 +80,7 @@ xfoil_polar = Adapter(
     },
     outputs={
         "CL":     {"unit": "1", "desc": "Lift coefficient"},
-        "source": {"desc": "xfoil (real) or mock (fallback)"},
+        "source": {"desc": "always 'xfoil' (real run; no mock fallback)"},
     },
     desc="2D airfoil CL/CD/CM via XFOIL",
     tags=["xfoil", "airfoil", "tierA", "cli"],
@@ -88,10 +97,12 @@ def register():
 
 - **Lazy import.** Never import the external package at module top level — import it *inside* the
   wrapper/invocation function. This lets the adapter file load even when the tool is absent.
-- **Mock fallback + `"source"` field.** Every adapter returns a `"source"` output (`"<tool>"` vs
-  `"mock"`) so downstream users always know whether a result is real or a placeholder. Prefer a
-  graceful analytical fallback over raising; raise only when no sensible fallback exists (then give
-  clear install instructions in the message).
+- **REAL ONLY — no mock fallbacks.** Adapters never substitute analytical stand-in results for the
+  real tool. A missing dependency raises `ImportError` (Python package) or `RuntimeError` (binary /
+  missing files) whose message names the dependency and the exact install command. Mock physics
+  output can be mistaken for real results — that failure mode is banned. Include a module-level
+  `is_available() -> bool` so callers can probe without triggering the error. Every adapter still
+  returns a `"source"` output naming the real tool that produced the result.
 - **Units.** Declare each input/output `"unit"`. Anvil passes inputs to the wrapper as **SI floats
   divided into the declared tool unit**, and wraps declared outputs back into `Q(value, unit)`.
   Dimensionless → omit `"unit"` or use `"1"`/`""`. (Implementation: `src/anvil/adapter.py` python
@@ -121,14 +132,25 @@ assert report["ok"]            # loaded + ran cleanly
 ```
 
 For *correctness* assertions, write a real test in `tests/` (script-style, like
-`tests/test_fixes_v05.py`). Adapters must pass on **both paths** — real binary/package present, and
-mock mode (CI typically runs mock-only):
+`tests/test_fixes_v05.py`). Two paths must be covered — the real run when the dependency is
+installed, and the **clear not-installed error** when it is absent (the error path is testable on
+every machine; skip the real run when the tool is missing):
 
 ```python
-r = xfoil_polar(Re=1e6, alpha_deg=5.0)
-assert math.isfinite(float(r["CL"])) and r["source"] in ("xfoil", "mock")
-assert r["CL"].unit in ("", "1")      # units round-trip
+if is_available():
+    r = xfoil_polar(Re=1e6, alpha_deg=5.0)
+    assert math.isfinite(float(r["CL"])) and r["source"] == "xfoil"
+else:
+    try:
+        xfoil_polar(Re=1e6, alpha_deg=5.0)
+        assert False, "expected a not-installed error"
+    except (ImportError, RuntimeError) as e:
+        assert "xfoil" in str(e).lower() and "install" in str(e).lower()
 ```
+
+Note: `anvil.check()` is **not** expected to report `ok=True` for a dependency-requiring adapter on
+a machine without the dependency — its dummy test run calls the adapter, which now raises. That is
+the intended behaviour.
 
 You may also pass `tests={...}` to `anvil.push(...)`; this metadata is persisted in the registry
 (`rsq.tests` column) for documentation/future use, but is not auto-asserted by `check()` today.
@@ -151,9 +173,11 @@ You may also pass `tests={...}` to `anvil.push(...)`; this metadata is persisted
 
 - [ ] Tier decided; tagged accordingly.
 - [ ] File at `src/anvil/adapters/<tool>.py`, external import is lazy.
-- [ ] Analytical mock fallback + `"source"` output field.
+- [ ] REAL ONLY: no mock fallback; missing dependency raises a clear error naming the install
+      command; `is_available()` provided; `"source"` output names the real tool.
 - [ ] All inputs/outputs declare units.
 - [ ] `register()` pushes to a sensible `domain`.
-- [ ] `examples/ex_<tool>_adapter.py` runs.
-- [ ] `anvil.check()` reports `ok` on real **and** mock paths; correctness test in `tests/`.
+- [ ] `examples/ex_<tool>_adapter.py` runs (and prints a clear "requires X, install with Y,
+      skipping" message when the tool is absent).
+- [ ] Correctness test in `tests/`: real path when installed, not-installed error path otherwise.
 - [ ] README + wiki updated.

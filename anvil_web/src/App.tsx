@@ -16,7 +16,11 @@ type Page = "calculator" | "canvas";
 function useTheme(): [Theme, () => void] {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem("anvil-theme");
-    return saved === "light" ? "light" : "dark";
+    if (saved === "light" || saved === "dark") return saved;
+    // No saved preference: respect the OS color scheme (dark-first fallback).
+    return window.matchMedia?.("(prefers-color-scheme: light)").matches
+      ? "light"
+      : "dark";
   });
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);

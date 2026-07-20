@@ -1,62 +1,12 @@
 /* ============================================================
-   Anvil RSQ Workbench — refined MONOCHROME theme.
-   Dark-first with a light toggle. Pure CSS, no UI kit.
-   Greyscale only: black / white / greys. The single "accent" is a
-   near-white in dark mode and a near-black in light mode.
+   Anvil RSQ Workbench — glass / minimal theme.
+   Tokens live in tokens.css (imported first). Pure CSS, no UI kit.
+
+   Performance rules honored here:
+     - backdrop-filter ONLY on: topbar, side panels, toolbars, overlays.
+     - Canvas nodes (.gnode) use near-opaque translucent fills — NO blur.
+     - Transitions are <=150ms and touch color/transform/opacity only.
    ============================================================ */
-
-:root,
-:root[data-theme="dark"] {
-  --bg: #0c0d0f;
-  --bg-elev: #151619;
-  --bg-elev-2: #1d1f23;
-  --bg-elev-3: #26282d;
-  --border: #2c2f35;
-  --border-strong: #3a3e45;
-  --text: #eceef1;
-  --text-dim: #b6bcc4;
-  --muted: #8d939c;
-  /* Monochrome "accent": a near-white used for active/focus/emphasis. */
-  --accent: #f3f4f6;
-  --accent-soft: #c9cdd3;
-  --on-accent: #0c0d0f;
-  --ok: #d8dbdf;
-  --err: #ff6b6b;
-  --input-bg: #0a0b0d;
-  --shadow: 0 6px 22px rgba(0, 0, 0, 0.55);
-  --chart-1: #f3f4f6;
-  --chart-2: #9aa0a8;
-  --chart-3: #c9cdd3;
-  --chart-4: #6b7178;
-  --chart-5: #e0e2e6;
-  --chart-6: #818790;
-}
-
-:root[data-theme="light"] {
-  --bg: #f6f7f8;
-  --bg-elev: #ffffff;
-  --bg-elev-2: #eeeff1;
-  --bg-elev-3: #e3e5e8;
-  --border: #d7dadf;
-  --border-strong: #b9bdc4;
-  --text: #14161a;
-  --text-dim: #41464e;
-  --muted: #686e76;
-  /* Monochrome "accent": a near-black used for active/focus/emphasis. */
-  --accent: #14161a;
-  --accent-soft: #3a3e45;
-  --on-accent: #ffffff;
-  --ok: #2a2e34;
-  --err: #c4302b;
-  --input-bg: #ffffff;
-  --shadow: 0 6px 20px rgba(20, 22, 26, 0.12);
-  --chart-1: #14161a;
-  --chart-2: #5a606a;
-  --chart-3: #3a3e45;
-  --chart-4: #8b9099;
-  --chart-5: #26282d;
-  --chart-6: #717783;
-}
 
 * {
   box-sizing: border-box;
@@ -71,23 +21,23 @@ body,
 
 /* ------------------------------------------------------------------
    FONT THEME (system fonts only — no web-font downloads).
-     - SERIF (--font-serif): headings, descriptions, labels, help,
-       buttons-as-text, instructive copy.
-     - MONO (--font-mono): RSQ NAMES (identifiers), variable names,
-       signatures, units, numeric values, tables, code, key caps.
+     - UI (--font-ui): clean sans for chrome, labels, copy, buttons.
+     - MONO (--font-mono): RSQ names (identifiers), variables, units,
+       numeric values, tables, code, key caps.
    ------------------------------------------------------------------ */
-:root {
-  --font-serif: Georgia, "Merriweather", "Times New Roman", serif;
-  --font-mono: "Courier New", Courier, monospace;
-}
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(1100px 700px at 12% -8%, var(--bg-glow-1), transparent 60%),
+    radial-gradient(900px 600px at 105% 18%, var(--bg-glow-2), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 14px;
   line-height: 1.45;
-  transition: background 0.18s ease, color 0.18s ease;
+  -webkit-font-smoothing: antialiased;
+  transition: color var(--t-med);
 }
 
 h1,
@@ -96,7 +46,13 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
 }
 
 /* RSQ identifiers, variable names, units, code, signatures, numerics: MONO. */
@@ -129,6 +85,67 @@ code,
 .result-table,
 .sweep-table {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Numeric readouts always align digit columns. */
+.num,
+.gnode-result-val,
+.calcpad-out,
+.calcpad-display,
+.calcpad-slot-val,
+.builder-stat,
+.residual-axis-label,
+.line-axis-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------- scrollbars (thin, quiet) ----------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--r-full);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ----------------------- focus (keyboard a11y) ----------------------- */
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 .app {
@@ -139,11 +156,11 @@ code,
 
 /* ----------------------- connection banner ----------------------- */
 .conn-banner {
-  background: var(--bg-elev-3);
+  background: var(--surface-2);
   color: var(--text);
-  border-bottom: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
   padding: 0.5rem 1rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 0.9rem;
   text-align: center;
 }
@@ -152,10 +169,11 @@ code,
   background: var(--accent);
   color: var(--on-accent);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   padding: 0.2rem 0.7rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -164,10 +182,14 @@ code,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 1rem;
-  background: var(--bg-elev);
+  padding: 0.55rem 1rem;
+  background: var(--surface-1);
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
   border-bottom: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 var(--edge-highlight);
   gap: 1rem;
+  z-index: 20;
 }
 .brand {
   display: flex;
@@ -180,23 +202,24 @@ code,
 }
 .brand-name {
   font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 0.5px;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
 }
 .brand-sub {
-  color: var(--text-dim);
-  font-size: 0.85rem;
+  color: var(--muted);
+  font-size: 0.82rem;
 }
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
 .health {
-  color: var(--text-dim);
-  font-size: 0.8rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ghost (text) buttons + links share one quiet style */
@@ -204,19 +227,22 @@ code,
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--bg-elev-2);
+  background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   padding: 0.35rem 0.7rem;
   cursor: pointer;
-  font-family: var(--font-serif);
-  font-size: 0.85rem;
+  font-family: var(--font-ui);
+  font-size: 0.83rem;
   text-decoration: none;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 .ghost-btn:hover {
   border-color: var(--border-strong);
-  background: var(--bg-elev-3);
+  background: var(--surface-3);
 }
 .icon-btn {
   padding: 0.35rem 0.6rem;
@@ -227,17 +253,21 @@ code,
 }
 
 .theme-toggle {
-  background: var(--bg-elev-2);
+  background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   padding: 0.35rem 0.7rem;
   cursor: pointer;
-  font-family: var(--font-serif);
-  font-size: 0.85rem;
+  font-family: var(--font-ui);
+  font-size: 0.83rem;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 .theme-toggle:hover {
   border-color: var(--border-strong);
+  background: var(--surface-3);
 }
 
 /* key caps */
@@ -248,7 +278,7 @@ code,
   background: var(--input-bg);
   border: 1px solid var(--border-strong);
   border-bottom-width: 2px;
-  border-radius: 5px;
+  border-radius: var(--r-xs);
   padding: 0.05rem 0.35rem;
   font-size: 0.72rem;
   color: var(--text-dim);
@@ -259,24 +289,26 @@ code,
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-family: var(--font-serif);
-  font-size: 0.78rem;
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
   color: var(--text-dim);
   border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.15rem 0.55rem;
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  padding: 0.15rem 0.6rem;
 }
 .conn-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-full);
   background: var(--muted);
 }
 .conn-connected .conn-dot {
-  background: var(--accent);
+  background: var(--ok);
+  box-shadow: 0 0 6px var(--ok);
 }
 .conn-connecting .conn-dot {
-  background: var(--accent-soft);
+  background: var(--accent);
   animation: conn-pulse 1.1s ease-in-out infinite;
 }
 .conn-disconnected {
@@ -297,28 +329,36 @@ code,
 }
 
 /* ----------------------------- view tabs ----------------------------- */
+/* Segmented control on glass. */
 .view-tabs {
   display: flex;
-  gap: 0.3rem;
+  gap: 0.2rem;
+  padding: 0.18rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
 }
 .view-tab {
   background: transparent;
   color: var(--text-dim);
   border: 1px solid transparent;
-  border-radius: 7px;
-  padding: 0.35rem 1rem;
+  border-radius: var(--r-sm);
+  padding: 0.28rem 1rem;
   cursor: pointer;
-  font-family: var(--font-serif);
-  font-size: 0.98rem;
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  transition:
+    background var(--t-fast),
+    color var(--t-fast);
 }
 .view-tab:hover {
   color: var(--text);
-  background: var(--bg-elev-2);
 }
 .view-tab.active {
   color: var(--text);
-  background: var(--bg-elev-2);
-  border-color: var(--border-strong);
+  background: var(--surface-3);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ----------------------------- layout ----------------------------- */
@@ -338,7 +378,7 @@ code,
 }
 .center {
   overflow: auto;
-  padding: 1.2rem;
+  padding: 1.4rem 1.6rem;
 }
 .layout-full {
   flex: 1;
@@ -356,26 +396,32 @@ code,
   background: transparent;
   color: var(--text-dim);
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: var(--r-sm);
   padding: 0.3rem 0.9rem;
   cursor: pointer;
-  font-family: var(--font-serif);
-  font-size: 0.88rem;
+  font-family: var(--font-ui);
+  font-size: 0.86rem;
+  transition:
+    background var(--t-fast),
+    color var(--t-fast),
+    border-color var(--t-fast);
 }
 .subtab:hover {
   color: var(--text);
-  background: var(--bg-elev-2);
+  background: var(--surface-2);
 }
 .subtab.active {
   color: var(--text);
-  background: var(--bg-elev-2);
+  background: var(--surface-3);
   border-color: var(--border-strong);
 }
 
 /* ----------------------------- catalog ----------------------------- */
 .catalog {
   border-right: 1px solid var(--border);
-  background: var(--bg-elev);
+  background: var(--surface-1);
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -389,29 +435,23 @@ code,
 }
 .catalog-search input {
   flex: 1;
+  min-width: 0;
   background: var(--input-bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   color: var(--text);
   padding: 0.45rem 0.6rem;
   font-size: 0.9rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
+  transition: border-color var(--t-fast);
 }
-/* Keyboard navigation: visible focus ring on all interactive elements. */
-button:focus-visible,
-a:focus-visible,
-select:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-[tabindex]:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
+.catalog-search input::placeholder {
+  color: var(--muted);
 }
-
 .catalog-search input:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 .catalog-count {
   color: var(--muted);
@@ -422,7 +462,7 @@ textarea:focus-visible,
 .catalog-groups {
   overflow: auto;
   flex: 1;
-  padding: 0.3rem;
+  padding: 0.4rem;
 }
 
 /* collapsible domain groups (shared by catalog + palette) */
@@ -437,13 +477,15 @@ textarea:focus-visible,
   text-align: left;
   background: transparent;
   border: none;
-  color: var(--text-dim);
-  padding: 0.35rem 0.5rem;
+  color: var(--muted);
+  padding: 0.4rem 0.5rem;
   cursor: pointer;
-  font-family: var(--font-serif);
-  font-size: 0.74rem;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.08em;
+  transition: color var(--t-fast);
 }
 .domain-head:hover {
   color: var(--text);
@@ -460,10 +502,10 @@ textarea:focus-visible,
 }
 .domain-count {
   font-family: var(--font-mono);
-  background: var(--bg-elev-2);
-  border-radius: 999px;
+  background: var(--surface-2);
+  border-radius: var(--r-full);
   padding: 0 0.4rem;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   color: var(--muted);
 }
 .catalog-list {
@@ -482,17 +524,20 @@ textarea:focus-visible,
   text-align: left;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--r-md);
   color: var(--text);
   padding: 0.45rem 0.6rem;
   cursor: pointer;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 .catalog-item:hover {
-  background: var(--bg-elev-2);
+  background: var(--surface-2);
 }
 .catalog-item.active {
-  background: var(--bg-elev-2);
-  border-color: var(--accent);
+  background: var(--accent-tint);
+  border-color: var(--accent-soft);
 }
 .catalog-item-head {
   display: flex;
@@ -505,6 +550,7 @@ textarea:focus-visible,
 }
 .catalog-name {
   font-weight: 600;
+  font-size: 0.85rem;
 }
 .catalog-desc {
   color: var(--text-dim);
@@ -524,12 +570,12 @@ textarea:focus-visible,
   gap: 0.45rem;
 }
 .catalog-doc {
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 0.74rem;
   color: var(--muted);
   text-decoration: none;
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--t-fast);
 }
 .catalog-pin {
   background: none;
@@ -540,14 +586,16 @@ textarea:focus-visible,
   color: var(--muted);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--t-fast);
 }
 .catalog-pin.pinned {
   opacity: 1;
-  color: var(--text);
+  color: var(--accent);
 }
 .catalog-list li:hover .catalog-doc,
-.catalog-list li:hover .catalog-pin {
+.catalog-list li:hover .catalog-pin,
+.catalog-list li:focus-within .catalog-doc,
+.catalog-list li:focus-within .catalog-pin {
   opacity: 1;
 }
 .catalog-doc:hover,
@@ -570,29 +618,29 @@ textarea:focus-visible,
 }
 
 /* ----------------------------- badges ----------------------------- */
-/* Monochrome badges differentiated by weight/fill, not hue. */
+/* Quiet badges; only S (solvable system) carries the accent. */
 .badge {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   padding: 0.05rem 0.4rem;
-  border-radius: 999px;
+  border-radius: var(--r-full);
   border: 1px solid var(--border-strong);
   color: var(--text-dim);
   white-space: nowrap;
 }
 .badge-R {
   color: var(--text);
-  border-color: var(--text-dim);
+  border-color: var(--border-strong);
 }
 .badge-S {
-  color: var(--on-accent);
-  background: var(--accent);
-  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-tint);
+  border-color: var(--accent-soft);
 }
 .badge-Q {
   color: var(--text-dim);
-  border-color: var(--border-strong);
+  border-color: var(--border);
 }
 
 /* ----------------------------- calculator ----------------------------- */
@@ -622,21 +670,23 @@ textarea:focus-visible,
   margin-top: 0.3rem;
 }
 .chip {
-  background: var(--bg-elev-2);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   padding: 0.1rem 0.45rem;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: var(--text-dim);
 }
 .calc-desc {
   color: var(--text-dim);
   margin: 0.6rem 0 0.4rem;
+  max-width: 68ch;
 }
 .calc-formula {
-  background: var(--bg-elev);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--r-lg);
+  box-shadow: inset 0 1px 0 var(--edge-highlight);
   padding: 0.9rem 1rem;
   margin: 0.6rem 0 1.2rem;
   overflow-x: auto;
@@ -655,15 +705,16 @@ textarea:focus-visible,
 .calc-grid {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
-  gap: 1.2rem;
+  gap: 1.4rem;
 }
 .calc-inputs h3,
 .calc-results h3 {
   margin: 0 0 0.6rem;
-  font-size: 0.95rem;
-  color: var(--text-dim);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
 }
 
 .field {
@@ -689,20 +740,23 @@ textarea:focus-visible,
 .field input {
   background: var(--input-bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   color: var(--text);
   padding: 0.45rem 0.6rem;
   font-size: 0.9rem;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  transition: border-color var(--t-fast);
 }
 .field input:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 .field-desc {
   color: var(--muted);
   font-size: 0.72rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
 }
 
 .run-btn {
@@ -710,28 +764,36 @@ textarea:focus-visible,
   background: var(--accent);
   color: var(--on-accent);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--r-md);
   padding: 0.55rem 1.2rem;
-  font-family: var(--font-serif);
-  font-size: 0.95rem;
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    filter var(--t-fast),
+    transform var(--t-fast);
 }
 .run-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 .run-btn:not(:disabled):hover {
-  filter: brightness(0.94);
+  filter: brightness(1.08);
+}
+.run-btn:not(:disabled):active {
+  transform: translateY(1px);
 }
 .live-btn {
-  background: var(--bg-elev-3);
+  background: var(--surface-3);
   color: var(--text);
   border: 1px solid var(--border-strong);
+  box-shadow: none;
 }
 .live-btn:not(:disabled):hover {
   filter: none;
-  background: var(--bg-elev-2);
+  background: var(--surface-2);
 }
 
 /* ----------------------------- results ----------------------------- */
@@ -751,12 +813,16 @@ textarea:focus-visible,
 .result-table th,
 .result-table td {
   text-align: left;
-  padding: 0.35rem 0.6rem;
+  padding: 0.4rem 0.6rem;
   border-bottom: 1px solid var(--border);
 }
 .result-table th {
-  font-family: var(--font-serif);
-  color: var(--text-dim);
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
 }
 .result-table th.num,
 .result-table td.num {
@@ -766,11 +832,14 @@ textarea:focus-visible,
 .result-table .role {
   color: var(--muted);
   font-size: 0.75rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
 }
 .result-table tr.output .var {
   font-weight: 700;
-  color: var(--text);
+  color: var(--accent);
+}
+.result-table tr.output td {
+  background: var(--accent-tint);
 }
 .result-table .unit {
   color: var(--text-dim);
@@ -781,24 +850,28 @@ textarea:focus-visible,
   margin-top: 0.9rem;
 }
 .export-row button {
-  background: var(--bg-elev-2);
+  background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   padding: 0.4rem 0.9rem;
   cursor: pointer;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 0.85rem;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 .export-row button:hover {
   border-color: var(--border-strong);
+  background: var(--surface-3);
 }
 
 /* ----------------------------- misc ----------------------------- */
 .panel {
-  background: var(--bg-elev);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--r-lg);
   padding: 1rem;
 }
 .muted {
@@ -812,30 +885,56 @@ textarea:focus-visible,
 .spotlight-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--overlay);
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+  backdrop-filter: blur(var(--blur-sm));
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding-top: 12vh;
   z-index: 1000;
+  animation: overlay-in 120ms ease;
+}
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .spotlight {
   width: min(640px, 92vw);
-  background: var(--bg-elev);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--blur-lg));
+  backdrop-filter: blur(var(--blur-lg));
   border: 1px solid var(--border-strong);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  border-radius: var(--r-xl);
+  box-shadow:
+    inset 0 1px 0 var(--edge-highlight),
+    var(--shadow-lg);
   overflow: hidden;
+  animation: sheet-in 130ms ease;
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .spotlight-input-row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.7rem 0.9rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border);
 }
 .spotlight-icon {
-  color: var(--text-dim);
+  color: var(--muted);
   font-size: 1.1rem;
 }
 .spotlight-input {
@@ -844,8 +943,11 @@ textarea:focus-visible,
   border: none;
   outline: none;
   color: var(--text);
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 1.05rem;
+}
+.spotlight-input::placeholder {
+  color: var(--muted);
 }
 .spotlight-hint {
   color: var(--muted);
@@ -855,7 +957,7 @@ textarea:focus-visible,
 .spotlight-results {
   list-style: none;
   margin: 0;
-  padding: 0.3rem;
+  padding: 0.35rem;
   max-height: 56vh;
   overflow: auto;
 }
@@ -864,11 +966,12 @@ textarea:focus-visible,
   grid-template-columns: 1fr auto;
   gap: 0.15rem 0.6rem;
   padding: 0.5rem 0.7rem;
-  border-radius: 8px;
+  border-radius: var(--r-md);
   cursor: pointer;
 }
 .spotlight-item.active {
-  background: var(--bg-elev-2);
+  background: var(--accent-tint);
+  box-shadow: inset 0 0 0 1px var(--accent-soft);
 }
 .spotlight-name {
   font-weight: 600;
@@ -900,19 +1003,27 @@ textarea:focus-visible,
 .help-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--overlay);
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+  backdrop-filter: blur(var(--blur-sm));
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: overlay-in 120ms ease;
 }
 .help-sheet {
   width: min(460px, 92vw);
-  background: var(--bg-elev);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--blur-lg));
+  backdrop-filter: blur(var(--blur-lg));
   border: 1px solid var(--border-strong);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  border-radius: var(--r-xl);
+  box-shadow:
+    inset 0 1px 0 var(--edge-highlight),
+    var(--shadow-lg);
   padding: 1.1rem 1.3rem 1.3rem;
+  animation: sheet-in 130ms ease;
 }
 .help-head {
   display: flex;
@@ -930,6 +1041,7 @@ textarea:focus-visible,
   font-size: 1.4rem;
   line-height: 1;
   cursor: pointer;
+  transition: color var(--t-fast);
 }
 .help-close:hover {
   color: var(--text);
@@ -960,7 +1072,7 @@ textarea:focus-visible,
 }
 .help-foot a,
 .calc-doc-link {
-  color: var(--text);
+  color: var(--accent);
 }
 
 /* ----------------------------- live residuals ----------------------------- */
@@ -971,8 +1083,9 @@ textarea:focus-visible,
 }
 .residual-chart {
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-elev);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  box-shadow: inset 0 1px 0 var(--edge-highlight);
   padding: 0.8rem 0.9rem;
   margin-bottom: 0.9rem;
 }
@@ -992,10 +1105,10 @@ textarea:focus-visible,
   color: var(--text-dim);
 }
 .residual-status.running {
-  color: var(--text);
+  color: var(--accent);
 }
 .residual-status.ok {
-  color: var(--text);
+  color: var(--ok);
 }
 .residual-status.err {
   color: var(--err);
@@ -1008,7 +1121,7 @@ textarea:focus-visible,
 .residual-grid {
   stroke: var(--border);
   stroke-width: 1;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 .residual-axis {
   stroke: var(--text-dim);
@@ -1023,7 +1136,7 @@ textarea:focus-visible,
   stroke-width: 1.8;
 }
 .residual-dot {
-  fill: var(--chart-3);
+  fill: var(--chart-1);
 }
 .residual-err {
   margin-top: 0.6rem;
@@ -1041,7 +1154,9 @@ textarea:focus-visible,
 }
 .builder-palette {
   border-right: 1px solid var(--border);
-  background: var(--bg-elev);
+  background: var(--surface-1);
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -1049,11 +1164,11 @@ textarea:focus-visible,
   gap: 0.6rem;
 }
 .palette-head {
-  font-weight: 700;
-  font-size: 0.8rem;
+  font-weight: 600;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 .palette-hint {
   margin: 0;
@@ -1078,28 +1193,39 @@ textarea:focus-visible,
   gap: 0.4rem;
   padding: 0.4rem 0.5rem;
   border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--bg-elev-2);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
   cursor: grab;
   margin-bottom: 0.2rem;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 .palette-item:hover {
   border-color: var(--border-strong);
+  background: var(--surface-3);
 }
 .palette-item:active {
   cursor: grabbing;
 }
 .palette-name {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
 }
+.palette-sym {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
 .palette-doc {
   color: var(--muted);
   text-decoration: none;
   font-size: 0.8rem;
+  transition: color var(--t-fast);
 }
 .palette-doc:hover {
   color: var(--text);
@@ -1120,7 +1246,9 @@ textarea:focus-visible,
   gap: 0.6rem;
   padding: 0.5rem 0.7rem;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-elev);
+  background: var(--surface-1);
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
   flex-wrap: wrap;
 }
 .builder-toolbar .run-btn {
@@ -1144,7 +1272,7 @@ textarea:focus-visible,
   min-height: 0;
 }
 .builder-flow .react-flow {
-  background: var(--bg);
+  background: transparent;
 }
 .builder-empty,
 .builder-missing.empty {
@@ -1158,7 +1286,9 @@ textarea:focus-visible,
 
 .builder-results {
   border-left: 1px solid var(--border);
-  background: var(--bg-elev);
+  background: var(--surface-1);
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
   padding: 0.8rem;
   overflow: auto;
   min-height: 0;
@@ -1171,21 +1301,33 @@ textarea:focus-visible,
   font-size: 0.72rem;
 }
 
-/* react-flow controls/minimap — monochrome.
-   v12 themes controls via --xy-* variables; set those so dark mode wins. */
+/* react-flow chrome (controls / minimap / background).
+   v12 themes controls via --xy-* variables; set those so both themes win.
+   These are small static surfaces — solid translucent fills, no blur. */
 .react-flow {
-  --xy-controls-button-background-color: var(--bg-elev-2);
-  --xy-controls-button-background-color-hover: var(--bg-elev-3);
+  --xy-controls-button-background-color: var(--node-bg);
+  --xy-controls-button-background-color-hover: var(--surface-3);
   --xy-controls-button-color: var(--text);
   --xy-controls-button-color-hover: var(--text);
   --xy-controls-button-border-color: var(--border);
-  --xy-controls-box-shadow: var(--shadow);
-  --xy-minimap-background-color: var(--bg-elev);
-  --xy-background-color: var(--bg);
+  --xy-controls-box-shadow: var(--shadow-md);
+  --xy-minimap-background-color: var(--bg);
+  --xy-background-color: transparent;
+  --xy-background-pattern-dots-color-default: var(--canvas-dot);
   --xy-attribution-background-color: transparent;
+  --xy-edge-stroke-selected: var(--accent);
+}
+.react-flow__background circle {
+  fill: var(--canvas-dot);
+}
+.react-flow__controls {
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
 }
 .react-flow__controls-button {
-  background: var(--bg-elev-2);
+  background: var(--node-bg);
   border-bottom: 1px solid var(--border);
   color: var(--text);
 }
@@ -1193,42 +1335,63 @@ textarea:focus-visible,
   fill: var(--text) !important;
 }
 .react-flow__controls-button:hover {
-  background: var(--bg-elev-3);
+  background: var(--surface-3);
 }
 .react-flow__minimap {
-  background: var(--bg-elev);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.react-flow__minimap-mask {
+  fill: var(--overlay);
 }
 .react-flow__attribution {
   display: none;
 }
 
 /* ----------------------------- graph nodes ----------------------------- */
+/* Glass LOOK without backdrop-filter: near-opaque translucent fill,
+   1px border, top sheen, one soft shadow. Cheap enough for dozens. */
 .gnode {
-  background: var(--bg-elev-2);
+  background: var(--node-bg);
   border: 1px solid var(--border-strong);
-  border-radius: 10px;
+  border-radius: var(--r-lg);
   min-width: 170px;
   max-width: 280px;
-  font-family: var(--font-serif);
-  box-shadow: var(--shadow);
+  font-family: var(--font-ui);
+  box-shadow:
+    inset 0 1px 0 var(--edge-highlight),
+    var(--shadow-md);
 }
 .gnode-quantity {
   border-color: var(--border-strong);
 }
 .gnode-relation {
-  border-color: var(--text-dim);
+  border-color: var(--border-strong);
+}
+/* selection: single accent ring, no extra blur/glow cost */
+.react-flow__node.selected .gnode,
+.react-flow__node:focus-visible .gnode {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent-soft),
+    var(--shadow-md);
 }
 .gnode-head {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.35rem 0.5rem;
+  padding: 0.4rem 0.55rem;
   border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
 }
 .gnode-kind {
-  font-size: 0.7rem;
+  font-size: 0.66rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.08em;
   color: var(--muted);
 }
 .gnode-title {
@@ -1247,6 +1410,7 @@ textarea:focus-visible,
   font-size: 1rem;
   line-height: 1;
   padding: 0 0.15rem;
+  transition: color var(--t-fast);
 }
 .gnode-x:hover {
   color: var(--err);
@@ -1254,18 +1418,56 @@ textarea:focus-visible,
 .gnode-name,
 .gnode-val,
 .gnode-unit,
-.gnode-portname {
+.gnode-portname,
+.gnode select,
+.gnode textarea,
+.gnode-expr,
+.gnode-op {
   background: var(--input-bg);
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: var(--r-xs);
   color: var(--text);
   padding: 0.25rem 0.35rem;
   font-size: 0.8rem;
   font-family: var(--font-mono);
+  transition: border-color var(--t-fast);
 }
-.gnode-name {
+.gnode input:focus,
+.gnode select:focus,
+.gnode textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.gnode-name,
+.gnode-expr,
+.gnode > .gnode-op {
   width: calc(100% - 1rem);
   margin: 0.4rem 0.5rem 0.2rem;
+}
+.gnode-coeffs {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem;
+}
+.gnode-coeff {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.gnode-coeff input {
+  width: 100%;
+  min-width: 0;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  color: var(--text);
+  padding: 0.2rem 0.3rem;
+  font-size: 0.74rem;
+  font-family: var(--font-mono);
 }
 .gnode-valrow {
   display: flex;
@@ -1348,6 +1550,21 @@ textarea:focus-visible,
 .gnode-port-out {
   background: var(--accent);
 }
+/* inline result strip (arith blocks etc.) */
+.gnode-result {
+  padding: 0.35rem 0.55rem 0.5rem;
+  font-size: 0.78rem;
+}
+.gnode-result-val {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-weight: 600;
+}
+.gnode-result-err {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--err);
+}
 .react-flow__edge.auto-edge .react-flow__edge-path {
   stroke: var(--text-dim);
   stroke-width: 1.6;
@@ -1358,24 +1575,33 @@ textarea:focus-visible,
   font-size: 11.5px;
 }
 .react-flow__edge.manual-edge .react-flow__edge-path {
-  stroke: var(--text);
+  stroke: var(--accent-soft);
   stroke-width: 1.8;
   stroke-dasharray: 6 3;
 }
+.react-flow__edge.selected .react-flow__edge-path,
+.react-flow__edge:focus .react-flow__edge-path {
+  stroke: var(--accent);
+}
 .react-flow__edge.auto-edge .react-flow__edge-textbg {
-  fill: var(--bg-elev);
+  fill: var(--bg);
+}
+.react-flow__connection-path {
+  stroke: var(--accent);
+  stroke-width: 1.6;
 }
 
 /* ----------------------------- line chart ----------------------------- */
 .line-chart {
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-elev);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  box-shadow: inset 0 1px 0 var(--edge-highlight);
   padding: 0.7rem 0.8rem;
   margin-bottom: 0.8rem;
 }
 .line-chart-title {
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-weight: 700;
   font-size: 0.9rem;
   margin-bottom: 0.3rem;
@@ -1388,7 +1614,7 @@ textarea:focus-visible,
 .line-grid {
   stroke: var(--border);
   stroke-width: 1;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 .line-axis {
   stroke: var(--text-dim);
@@ -1448,10 +1674,18 @@ textarea:focus-visible,
 .trace-select {
   background: var(--input-bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   color: var(--text);
   padding: 0.4rem 0.5rem;
   font-size: 0.85rem;
+  font-family: var(--font-ui);
+  transition: border-color var(--t-fast);
+}
+.sweep-controls input:focus,
+.sweep-controls select:focus,
+.trace-select:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 .sweep-controls input {
   width: 90px;
@@ -1485,7 +1719,7 @@ textarea:focus-visible,
 .builder-toolbar .toolbar-btn {
   padding: 0.35rem 0.7rem;
   font-size: 0.8rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
 }
 .builder-toolbar .toolbar-btn:disabled {
   opacity: 0.5;
@@ -1505,15 +1739,16 @@ textarea:focus-visible,
   font-size: 0.72rem;
   color: var(--text-dim);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   padding: 0.2rem 0.5rem;
-  background: var(--bg-elev-2);
+  background: var(--surface-2);
+  animation: overlay-in 120ms ease;
 }
 .canvas-warn-banner {
   border-bottom: 1px solid var(--border);
-  background: var(--bg-elev);
+  background: var(--surface-1);
   padding: 0.45rem 0.7rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 0.82rem;
 }
 .canvas-warn-head {
@@ -1532,7 +1767,7 @@ textarea:focus-visible,
 
 /* --------------------------- sweep / plot nodes --------------------------- */
 .gnode-sweep {
-  border-color: var(--text-dim);
+  border-color: var(--border-strong);
   min-width: 230px;
 }
 .gnode-sweep-paramrow {
@@ -1554,7 +1789,7 @@ textarea:focus-visible,
   display: flex;
   flex-direction: column;
   gap: 0.12rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 0.68rem;
   color: var(--muted);
 }
@@ -1562,7 +1797,7 @@ textarea:focus-visible,
   width: 58px;
   background: var(--input-bg);
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: var(--r-xs);
   color: var(--text);
   padding: 0.2rem 0.3rem;
   font-size: 0.74rem;
@@ -1577,7 +1812,7 @@ textarea:focus-visible,
   font-size: 0.74rem;
 }
 .gnode-sweep-label {
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 0.7rem;
   color: var(--muted);
 }
@@ -1602,12 +1837,15 @@ textarea:focus-visible,
   background: transparent;
   color: var(--text-dim);
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: var(--r-xs);
   cursor: pointer;
+  transition:
+    color var(--t-fast),
+    border-color var(--t-fast);
 }
 .gnode-csv-btn:hover {
   color: var(--text);
-  border-color: var(--text-dim);
+  border-color: var(--border-strong);
 }
 .gnode-sweep-meta {
   font-family: var(--font-mono);
@@ -1615,7 +1853,7 @@ textarea:focus-visible,
   color: var(--text-dim);
 }
 .gnode-plot {
-  border-color: var(--text-dim);
+  border-color: var(--border-strong);
   width: 340px;
   max-width: 340px;
 }
@@ -1628,8 +1866,32 @@ textarea:focus-visible,
 .gnode-plot-body .line-chart {
   border: none;
   background: transparent;
+  box-shadow: none;
   padding: 0.2rem 0.2rem 0;
   margin-bottom: 0;
+}
+
+/* csv node bits */
+.gnode-csv-text {
+  width: calc(100% - 1rem);
+  margin: 0.4rem 0.5rem 0.2rem;
+  resize: vertical;
+  min-height: 3.4rem;
+}
+.gnode-csv-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0.5rem 0.4rem;
+}
+.gnode-csv-row .run-btn {
+  margin-top: 0;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+}
+.gnode-csv-meta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
 }
 
 /* ----------------------------- system solve panel ----------------------------- */
@@ -1677,7 +1939,9 @@ textarea:focus-visible,
 /* Scientific keypad + memory plane on the Calculator page. */
 .calcpad {
   border-left: 1px solid var(--border);
-  background: var(--bg-elev-1);
+  background: var(--surface-1);
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -1697,11 +1961,12 @@ textarea:focus-visible,
   margin-bottom: 0.55rem;
 }
 .calcpad-title {
-  font-family: var(--font-serif);
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--muted);
 }
 .calcpad-mode {
   font-family: var(--font-mono);
@@ -1709,13 +1974,16 @@ textarea:focus-visible,
   padding: 0.12rem 0.5rem;
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--r-full);
   color: var(--text-dim);
   cursor: pointer;
+  transition:
+    color var(--t-fast),
+    border-color var(--t-fast);
 }
 .calcpad-mode.deg {
-  color: var(--text);
-  border-color: var(--text-dim);
+  color: var(--accent);
+  border-color: var(--accent-soft);
 }
 .calcpad-clear {
   font-family: var(--font-mono);
@@ -1723,33 +1991,40 @@ textarea:focus-visible,
   padding: 0.1rem 0.45rem;
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: var(--r-xs);
   color: var(--text-dim);
   cursor: pointer;
+  transition:
+    color var(--t-fast),
+    border-color var(--t-fast);
 }
 .calcpad-clear:hover {
   color: var(--text);
-  border-color: var(--text-dim);
+  border-color: var(--border-strong);
 }
 .calcpad-display {
   width: 100%;
   font-family: var(--font-mono);
   font-size: 0.95rem;
   padding: 0.5rem 0.6rem;
-  background: var(--bg);
+  background: var(--input-bg);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 6px 6px 0 0;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
   border-bottom: none;
+}
+.calcpad-display:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 .calcpad-out {
   font-family: var(--font-mono);
   font-size: 0.95rem;
   min-height: 1.9rem;
   padding: 0.3rem 0.6rem;
-  background: var(--bg);
+  background: var(--input-bg);
   border: 1px solid var(--border);
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
   color: var(--text);
   text-align: right;
   overflow: hidden;
@@ -1771,18 +2046,21 @@ textarea:focus-visible,
   font-family: var(--font-mono);
   font-size: 0.82rem;
   padding: 0.42rem 0;
-  background: var(--bg-elev-2);
+  background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: var(--r-sm);
   cursor: pointer;
-  transition: background 0.08s ease, border-color 0.08s ease;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 .calcpad-key:hover {
-  border-color: var(--text-dim);
+  border-color: var(--border-strong);
+  background: var(--surface-3);
 }
 .calcpad-key:active {
-  background: var(--bg);
+  background: var(--input-bg);
 }
 .calcpad-key-dim {
   color: var(--text-dim);
@@ -1791,15 +2069,19 @@ textarea:focus-visible,
   grid-column: span 2;
   background: var(--accent);
   color: var(--on-accent);
-  border-color: var(--accent);
+  border-color: transparent;
   font-weight: 700;
+}
+.calcpad-key-eq:hover {
+  background: var(--accent);
+  filter: brightness(1.08);
 }
 .calcpad-key:disabled {
   opacity: 0.4;
   cursor: default;
 }
 .calcpad-empty {
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: 0.8rem;
   color: var(--muted);
   margin: 0;
@@ -1824,14 +2106,18 @@ textarea:focus-visible,
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.32rem 0.55rem;
-  background: var(--bg);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: var(--r-sm);
   cursor: pointer;
   text-align: left;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 .calcpad-slot-main:hover {
-  border-color: var(--text-dim);
+  border-color: var(--border-strong);
+  background: var(--surface-3);
 }
 .calcpad-slot-name {
   font-family: var(--font-mono);
@@ -1850,11 +2136,14 @@ textarea:focus-visible,
 .calcpad-slot-x {
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 5px;
+  border-radius: var(--r-sm);
   color: var(--muted);
   font-size: 0.85rem;
   width: 1.6rem;
   cursor: pointer;
+  transition:
+    color var(--t-fast),
+    border-color var(--t-fast);
 }
 .calcpad-slot-x:hover {
   color: var(--text);
@@ -1895,14 +2184,18 @@ textarea:focus-visible,
   font-family: var(--font-mono);
   font-size: 0.74rem;
   padding: 0.1rem 0.4rem;
-  background: var(--bg);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   color: var(--text);
   cursor: pointer;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 .calcpad-log-val:hover {
-  border-color: var(--text-dim);
+  border-color: var(--border-strong);
+  background: var(--surface-3);
 }
 .calcpad-log-name {
   color: var(--text-dim);

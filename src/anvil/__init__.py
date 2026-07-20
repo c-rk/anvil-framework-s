@@ -263,6 +263,17 @@ def search(keyword, tags=None):
     return results
 
 
+# Lazy attributes (PEP 562) -- keep `import anvil` fast.
+def __getattr__(name):
+    if name == "AnvilClient":
+        from anvil.client import AnvilClient
+        return AnvilClient
+    if name == "AnvilServerError":
+        from anvil.client import AnvilServerError
+        return AnvilServerError
+    raise AttributeError(f"module 'anvil' has no attribute '{name}'")
+
+
 # Auto-seed the registry on first import
 try:
     from anvil.seed import seed as _seed
