@@ -194,16 +194,23 @@ q   = <span class="nu">0.5</span> * rho * V**<span class="nu">2</span>   <span c
 <pre><span class="kw">from</span> anvil <span class="kw">import</span> System
 
 hx = System(<span class="st">"counter_flow_hx"</span>)
-hx.<span class="fn">add</span>(<span class="st">"T_hot_in"</span>,  <span class="nu">600</span>, <span class="st">"K"</span>)
-hx.<span class="fn">add</span>(<span class="st">"T_cold_in"</span>, <span class="nu">290</span>, <span class="st">"K"</span>)
-hx.<span class="fn">add</span>(<span class="st">"UA"</span>, <span class="nu">2000</span>, <span class="st">"W"</span>)
-hx.<span class="fn">add</span>(<span class="st">"mdot_hot"</span>, <span class="nu">0.8</span>, <span class="st">"kg/s"</span>); hx.<span class="fn">add</span>(<span class="st">"mdot_cold"</span>, <span class="nu">0.5</span>, <span class="st">"kg/s"</span>)
+hx.<span class="fn">add</span>(<span class="st">"T_hot_in"</span>,  <span class="nu">600</span>,  <span class="st">"K"</span>)
+hx.<span class="fn">add</span>(<span class="st">"T_cold_in"</span>, <span class="nu">290</span>,  <span class="st">"K"</span>)
+hx.<span class="fn">add</span>(<span class="st">"UA"</span>,        <span class="nu">2000</span>, <span class="st">"W"</span>)
+hx.<span class="fn">add</span>(<span class="st">"Cp_hot"</span>,    <span class="nu">1050</span>, <span class="st">"J/kg/K"</span>)
+hx.<span class="fn">add</span>(<span class="st">"Cp_cold"</span>,   <span class="nu">4186</span>, <span class="st">"J/kg/K"</span>)
+hx.<span class="fn">add</span>(<span class="st">"mdot_hot"</span>,  <span class="nu">0.8</span>,  <span class="st">"kg/s"</span>)
+hx.<span class="fn">add</span>(<span class="st">"mdot_cold"</span>, <span class="nu">0.5</span>,  <span class="st">"kg/s"</span>)
+
+<span class="cm"># initial guesses for the two coupled variables (Q_dot &harr; T_cold_out)</span>
+hx.<span class="fn">add</span>(<span class="st">"T_cold_out"</span>, <span class="nu">350</span>,   <span class="st">"K"</span>)
+hx.<span class="fn">add</span>(<span class="st">"Q_dot"</span>,      <span class="nu">50000</span>, <span class="st">"W"</span>)
 
 hx.<span class="fn">use</span>(<span class="st">"hx_heat_rate"</span>); hx.<span class="fn">use</span>(<span class="st">"hx_cold_out"</span>)
 hx.<span class="fn">use</span>(<span class="st">"hx_hot_out"</span>);  hx.<span class="fn">use</span>(<span class="st">"hx_effectiveness"</span>)
 
 result = hx.<span class="fn">solve_gauss_seidel</span>(monitor=<span class="kw">True</span>)
-result.<span class="fn">summary</span>()      <span class="out"># ~33 iterations, effectiveness ~ 0.806</span></pre></div>
+result.<span class="fn">summary</span>()      <span class="out"># ~19 iterations, effectiveness ~ 0.806</span></pre></div>
       <p class="note">Other solvers: <code>solve_forward()</code> for acyclic systems and <code>solve_newton()</code> for stiff coupling. For ODE/BVP/PDE, reach into <code>anvil.solvers</code>.</p>
     </div>
   </section>
@@ -211,11 +218,12 @@ result.<span class="fn">summary</span>()      <span class="out"># ~33 iterations
   <section class="step">
     <div class="rail"><div class="idx">05</div><h2>Sweep and analyze</h2></div>
     <div class="body">
-      <p>Vary a parameter across a range — in parallel if you like — then rank which inputs move your outputs the most.</p>
+      <p>Vary a parameter across a range, then rank which inputs move your outputs the most. This coupled system converges best with under-relaxation, so the sweep passes the same solver settings.</p>
       <div class="code glass"><div class="fname mono"><span>python</span><span>python</span></div>
 <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
 
-sweep = hx.<span class="fn">sweep</span>(<span class="st">"UA"</span>, np.<span class="fn">linspace</span>(<span class="nu">500</span>, <span class="nu">5000</span>, <span class="nu">6</span>), parallel=<span class="nu">4</span>)
+sweep = hx.<span class="fn">sweep</span>(<span class="st">"UA"</span>, np.<span class="fn">linspace</span>(<span class="nu">500</span>, <span class="nu">5000</span>, <span class="nu">6</span>),
+                 method=<span class="st">"gauss_seidel"</span>, relaxation=<span class="nu">0.5</span>, max_iter=<span class="nu">200</span>)
 sweep.<span class="fn">summary</span>(outputs=[<span class="st">"effectiveness"</span>, <span class="st">"Q_dot"</span>])
 sweep.<span class="fn">to_csv</span>(<span class="st">"hx_sweep.csv"</span>)
 
