@@ -14,9 +14,13 @@ What it does (fresh clone, zero setup required):
 
 Stop with Ctrl+C.
 
-Options are forwarded to the server:
+Options:
     python start_anvil.py --port 9000 --host 0.0.0.0 --project ./my_study
     python start_anvil.py --no-browser
+    python start_anvil.py --no-venv     # install into the current Python
+
+On Debian/Ubuntu/WSL, creating a venv needs the system package first:
+    sudo apt install python3-venv
 
 Standard library only -- runs on a bare Python install.
 """
@@ -75,10 +79,14 @@ def venv_python(venv_dir: Path) -> Path:
 # Step 2: pick / create the target environment
 # --------------------------------------------------------------------------- #
 
-def get_target_python() -> Path:
+def get_target_python(no_venv: bool = False) -> Path:
     """Return the python executable to install into and run the server with."""
     if in_venv():
         say(f"Already inside a virtual environment ({sys.prefix}); using it.")
+        return Path(sys.executable)
+
+    if no_venv:
+        say(f"--no-venv: installing into the current Python ({sys.executable}).")
         return Path(sys.executable)
 
     py = venv_python(VENV_DIR)
@@ -92,10 +100,23 @@ def get_target_python() -> Path:
         capture_output=True, text=True,
     )
     if result.returncode != 0 or not py.exists():
+        pyver = f"{sys.version_info.major}.{sys.version_info.minor}"
+        output = (result.stdout or "") + (result.stderr or "")
+        if "ensurepip" in output or "python3-venv" in output:
+            # Debian/Ubuntu/WSL split venv into a separate apt package.
+            fail(
+                "Your Python is missing the 'venv' module (common on "
+                "Debian/Ubuntu/WSL).\n\n"
+                f"  Install it:  sudo apt install python{pyver}-venv\n"
+                "  Then re-run: python3 start_anvil.py\n\n"
+                "Or, if you already have a working pip and would rather install into\n"
+                "the current Python instead of a fresh .venv:\n"
+                "               python3 start_anvil.py --no-venv"
+            )
         fail(
             "Could not create the virtual environment.\n"
             f"Command output:\n{result.stdout}\n{result.stderr}\n"
-            "On Debian/Ubuntu you may need: sudo apt install python3-venv"
+            f"On Debian/Ubuntu you may need: sudo apt install python{pyver}-venv"
         )
     return py
 
@@ -174,10 +195,15 @@ def main() -> None:
         "--no-browser", action="store_true",
         help="do not open the web browser automatically",
     )
+    ap.add_argument(
+        "--no-venv", action="store_true",
+        help="install into the current Python instead of creating a .venv "
+             "(use when you already manage your own environment)",
+    )
     args = ap.parse_args()
 
     check_python()
-    py = get_target_python()
+    py = get_target_python(args.no_venv)
     ensure_installed(py)
 
     host = args.host or os.environ.get("ANVIL_HOST", "127.0.0.1")
