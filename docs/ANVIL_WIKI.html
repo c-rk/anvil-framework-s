@@ -6,102 +6,102 @@
 <title>Anvil Framework — Wiki</title>
 <style>
 /* ── Reset & Base ───────────────────────────────────────────────────────────── */
-*,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
-html{{scroll-behavior:smooth}}
-body{{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-     font-size:15px;line-height:1.78;color:#1a1a2e;background:#f7f8fa}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+     font-size:15px;line-height:1.78;color:#1a1a2e;background:#f7f8fa}
 
 /* ── Layout ─────────────────────────────────────────────────────────────────── */
-#sidebar{{
+#sidebar{
   position:fixed;top:0;left:0;width:268px;height:100vh;
   background:#0d1117;color:#c9d1d9;overflow-y:auto;
   padding:0 0 48px;z-index:100;font-size:13px;
-}}
-#sidebar::-webkit-scrollbar{{width:3px}}
-#sidebar::-webkit-scrollbar-thumb{{background:#242b36;border-radius:2px}}
-#main{{margin-left:268px;min-height:100vh;padding:0}}
-.page-wrap{{max-width:920px;padding:52px 60px 90px}}
+}
+#sidebar::-webkit-scrollbar{width:3px}
+#sidebar::-webkit-scrollbar-thumb{background:#242b36;border-radius:2px}
+#main{margin-left:268px;min-height:100vh;padding:0}
+.page-wrap{max-width:920px;padding:52px 60px 90px}
 
 /* ── Sidebar ─────────────────────────────────────────────────────────────────── */
-.sb-brand{{
+.sb-brand{
   padding:24px 20px 16px;border-bottom:1px solid #1a2130;
   font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
   font-weight:400;font-size:15px;color:#a8c4e0;letter-spacing:.3px;
   cursor:pointer;
-}}
-.sb-brand small{{display:block;font-size:11px;color:#4a5a6a;
-  font-weight:400;margin-top:4px;font-style:italic;letter-spacing:.2px}}
-.sb-search{{padding:10px 14px;border-bottom:1px solid #1a2130}}
-.sb-search input{{
+}
+.sb-brand small{display:block;font-size:11px;color:#4a5a6a;
+  font-weight:400;margin-top:4px;font-style:italic;letter-spacing:.2px}
+.sb-search{padding:10px 14px;border-bottom:1px solid #1a2130}
+.sb-search input{
   width:100%;background:#131920;border:1px solid #252e3b;
   color:#c9d1d9;border-radius:5px;padding:6px 10px;font-size:12.5px;
   outline:none;font-family:inherit;transition:border-color .15s;
-}}
-.sb-search input:focus{{border-color:#4a7fa0}}
-.sb-section{{
+}
+.sb-search input:focus{border-color:#4a7fa0}
+.sb-section{
   padding:13px 20px 4px;font-size:9.5px;text-transform:uppercase;
   letter-spacing:1.1px;color:#3d4d5e;font-weight:600;margin-top:6px;
   font-family:'Segoe UI',system-ui,sans-serif;
-}}
-#sidebar a{{
+}
+#sidebar a{
   display:block;padding:4px 20px 4px 26px;color:#7a8a9a;
   text-decoration:none;transition:color .12s,background .12s;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   cursor:pointer;line-height:1.7;
-}}
-#sidebar a:hover{{color:#c8d8e8;background:#111820}}
-#sidebar a.active{{color:#7eb8d8;background:#0e1620;
-  border-left:1px solid #4a7fa0;padding-left:25px}}
-.search-highlight{{background:#f5d76e;color:#1a1a2e;border-radius:2px;padding:0 2px}}
+}
+#sidebar a:hover{color:#c8d8e8;background:#111820}
+#sidebar a.active{color:#7eb8d8;background:#0e1620;
+  border-left:1px solid #4a7fa0;padding-left:25px}
+.search-highlight{background:#f5d76e;color:#1a1a2e;border-radius:2px;padding:0 2px}
 
 /* ── Typography ──────────────────────────────────────────────────────────────── */
-.wiki-page h1{{
+.wiki-page h1{
   font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
   font-size:2.1em;font-weight:300;color:#0f1117;
   line-height:1.2;margin:0 0 12px;letter-spacing:-.2px;
-}}
-.wiki-page h2{{
+}
+.wiki-page h2{
   font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
   font-size:1.42em;font-weight:400;color:#0f1117;
   margin:44px 0 14px;padding-top:20px;border-top:1px solid #e1e4e8;
   letter-spacing:-.05px;
-}}
-.wiki-page h2:first-child{{border-top:none;margin-top:0;padding-top:0}}
-.wiki-page h3{{font-size:1.08em;font-weight:600;color:#1a2432;margin:28px 0 10px}}
-.wiki-page h4{{font-size:.96em;font-weight:600;color:#444d56;margin:18px 0 6px}}
-.wiki-page p{{margin:10px 0;color:#24292f}}
-.wiki-page ul,.wiki-page ol{{margin:10px 0 10px 22px}}
-.wiki-page li{{margin:4px 0}}
-.wiki-page strong{{color:#0f1117}}
-.wiki-page em{{color:#57606a;font-style:italic}}
-.wiki-page blockquote{{
+}
+.wiki-page h2:first-child{border-top:none;margin-top:0;padding-top:0}
+.wiki-page h3{font-size:1.08em;font-weight:600;color:#1a2432;margin:28px 0 10px}
+.wiki-page h4{font-size:.96em;font-weight:600;color:#444d56;margin:18px 0 6px}
+.wiki-page p{margin:10px 0;color:#24292f}
+.wiki-page ul,.wiki-page ol{margin:10px 0 10px 22px}
+.wiki-page li{margin:4px 0}
+.wiki-page strong{color:#0f1117}
+.wiki-page em{color:#57606a;font-style:italic}
+.wiki-page blockquote{
   border-left:3px solid #4a7fa0;padding:10px 16px;
   background:#f0f5fb;border-radius:0 6px 6px 0;margin:16px 0;
   color:#2a4a6a;font-style:normal;
-}}
-.wiki-page hr{{border:none;border-top:1px solid #e1e4e8;margin:30px 0}}
-.wiki-page a{{color:#2a6fa0;text-decoration:none}}
-.wiki-page a:hover{{text-decoration:underline;color:#0969da}}
+}
+.wiki-page hr{border:none;border-top:1px solid #e1e4e8;margin:30px 0}
+.wiki-page a{color:#2a6fa0;text-decoration:none}
+.wiki-page a:hover{text-decoration:underline;color:#0969da}
 
 /* ── Page transition ─────────────────────────────────────────────────────────── */
-.wiki-page{{animation:fadein .18s ease}}
-@keyframes fadein{{from{{opacity:0;transform:translateY(4px)}}to{{opacity:1;transform:none}}}}
+.wiki-page{animation:fadein .18s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 /* ── Code ────────────────────────────────────────────────────────────────────── */
-.wiki-page :not(pre) > code {{
+.wiki-page :not(pre) > code {
   font-family:'Consolas','Cascadia Code','Fira Mono',monospace;
   font-size:.86em;background:#eef0f4;color:#b5303a;
   padding:1px 6px;border-radius:4px;
-}}
-.wiki-page pre{{margin:14px 0;border-radius:7px;overflow-x:auto;border:1px solid #2a3340}}
-.wiki-page pre code {{
+}
+.wiki-page pre{margin:14px 0;border-radius:7px;overflow-x:auto;border:1px solid #2a3340}
+.wiki-page pre code {
   background:none!important;color:inherit!important;padding:0!important;
   border-radius:0!important;font-size:1em!important;
-}}
-.codehilite{{background:#0d1117!important;padding:18px 22px;border-radius:7px;
+}
+.codehilite{background:#0d1117!important;padding:18px 22px;border-radius:7px;
   font-family:'Consolas','Cascadia Code','Fira Mono',monospace;font-size:.84em;
-  line-height:1.62;border:1px solid #2a3340;overflow-x:auto}}
-.codehilite .hll{{background:#ff03}}
+  line-height:1.62;border:1px solid #2a3340;overflow-x:auto}
+.codehilite .hll{background:#ff03}
 pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
 span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -189,68 +189,68 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .codehilite .il { color: #D19A66 } /* Literal.Number.Integer.Long */
 
 /* ── Tables ──────────────────────────────────────────────────────────────────── */
-.wiki-page .table-wrap{{overflow-x:auto;margin:14px 0}}
-.wiki-page table{{border-collapse:collapse;width:100%;font-size:.88em;margin:0}}
-.wiki-page th{{background:#0d1117;color:#e6edf3;padding:9px 14px;
-  text-align:left;font-weight:500;white-space:nowrap;letter-spacing:.02em}}
-.wiki-page td{{padding:7px 14px;border-bottom:1px solid #eaecf0;vertical-align:top}}
-.wiki-page tr:last-child td{{border-bottom:none}}
-.wiki-page tr:hover td{{background:#f5f7fa}}
-.wiki-page td code{{background:#eef0f4;color:#b5303a}}
+.wiki-page .table-wrap{overflow-x:auto;margin:14px 0}
+.wiki-page table{border-collapse:collapse;width:100%;font-size:.88em;margin:0}
+.wiki-page th{background:#0d1117;color:#e6edf3;padding:9px 14px;
+  text-align:left;font-weight:500;white-space:nowrap;letter-spacing:.02em}
+.wiki-page td{padding:7px 14px;border-bottom:1px solid #eaecf0;vertical-align:top}
+.wiki-page tr:last-child td{border-bottom:none}
+.wiki-page tr:hover td{background:#f5f7fa}
+.wiki-page td code{background:#eef0f4;color:#b5303a}
 
 /* ── TOC ─────────────────────────────────────────────────────────────────────── */
-.wiki-page .toc{{
+.wiki-page .toc{
   background:#f8f9fb;border:1px solid #d8dce4;border-radius:7px;
   padding:16px 22px;margin:0 0 30px;font-size:.89em;
-}}
-.wiki-page .toc ul{{margin:4px 0 4px 16px;list-style:none}}
-.wiki-page .toc li{{margin:3px 0}}
-.wiki-page .toc a{{color:#2a6fa0}}
-.wiki-page .toc a:hover{{color:#0969da}}
-.wiki-page .toc::before{{
+}
+.wiki-page .toc ul{margin:4px 0 4px 16px;list-style:none}
+.wiki-page .toc li{margin:3px 0}
+.wiki-page .toc a{color:#2a6fa0}
+.wiki-page .toc a:hover{color:#0969da}
+.wiki-page .toc::before{
   content:'Contents';display:block;
   font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
   font-weight:400;font-size:1em;color:#1a2432;margin-bottom:10px;
   letter-spacing:.02em;
-}}
+}
 
 /* ── Header bar ──────────────────────────────────────────────────────────────── */
-#topbar{{
+#topbar{
   background:#fff;border-bottom:1px solid #e8eaee;
   padding:12px 56px 12px 36px;display:flex;align-items:center;gap:16px;
   position:sticky;top:0;z-index:90;
-}}
-#topbar .breadcrumb{{color:#7a8694;font-size:.88em;letter-spacing:.01em}}
-#topbar .breadcrumb span{{color:#2a6fa0;font-weight:600}}
-#topbar .nav-btns{{margin-left:auto;display:flex;gap:6px}}
-#topbar button{{
+}
+#topbar .breadcrumb{color:#7a8694;font-size:.88em;letter-spacing:.01em}
+#topbar .breadcrumb span{color:#2a6fa0;font-weight:600}
+#topbar .nav-btns{margin-left:auto;display:flex;gap:6px}
+#topbar button{
   background:transparent;border:1px solid #d0d7de;border-radius:5px;
   padding:4px 12px;font-size:.82em;cursor:pointer;color:#555f6d;
   transition:all .12s;letter-spacing:.01em;
-}}
-#topbar button:hover{{background:#f0f2f5;border-color:#b0bac4;color:#1a1a2e}}
+}
+#topbar button:hover{background:#f0f2f5;border-color:#b0bac4;color:#1a1a2e}
 
 /* ── Search overlay ──────────────────────────────────────────────────────────── */
-#search-results{{
+#search-results{
   position:fixed;top:0;left:268px;right:0;bottom:0;
   background:rgba(10,14,20,.65);
   z-index:200;display:none;align-items:flex-start;justify-content:center;
   padding-top:80px;backdrop-filter:blur(2px);
-}}
-#search-results.open{{display:flex}}
-#search-box{{
+}
+#search-results.open{display:flex}
+#search-box{
   background:#fff;border-radius:10px;padding:22px;width:min(680px,90%);
   max-height:68vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.28);
-}}
-#search-box h3{{margin:0 0 14px;font-size:.95em;color:#555;font-weight:500}}
-.sr-item{{
+}
+#search-box h3{margin:0 0 14px;font-size:.95em;color:#555;font-weight:500}
+.sr-item{
   padding:10px 14px;border-radius:6px;cursor:pointer;
   margin-bottom:5px;border:1px solid #e8eaee;transition:all .1s;
-}}
-.sr-item:hover{{background:#f2f7fc;border-color:#4a7fa0}}
-.sr-item strong{{color:#2a6fa0;display:block;font-size:.93em;margin-bottom:2px}}
-.sr-item span{{color:#57606a;font-size:.84em;display:-webkit-box;
-  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}}
+}
+.sr-item:hover{background:#f2f7fc;border-color:#4a7fa0}
+.sr-item strong{color:#2a6fa0;display:block;font-size:.93em;margin-bottom:2px}
+.sr-item span{color:#57606a;font-size:.84em;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style>
 </head>
 <body>
@@ -307,7 +307,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   </div>
   <div class="page-wrap">
 <section id="page-index" class="wiki-page" style="display:none"><h1 id="anvil-framework-complete-reference-wiki">Anvil Framework — Complete Reference Wiki<a class="headerlink" href="#anvil-framework-complete-reference-wiki" title="Permanent link">&para;</a></h1>
-<p><strong>Version 1.3.0</strong> | Python 3.10+ | <a href="https://github.com/c-rk/the-anvil-framework">GitHub</a></p>
+<p><strong>Version 1.3.0</strong> | Python 3.10+ | <a href="https://github.com/c-rk/anvil-framework-s">GitHub</a></p>
 <hr />
 <p>Anvil is an engineering computation framework: write physics as plain Python functions, wire them into solvable systems, and get results with automatic unit tracking.</p>
 <p><strong>Three primitives:</strong>
@@ -579,22 +579,47 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </table></section>
 <section id="page-01" class="wiki-page" style="display:none"><h1 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h1>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/c-rk/the-anvil-framework
-<span class="nb">cd</span><span class="w"> </span>the-anvil-framework/anvil-03-1
+<h3 id="fastest-one-command">Fastest: one command<a class="headerlink" href="#fastest-one-command" title="Permanent link">&para;</a></h3>
+<p>From a fresh clone, this provisions a virtual environment, installs Anvil plus
+the web server, launches it, and opens the workbench in your browser — no Node,
+no npm:</p>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/c-rk/anvil-framework-s
+<span class="nb">cd</span><span class="w"> </span>anvil-framework-s
+python<span class="w"> </span>start_anvil.py
+</code></pre></div>
 
-<span class="c1"># Core + visualization</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[viz]&quot;</span>
-
-<span class="c1"># Core + specific adapter dependencies</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[poliastro]&quot;</span><span class="w">   </span><span class="c1"># poliastro + astropy</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[pykep]&quot;</span><span class="w">       </span><span class="c1"># pykep</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[adapters]&quot;</span><span class="w">    </span><span class="c1"># all adapter deps</span>
-
-<span class="c1"># Cantera (conda recommended)</span>
-conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>cantera<span class="w"> </span>cantera
+<p>On Debian/Ubuntu/WSL you may first need <code>sudo apt install python3-venv</code>. The
+script self-heals a half-built environment and accepts <code>--port</code>, <code>--host</code>,
+<code>--no-browser</code>, and <code>--no-venv</code>.</p>
+<h3 id="library-only-pip">Library only (pip)<a class="headerlink" href="#library-only-pip" title="Permanent link">&para;</a></h3>
+<p>If you just want the Python API, or you manage your own environment:</p>
+<div class="codehilite"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="w">                 </span><span class="c1"># core (numpy + scipy)</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[server]&quot;</span><span class="w">       </span><span class="c1"># + web workbench (FastAPI/uvicorn)</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[viz]&quot;</span><span class="w">          </span><span class="c1"># + matplotlib plots</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[poliastro]&quot;</span><span class="w">    </span><span class="c1"># poliastro + astropy</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[pykep]&quot;</span><span class="w">        </span><span class="c1"># pykep</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[adapters]&quot;</span><span class="w">     </span><span class="c1"># all adapter deps</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[all]&quot;</span><span class="w">          </span><span class="c1"># viz + all adapters + server</span>
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>cantera<span class="w"> </span>cantera<span class="w"> </span><span class="c1"># Cantera (conda recommended)</span>
 </code></pre></div>
 
 <p>After install, <code>import anvil</code> works from any directory and any script. No <code>sys.path</code> manipulation needed.</p>
+<h3 id="command-line">Command line<a class="headerlink" href="#command-line" title="Permanent link">&para;</a></h3>
+<p>Installing gives you an <code>anvil</code> command:</p>
+<div class="codehilite"><pre><span></span><code>anvil<span class="w"> </span>doctor<span class="w">     </span><span class="c1"># report which adapters are usable on this machine, with install hints</span>
+anvil<span class="w"> </span>serve<span class="w">      </span><span class="c1"># start the web workbench (same as start_anvil.py, without the venv setup)</span>
+anvil<span class="w"> </span>version<span class="w">    </span><span class="c1"># print the installed version</span>
+</code></pre></div>
+
+<h3 id="call-a-running-server-from-any-code">Call a running server from any code<a class="headerlink" href="#call-a-running-server-from-any-code" title="Permanent link">&para;</a></h3>
+<p><code>start_anvil.py</code>/<code>anvil serve</code> expose a REST API; drive it from any Python with the built-in client:</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">anvil.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnvilClient</span>
+
+<span class="n">srv</span> <span class="o">=</span> <span class="n">AnvilClient</span><span class="p">(</span><span class="s2">&quot;http://127.0.0.1:8000&quot;</span><span class="p">)</span>
+<span class="n">srv</span><span class="o">.</span><span class="n">health</span><span class="p">()</span>                                    <span class="c1"># {&#39;status&#39;: &#39;ok&#39;, &#39;rsq_count&#39;: ...}</span>
+<span class="n">srv</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s2">&quot;isentropic_ratios&quot;</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">1.4</span><span class="p">)</span> <span class="c1"># -&gt; {&#39;T0_T&#39;: 1.8, ...}</span>
+</code></pre></div>
+
 <table>
 <thead>
 <tr>

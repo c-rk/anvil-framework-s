@@ -2,23 +2,60 @@
 
 ## Installation
 
+### Fastest: one command
+
+From a fresh clone, this provisions a virtual environment, installs Anvil plus
+the web server, launches it, and opens the workbench in your browser — no Node,
+no npm:
+
 ```bash
-git clone https://github.com/c-rk/the-anvil-framework
-cd the-anvil-framework/anvil-03-1
+git clone https://github.com/c-rk/anvil-framework-s
+cd anvil-framework-s
+python start_anvil.py
+```
 
-# Core + visualization
-pip install -e ".[viz]"
+On Debian/Ubuntu/WSL you may first need `sudo apt install python3-venv`. The
+script self-heals a half-built environment and accepts `--port`, `--host`,
+`--no-browser`, and `--no-venv`.
 
-# Core + specific adapter dependencies
-pip install -e ".[poliastro]"   # poliastro + astropy
-pip install -e ".[pykep]"       # pykep
-pip install -e ".[adapters]"    # all adapter deps
+### Library only (pip)
 
-# Cantera (conda recommended)
-conda install -c cantera cantera
+If you just want the Python API, or you manage your own environment:
+
+```bash
+pip install -e .                 # core (numpy + scipy)
+pip install -e ".[server]"       # + web workbench (FastAPI/uvicorn)
+pip install -e ".[viz]"          # + matplotlib plots
+pip install -e ".[poliastro]"    # poliastro + astropy
+pip install -e ".[pykep]"        # pykep
+pip install -e ".[adapters]"     # all adapter deps
+pip install -e ".[all]"          # viz + all adapters + server
+conda install -c cantera cantera # Cantera (conda recommended)
 ```
 
 After install, `import anvil` works from any directory and any script. No `sys.path` manipulation needed.
+
+### Command line
+
+Installing gives you an `anvil` command:
+
+```bash
+anvil doctor     # report which adapters are usable on this machine, with install hints
+anvil serve      # start the web workbench (same as start_anvil.py, without the venv setup)
+anvil version    # print the installed version
+```
+
+### Call a running server from any code
+
+`start_anvil.py`/`anvil serve` expose a REST API; drive it from any Python with the built-in client:
+
+```python
+from anvil.client import AnvilClient
+
+srv = AnvilClient("http://127.0.0.1:8000")
+srv.health()                                    # {'status': 'ok', 'rsq_count': ...}
+srv.call("isentropic_ratios", M=2.0, gamma=1.4) # -> {'T0_T': 1.8, ...}
+```
 
 | Extra | What it enables |
 |-------|----------------|

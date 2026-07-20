@@ -1,6 +1,6 @@
 # Anvil Framework — Complete Reference Wiki
 
-**Version 1.3.0** | Python 3.10+ | [GitHub](https://github.com/c-rk/the-anvil-framework)
+**Version 1.3.0** | Python 3.10+ | [GitHub](https://github.com/c-rk/anvil-framework-s)
 
 ---
 

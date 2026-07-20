@@ -450,11 +450,22 @@ def build():
             .replace("PAGES_PLACEHOLDER", pages_html)
             .replace("PAGES_DATA_PLACEHOLDER", pages_data))
 
+    # The CSS in HTML_TEMPLATE has doubled braces ({{ }}) -- a leftover from a
+    # str.format() design, but we assemble via str.replace(), so they were never
+    # unescaped and the stylesheet shipped invalid (the wiki rendered unstyled).
+    # Unescape braces inside the <style> block only, leaving JS/content untouched.
+    html = re.sub(
+        r"<style>.*?</style>",
+        lambda m: m.group(0).replace("{{", "{").replace("}}", "}"),
+        html, flags=re.DOTALL,
+    )
+
     # Write twice: ANVIL_WIKI.html (served at /wiki by anvil_server) and
-    # index.html (so docs/ deploys as-is to a static host, e.g. Cloudflare
-    # Pages with output directory "docs" and no build command).
+    # wiki.html (the static docs/ copy for Cloudflare Pages). NOTE: index.html
+    # is the hand-authored landing page -- do NOT write it here or it gets
+    # clobbered.
     out = os.path.join(os.path.dirname(__file__), "ANVIL_WIKI.html")
-    for target in (out, os.path.join(os.path.dirname(__file__), "index.html")):
+    for target in (out, os.path.join(os.path.dirname(__file__), "wiki.html")):
         with open(target, "w", encoding="utf-8") as f:
             f.write(html)
         size_kb = os.path.getsize(target) // 1024

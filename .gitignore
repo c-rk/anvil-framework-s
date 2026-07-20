@@ -28,8 +28,10 @@ sweep_*.json
 results.csv
 results.json
 
-# Dev scratch
+# Dev scratch / maintainer-only (kept local, never published)
 _probe_tmp.py
+DEVLOG.md
+GITHUB_SETUP.md
 
 # Saved canvases (user-specific work, created via the web UI)
 canvases/*.py

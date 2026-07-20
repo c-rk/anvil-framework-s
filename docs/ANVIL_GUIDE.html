@@ -302,21 +302,30 @@ section { scroll-margin-top: 20px; }
 <section id="install">
 <h2>Installation</h2>
 
-<pre><span class="cm"># Clone and install (editable — changes to src/ take effect immediately)</span>
-git clone https://github.com/c-rk/the-anvil-framework
-<span class="kw">cd</span> the-anvil-framework/anvil-03-1
-pip install -e <span class="st">".[viz]"</span>          <span class="cm"># core + matplotlib</span>
+<pre><span class="cm"># Fastest: one command — provisions a venv, installs, launches the workbench</span>
+git clone https://github.com/c-rk/anvil-framework-s
+<span class="kw">cd</span> anvil-framework-s
+python start_anvil.py
+<span class="lang-label">bash</span></pre>
 
-<span class="cm"># Optional: adapter library dependencies</span>
+<div class="tip">On Debian/Ubuntu/WSL you may first need <code>sudo apt install python3-venv</code>. <code>start_anvil.py</code> accepts <code>--port</code>, <code>--host</code>, <code>--no-browser</code>, and <code>--no-venv</code>.</div>
+
+<pre><span class="cm"># Or install the library with pip (editable — src/ changes take effect at once)</span>
+pip install -e <span class="st">"."</span>              <span class="cm"># core (numpy + scipy)</span>
+pip install -e <span class="st">".[server]"</span>       <span class="cm"># + web workbench (FastAPI/uvicorn)</span>
+pip install -e <span class="st">".[viz]"</span>          <span class="cm"># + matplotlib plots</span>
 pip install -e <span class="st">".[poliastro]"</span>    <span class="cm"># poliastro + astropy</span>
 pip install -e <span class="st">".[pykep]"</span>        <span class="cm"># pykep trajectory design</span>
-pip install -e <span class="st">".[adapters]"</span>     <span class="cm"># all adapter deps</span>
+pip install -e <span class="st">".[all]"</span>          <span class="cm"># viz + all adapters + server</span>
 conda install -c cantera cantera   <span class="cm"># Cantera combustion</span>
 <span class="lang-label">bash</span></pre>
 
+<div class="tip"><strong>Command line:</strong> installing adds an <code>anvil</code> command — <code>anvil doctor</code> (which adapters are usable here, with install hints), <code>anvil serve</code> (start the workbench), and <code>anvil version</code>.</div>
+
 <div class="table-wrap"><table>
 <tr><th>Extra</th><th>What it enables</th><th>Key packages</th></tr>
-<tr><td><code>(none)</code></td><td>All 76 built-in RSQs, all solvers, registry</td><td>numpy, scipy</td></tr>
+<tr><td><code>(none)</code></td><td>All built-in RSQs, all solvers, registry</td><td>numpy, scipy</td></tr>
+<tr><td><code>server</code></td><td>Web workbench (<code>anvil serve</code> / <code>start_anvil.py</code>)</td><td>fastapi, uvicorn, pydantic</td></tr>
 <tr><td><code>viz</code></td><td><code>anvil.viz.*</code> plots</td><td>matplotlib</td></tr>
 <tr><td><code>poliastro</code></td><td><code>anvil.adapters.poliastro_orbits</code></td><td>poliastro ≥0.17, astropy</td></tr>
 <tr><td><code>pykep</code></td><td><code>anvil.adapters.pykep_trajectories</code></td><td>pykep ≥2.6</td></tr>
@@ -1429,7 +1438,7 @@ r=5  energy=0.101
 r=10 energy=0.185</div>
 </div>
 
-<div class="note"><strong>Low-level module API:</strong> <code>decomp.pod_reconstruct()</code>, <code>decomp.pod_rank()</code>, <code>decomp.dmd_reconstruct()</code>, <code>decomp.hankel()</code>, <code>decomp.abel_image()</code>, <code>decomp.abel_center()</code> are available as direct module calls for operations that don't fit the RSQ pattern (e.g. image inversion, Hankel embedding). See the <a href="https://github.com/c-rk/the-anvil-framework">wiki pages 16 &amp; 17</a> for full details.</div>
+<div class="note"><strong>Low-level module API:</strong> <code>decomp.pod_reconstruct()</code>, <code>decomp.pod_rank()</code>, <code>decomp.dmd_reconstruct()</code>, <code>decomp.hankel()</code>, <code>decomp.abel_image()</code>, <code>decomp.abel_center()</code> are available as direct module calls for operations that don't fit the RSQ pattern (e.g. image inversion, Hankel embedding). See the <a href="https://github.com/c-rk/anvil-framework-s">wiki pages 16 &amp; 17</a> for full details.</div>
 </section>
 
 <!-- ══════════════════════════════════════════════════════════════════════════
