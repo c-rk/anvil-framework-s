@@ -61,3 +61,10 @@ Thumbs.db
 
 # Generated build fragment (injected into ANVIL_GUIDE.html)
 docs/_examples_section.html
+
+# Solver output artifacts from running examples
+*.amesh
+*.vtk
+*.op2
+*.msh
+examples/*_flow.*
