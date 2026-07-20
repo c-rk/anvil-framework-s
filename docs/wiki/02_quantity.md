@@ -1,9 +1,9 @@
 # Quantity (`Q`)
 
 `Quantity` (aliased as `Q`) is the core value type in Anvil. It stores:
-- `_si_value` — the numerical value in SI base units (float64 or ndarray)
-- `_dim` — a `Dim` object tracking physical dimensions
-- `_unit_hint` — the unit string the user originally specified (for display)
+- `_si_value`, the numerical value in SI base units (float64 or ndarray)
+- `_dim`, a `Dim` object tracking physical dimensions
+- `_unit_hint`, the unit string the user originally specified (for display)
 
 All arithmetic on `Q` objects propagates dimensions in parallel with the numerical computation.
 
@@ -19,8 +19,8 @@ from anvil import Q
 p = Q(101325, "Pa")
 T = Q(300, "K")
 v = Q(340, "m/s")
-mdot = Q(1.5, "g/s")       # compound unit — parsed automatically
-vol  = Q(5,   "cm^3")      # ** also accepted: "cm**3"
+mdot = Q(1.5, "g/s")       # compound unit, parsed automatically
+vol  = Q(5,  "cm^3")      # ** also accepted: "cm**3"
 flux = Q(200, "W/m^2")
 ```
 
@@ -55,7 +55,7 @@ from anvil import kN, kJ, MJ, kW, BTU, ft, inch, in_, lb, lbf, hr
 T   = 300 * K           # Q(300, "K")
 P   = 101325 * Pa       # Q(101325, "Pa")
 v   = 340 * (m/s)       # Q(340, "m/s")
-g   = 9.81 * m/s**2     # Q(9.81, "m/s^2") — parens optional
+g   = 9.81 * m/s**2     # Q(9.81, "m/s^2"), parens optional
 rho = 1.225 * kg/m**3   # Q(1.225, "kg/m^3")
 ```
 
@@ -81,7 +81,7 @@ print(pressures.si)      # array([100000. 150000. 200000.])
 qs = Q.linspace(100, 300, 5, unit="K")  # list of 5 Quantity objects
 ```
 
-### `Q(None, unit)` — undefined quantity
+### `Q(None, unit)`, undefined quantity
 
 ```python
 q = Q(None, "Pa")
@@ -126,7 +126,7 @@ print(p_psi.unit)      # "psi"
 
 ```python
 anvil.set_units("Imperial")
-Q(101325, "Pa").unit   # "psi" — preferred Imperial unit for pressure
+Q(101325, "Pa").unit   # "psi", preferred Imperial unit for pressure
 anvil.set_units("SI")
 Q(101325, "Pa").unit   # "Pa"
 ```
@@ -179,7 +179,7 @@ Integer, float, dimensionless Q exponents:
 ```python
 Q(3, "m") ** 2                   # → Q(9, "m^2")
 Q(9, "m^2") ** 0.5               # → Q(3, "m")
-Q(3, "m") ** Q(2)                # → Q(9, "m^2") — Q must be dimensionless
+Q(3, "m") ** Q(2)                # → Q(9, "m^2"), Q must be dimensionless
 
 Q(3, "m") ** Q(2, "N")          # ValueError: exponent must be dimensionless
 ```
@@ -221,13 +221,13 @@ q.to("unit_string")   # returns new Quantity; original unchanged
 Q(101325, "Pa").to("atm")      # 1.0000 atm
 Q(101325, "Pa").to("psi")      # 14.6959 psi
 Q(101325, "Pa").to("kPa")      # 101.3250 kPa
-Q(300,    "K").to("R")         # 540.00 R
-Q(1000,   "N").to("lbf")       # 224.81 lbf
-Q(10,     "m/s").to("cm/s")    # 1000.00 cm/s
-Q(10,     "m/s").to("mph")     # 22.37 mph
-Q(0.001,  "kg/s").to("g/s")    # 1.0000 g/s
-Q(1e-6,   "m^3").to("cm^3")    # 1.0000 cm^3
-Q(100,    "J").to("BTU")       # 0.0948 BTU
+Q(300,   "K").to("R")         # 540.00 R
+Q(1000,  "N").to("lbf")       # 224.81 lbf
+Q(10,    "m/s").to("cm/s")    # 1000.00 cm/s
+Q(10,    "m/s").to("mph")     # 22.37 mph
+Q(0.001, "kg/s").to("g/s")    # 1.0000 g/s
+Q(1e-6,  "m^3").to("cm^3")    # 1.0000 cm^3
+Q(100,   "J").to("BTU")       # 0.0948 BTU
 ```
 
 Incompatible dimensions raise `ValueError`:
@@ -302,7 +302,7 @@ print(ps.si)   # [100000. 200000. 300000.]
 
 ## Known Limits and Gotchas
 
-### `Q(Q_obj, unit)` — not a double-wrap
+### `Q(Q_obj, unit)`, not a double-wrap
 
 Passing a `Q` as the value to `Q()` is **not** double-wrapping. The `Quantity.__init__` always does `float(value) * scale`, which calls `__float__` on the inner Q, returning its SI value. The result is dimensionally correct:
 
@@ -316,8 +316,8 @@ q2 = Q(q1, "Pa")     # works: q2.si == 100.0
 ### Adding scalar to dimensional Q
 
 ```python
-Q(10, "N") + 5     # ValueError — non-dimensionless Q can't add to scalar
-Q(1.4) + 0.1       # OK — dimensionless
+Q(10, "N") + 5     # ValueError, non-dimensionless Q can't add to scalar
+Q(1.4) + 0.1       # OK, dimensionless
 ```
 
 ### Units not in database → custom dimension
@@ -325,7 +325,7 @@ Q(1.4) + 0.1       # OK — dimensionless
 ```python
 q = Q(5, "flarps")
 r = q * Q(3, "s")
-print(r)            # 15.0000 [T][flarps]  — custom dim preserved
+print(r)            # 15.0000 [T][flarps], custom dim preserved
 ```
 
 Custom dims propagate through arithmetic but can never be converted to a named unit.
@@ -340,7 +340,7 @@ Q(10, "N") >= Q(5, "K")
 # TypeError: Cannot compare [L][M][T-2] >= [Θ]: incompatible dimensions.
 ```
 
-`<`, `<=`, `>`, `>=` all raise `TypeError` when dimensions differ. `==` returns `False` (no exception) for dimension mismatches — this matches Python convention where equality across types is usually `False`, not an error.
+`<`, `<=`, `>`, `>=` all raise `TypeError` when dimensions differ. `==` returns `False` (no exception) for dimension mismatches, this matches Python convention where equality across types is usually `False`, not an error.
 
 ### `Q ** non-dimensionless Q` → ValueError
 
@@ -350,6 +350,6 @@ Q(3, "m") ** Q(2, "N")    # ValueError: Exponent must be dimensionless.
 
 ### ndarray Quantities in System solvers
 
-The `_forward()` method calls `float(q._si_value)` on all workspace values. This **fails silently** if the value is an ndarray with ndim > 0 — it will be stored as-is in the workspace, and downstream float arithmetic will fail.
+The `_forward()` method calls `float(q._si_value)` on all workspace values. This **fails silently** if the value is an ndarray with ndim > 0, it will be stored as-is in the workspace, and downstream float arithmetic will fail.
 
 Only scalar Quantities should be system inputs.

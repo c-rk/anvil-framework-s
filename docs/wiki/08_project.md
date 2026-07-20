@@ -26,8 +26,8 @@ Opening the same project twice (same name + path) reopens the existing database.
 
 ```python
 proj.push(
-    obj,                 # function, Relation, System, or Quantity
-    name=None,           # defaults to obj.__name__
+    obj,                # function, Relation, System, or Quantity
+    name=None,          # defaults to obj.__name__
     domain="",
     version="0.0.1",
     description="",
@@ -150,7 +150,7 @@ anvil.R.rayleigh_ratios(M=0.5)   # now works globally
 
 ---
 
-## Context Manager — Auto-route `anvil.push()`
+## Context Manager, Auto-route `anvil.push()`
 
 The context manager routes `anvil.push()` calls to the project store automatically:
 
@@ -164,16 +164,16 @@ with anvil.project("my_study", path="./work") as proj:
     proj.push(draft_relation)        # → project store
     anvil.R.isentropic_ratios(M=2)   # global still works
 
-# Outside the with block — promote when satisfied
+# Outside the with block, promote when satisfied
 proj.promote("draft_relation")
 ```
 
 **How it works internally:**
-- `Project.__enter__()` calls `_set_active_project(self)` — sets a module-level `_active_project`
-- `anvil.push()` checks `get_active_project()` — if set, routes to project store
-- `Project.__exit__()` calls `_set_active_project(None)` — clears active project
+- `Project.__enter__()` calls `_set_active_project(self)`, sets a module-level `_active_project`
+- `anvil.push()` checks `get_active_project()`, if set, routes to project store
+- `Project.__exit__()` calls `_set_active_project(None)`, clears active project
 
-**Warning:** `_active_project` is a module-level global. Nested `with anvil.project(...)` blocks are not safe — the inner one overrides the outer. Use explicit `proj.push()` for nested workflows.
+**Warning:** `_active_project` is a module-level global. Nested `with anvil.project(...)` blocks are not safe, the inner one overrides the outer. Use explicit `proj.push()` for nested workflows.
 
 ---
 
@@ -204,7 +204,7 @@ def rayleigh_heat(M1, T01, P1, q_heat, cp, gamma=1.4):
 # 2. Push to project
 proj = anvil.project("rayleigh_study", path="./rayleigh_work")
 proj.push(rayleigh_ratios, domain="aero.compressible", tags=["rayleigh"])
-proj.push(rayleigh_heat,   domain="aero.compressible", tags=["rayleigh"])
+proj.push(rayleigh_heat,  domain="aero.compressible", tags=["rayleigh"])
 
 # 3. Use in System
 duct = anvil.system("rayleigh_duct")
@@ -230,12 +230,12 @@ sweep.summary(outputs=["M2", "T02", "P02_P01"])
 ## Project Object Attributes
 
 ```python
-proj.name        # str — project name
-proj._store      # Store — SQLite backend
-proj._path       # Path — filesystem path
-proj.R           # Namespace — project Relation access
-proj.S           # Namespace — project System access
-proj.Q           # Namespace — project Quantity access
+proj.name        # str, project name
+proj._store      # Store, SQLite backend
+proj._path       # Path, filesystem path
+proj.R           # Namespace, project Relation access
+proj.S           # Namespace, project System access
+proj.Q           # Namespace, project Quantity access
 
 repr(proj)       # <Project 'my_study': 2 RSQs at ./work>
 ```

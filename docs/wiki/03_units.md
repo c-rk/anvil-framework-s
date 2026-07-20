@@ -4,7 +4,7 @@ Anvil's unit engine is built around the `Dim` class and the `UnitDB` singleton (
 
 ---
 
-## Dim — Physical Dimension Object
+## Dim, Physical Dimension Object
 
 `Dim` stores dimensions as a dict of `{symbol: exponent}`. Only non-zero exponents are stored.
 
@@ -32,7 +32,7 @@ dimless   = Dim.dimensionless()      # singleton version
 
 # Parse from string
 d = Dim.parse("[L][M][T-2]")        # standard
-d = Dim.parse("[LMT-2]")            # compact — same result
+d = Dim.parse("[LMT-2]")            # compact, same result
 d = Dim.parse("[L2][T-2]")          # with exponents
 ```
 
@@ -59,12 +59,12 @@ pressure = force / area                 # [L-1][M][T-2] = Pa
 ```python
 Dim(L=1, M=1, T=-2) == Dim(L=1, M=1, T=-2)   # True
 Dim(L=1) == Dim(T=1)                            # False
-hash(d)                                          # hashable — usable as dict key
+hash(d)                                          # hashable, usable as dict key
 ```
 
 ---
 
-## UnitDB — The Unit Database
+## UnitDB, The Unit Database
 
 `anvil.units.db` is a singleton `UnitDB` instance. It maps unit strings → (scale_to_SI, Dim) pairs and provides reverse lookup (Dim → named unit).
 
@@ -80,10 +80,10 @@ scale, dim = db.lookup("psi")
 # scale = 6894.757, dim = Dim(L=-1, M=1, T=-2)
 
 scale, dim = db.lookup("cm/s")
-# scale = 0.01, dim = Dim(L=1, T=-1)  — parsed as compound
+# scale = 0.01, dim = Dim(L=1, T=-1), parsed as compound
 
 scale, dim = db.lookup("flarps")
-# scale = 1.0, dim = Dim(flarps=1)    — custom dimension created
+# scale = 1.0, dim = Dim(flarps=1)  , custom dimension created
 ```
 
 ### `db.find_unit(dim, system)` → `(name, scale)` or `None`
@@ -119,9 +119,9 @@ db.get_offset("Pa")     # 0.0
 ### `db.compatible(a, b)` → bool
 
 ```python
-db.compatible("Pa", "psi")  # True — same dimension
+db.compatible("Pa", "psi")  # True, same dimension
 db.compatible("Pa", "K")    # False
-db.compatible("degC", "K")  # True — same [Θ] dimension
+db.compatible("degC", "K")  # True, same [Θ] dimension
 db.compatible("degF", "R")  # True
 ```
 
@@ -144,14 +144,14 @@ Units not in the database are parsed at runtime from their components using `_pa
 from anvil import Q
 
 Q(1.5, "g/s")       # → 0.0015 kg/s     [M][T-1]
-Q(10,  "cm/s")      # → 0.1 m/s         [L][T-1]
-Q(5,   "cm^3")      # → 5e-6 m^3        [L3]
-Q(5,   "cm**3")     # ** also accepted
+Q(10, "cm/s")      # → 0.1 m/s         [L][T-1]
+Q(5,  "cm^3")      # → 5e-6 m^3        [L3]
+Q(5,  "cm**3")     # ** also accepted
 Q(200, "W/m^2")     # → W/m^2           [M][T-3]
 Q(1e-3,"Pa*s")      # → Pa·s            [L-1][M][T-1]
-Q(1,   "kg*m/s^2")  # → 1 N             [L][M][T-2]
-Q(1,   "J/kg/K")    # → J/kg/K          [L2][T-2][Θ-1]
-Q(1,   "m^0.5")     # fractional exponent OK
+Q(1,  "kg*m/s^2")  # → 1 N             [L][M][T-2]
+Q(1,  "J/kg/K")    # → J/kg/K          [L2][T-2][Θ-1]
+Q(1,  "m^0.5")     # fractional exponent OK
 ```
 
 **Limitation:** Every base token must be a known unit. `Q(1, "flarps/s")` creates a custom dimension `flarps` and parses `/s` correctly, but `flarps` will have an unknown dimension unless explicitly registered.
@@ -231,9 +231,9 @@ Pass a category name as the unit string to get the default SI unit for that dime
 |------|--------------------|---------------|-------|
 | `K` | 1.0 | 0 | Kelvin, SI preferred |
 | `R` | 5/9 ≈ 0.5556 | 0 | Rankine, Imperial preferred |
-| `degC` | 1.0 | +273.15 | Celsius — full offset arithmetic |
+| `degC` | 1.0 | +273.15 | Celsius, full offset arithmetic |
 | `°C` | 1.0 | +273.15 | Unicode alias for `degC` |
-| `degF` | 5/9 | +255.372 | Fahrenheit — full offset arithmetic |
+| `degF` | 5/9 | +255.372 | Fahrenheit, full offset arithmetic |
 | `°F` | 5/9 | +255.372 | Unicode alias for `degF` |
 
 **Storage formula:** `SI_value = input_value × scale + offset`
@@ -247,7 +247,7 @@ Q(25, "degC").value       # 25.0    (display in °C)
 Q(25, "degC").to("K")     # 298.15 K
 Q(25, "degC").to("degF")  # 77.00 degF
 Q(100, "degC").to("degF") # 212.00 degF
-Q(32,  "degF").to("K")    # 273.15 K
+Q(32, "degF").to("K")    # 273.15 K
 Q(373.15, "K").to("degC") # 100.00 degC
 
 # Unicode forms
@@ -255,7 +255,7 @@ Q(0, "°C").si             # 273.15
 Q(32, "°F").to("°C")      # 0.00 °C
 ```
 
-> **Note:** `degC`/`degF` share the `[Θ]` dimension with `K` and `R` — all conversions and dimension checks work normally. Arithmetic between temperature quantities (e.g., `Q(100,"degC") + Q(50,"degC")`) operates on the SI (Kelvin) values, which is the physically correct behaviour for absolute-scale arithmetic. For temperature *differences* the result is correct; for absolute sums the meaning is ambiguous (as it is in any unit system).
+> **Note:** `degC`/`degF` share the `[Θ]` dimension with `K` and `R`, all conversions and dimension checks work normally. Arithmetic between temperature quantities (e.g., `Q(100,"degC") + Q(50,"degC")`) operates on the SI (Kelvin) values, which is the physically correct behaviour for absolute-scale arithmetic. For temperature *differences* the result is correct; for absolute sums the meaning is ambiguous (as it is in any unit system).
 
 ### Force
 | Unit | SI scale |
@@ -379,7 +379,7 @@ Q(32, "°F").to("°C")      # 0.00 °C
 
 ---
 
-## UnitStub — Value × Unit Syntax
+## UnitStub, Value × Unit Syntax
 
 `UnitStub` objects can be combined to form compound stubs before multiplying by a value:
 

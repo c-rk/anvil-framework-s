@@ -8,15 +8,15 @@ The Anvil registry is a SQLite database at `~/.anvil/registry.db`. It stores RSQ
 
 | Type | Description | Accessed via |
 |------|-------------|-------------|
-| `"R"` | Relation — a computation function | `anvil.R.<name>` |
-| `"S"` | System — a pre-built solvable problem | `anvil.S.<name>` |
-| `"Q"` | Quantity — a named constant | `anvil.QDB.<name>` |
+| `"R"` | Relation, a computation function | `anvil.R.<name>` |
+| `"S"` | System, a pre-built solvable problem | `anvil.S.<name>` |
+| `"Q"` | Quantity, a named constant | `anvil.QDB.<name>` |
 
 ---
 
 ## Exploring the Registry
 
-### `anvil.registry.list()` — list RSQs
+### `anvil.registry.list()`, list RSQs
 
 ```python
 import anvil
@@ -37,7 +37,7 @@ anvil.registry.list(tag="combustion")      # filter by tag
 ...
 ```
 
-### `anvil.registry.search(keyword)` — fuzzy search
+### `anvil.registry.search(keyword)`, fuzzy search
 
 Searches name, description, domain, and tags:
 
@@ -57,7 +57,7 @@ anvil.registry.search("rayleigh")
   2 result(s)
 ```
 
-### `anvil.registry.info(name)` — detailed metadata
+### `anvil.registry.info(name)`, detailed metadata
 
 ```python
 anvil.registry.info("isentropic_ratios")
@@ -78,7 +78,7 @@ anvil.registry.info("isentropic_ratios")
     gamma      default=1.4
 ```
 
-### `anvil.registry.export(name)` — print source code
+### `anvil.registry.export(name)`, print source code
 
 ```python
 anvil.registry.export("isentropic_ratios")
@@ -112,19 +112,19 @@ Permanently deletes from the SQLite database. Cannot be undone (re-push to resto
 
 ## Registering RSQs
 
-### `anvil.push()` — register
+### `anvil.push()`, register
 
 ```python
 anvil.push(
-    obj,                    # function, Relation, System, or Quantity
-    name=None,              # defaults to function.__name__
-    domain="",              # hierarchical: "aero.compressible"
+    obj,                   # function, Relation, System, or Quantity
+    name=None,             # defaults to function.__name__
+    domain="",             # hierarchical: "aero.compressible"
     version="0.0.1",
     description="",
     author="",
-    tags=None,              # list of strings
-    tests=None,             # dict of test cases (future feature)
-    depends=None,           # list of dependency RSQ names
+    tags=None,             # list of strings
+    tests=None,            # dict of test cases (future feature)
+    depends=None,          # list of dependency RSQ names
 )
 ```
 
@@ -146,23 +146,23 @@ anvil.R.my_drag(CL=0.5, CD0=0.02, AR=8)
 
 **Origin:** RSQs pushed via `anvil.push()` have `origin="local"`. Built-ins have `origin="builtin"`.
 
-**Duplicate warning:** Pushing a name that already exists in the local registry raises `UserWarning`. Use `anvil.update()` to signal intentional overwrite — `update()` never shows this warning.
+**Duplicate warning:** Pushing a name that already exists in the local registry raises `UserWarning`. Use `anvil.update()` to signal intentional overwrite, `update()` never shows this warning.
 
-**Namespace rebuild:** `anvil.push()` and `anvil.update()` both rebuild `anvil.R.*` / `anvil.S.*` / `anvil.QDB.*` automatically. `anvil.R.<name>` is accessible immediately after the call — no session restart needed:
+**Namespace rebuild:** `anvil.push()` and `anvil.update()` both rebuild `anvil.R.*` / `anvil.S.*` / `anvil.QDB.*` automatically. `anvil.R.<name>` is accessible immediately after the call, no session restart needed:
 
 ```python
 anvil.push(my_func, name="my_rsq")
 anvil.R.my_rsq(x=1.0)   # works immediately
 ```
 
-### `anvil.update()` — update existing
+### `anvil.update()`, update existing
 
 ```python
 anvil.update(
     obj,
     name=None,
-    domain=None,         # None = keep existing
-    version=None,        # None = keep existing
+    domain=None,        # None = keep existing
+    version=None,       # None = keep existing
     description=None,
     author=None,
     tags=None,
@@ -181,7 +181,7 @@ anvil.update(my_drag_v2, name="my_drag", version="1.1.0")
 # Updated 'my_drag'.
 ```
 
-`update()` is semantically "intentional overwrite" — no duplicate warning. Merges only the fields you pass; omitted fields keep their current values. Rebuilds `anvil.R.*` automatically.
+`update()` is semantically "intentional overwrite", no duplicate warning. Merges only the fields you pass; omitted fields keep their current values. Rebuilds `anvil.R.*` automatically.
 
 ---
 
@@ -209,12 +209,12 @@ sys.use("normal_shock", map={"M1": "M_upstream"})
 
 ### `anvil.R.<name>` vs `anvil.registry.search()`
 
-- `anvil.R.name` — attribute access, returns the live Relation/System/Quantity object
-- `anvil.registry.search("name")` — returns metadata records (dicts from SQLite), not live objects
+- `anvil.R.name`, attribute access, returns the live Relation/System/Quantity object
+- `anvil.registry.search("name")`, returns metadata records (dicts from SQLite), not live objects
 
 ---
 
-## `anvil.check()` — Health Check
+## `anvil.check()`, Health Check
 
 ```python
 report = anvil.check("isentropic_ratios")
@@ -261,7 +261,7 @@ report = anvil.check(my_relation_object)
 | `"issues"` | list | Problems found |
 | `"test_result"` | dict | Test run outputs |
 
-**`verbose=False`** — suppresses print, returns report dict only:
+**`verbose=False`**, suppresses print, returns report dict only:
 
 ```python
 report = anvil.check("isentropic_ratios", verbose=False)
@@ -272,19 +272,19 @@ report["outputs"]  # ['P0_P', 'T0_T', 'rho0_rho']
 
 ---
 
-## `anvil.fetch()` — Load by Name/Domain/Tag
+## `anvil.fetch()`, Load by Name/Domain/Tag
 
 ```python
 anvil.fetch("pid_output")          # by name
-anvil.fetch("aero.compressible")   # by domain — loads all in that domain
+anvil.fetch("aero.compressible")   # by domain, loads all in that domain
 anvil.fetch("combustion")          # by tag
 ```
 
-Primarily useful for refreshing the namespace after direct database manipulation. Not needed after `anvil.push()` or `anvil.update()` — those rebuild automatically.
+Primarily useful for refreshing the namespace after direct database manipulation. Not needed after `anvil.push()` or `anvil.update()`, those rebuild automatically.
 
 ---
 
-## Store — SQLite Backend
+## Store, SQLite Backend
 
 The underlying store is `anvil.registry.store.Store`, backed by `~/.anvil/registry.db`.
 

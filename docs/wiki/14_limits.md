@@ -6,11 +6,11 @@ Comprehensive list of what Anvil cannot do, where it behaves unexpectedly, and h
 
 ## 1. System & Solver Limitations
 
-### DOF analysis — partial ✓ fixed
+### DOF analysis, partial ✓ fixed
 
 `validate()` now emits warnings for two common DOF mistakes:
 
-1. **Declared variable also produced by relation** — silent overwrite (intentional for iterative initial guesses, but likely a naming bug in forward systems):
+1. **Declared variable also produced by relation**, silent overwrite (intentional for iterative initial guesses, but likely a naming bug in forward systems):
 
 ```python
 sys.add("T0_T", 999.0)       # declared
@@ -20,7 +20,7 @@ sys.validate()
 #   declared value will be overwritten after solve: ['T0_T']
 ```
 
-2. **Declared variable used by no relation** — orphan / typo:
+2. **Declared variable used by no relation**, orphan / typo:
 
 ```python
 sys.add("unused_var", 42.0)
@@ -37,7 +37,7 @@ Warnings fire once per system instance; suppressed on sweeps/re-solves.
 **Problem:** Systems with strong coupling (|spectral radius| > 1) diverge regardless of relaxation.
 
 ```python
-# This ALWAYS diverges — spectral radius >> 1
+# This ALWAYS diverges, spectral radius >> 1
 def r1(x): return {"y": 10*x + 1}
 def r2(y): return {"x": 10*y + 1}
 sys.use(r1); sys.use(r2)
@@ -52,8 +52,8 @@ sys.solve_gauss_seidel(max_iter=20)
 For linear systems, Gauss-Seidel convergence rate is linear (geometric). With `relaxation=ω < 1`, each iteration reduces error by factor ≈ ω × spectral_radius. Heat exchanger example needs 33 iterations; aerodynamic systems may need 100+.
 
 **Workaround for slow convergence:**
-1. Try `relaxation=0.5` — more conservative but stable
-2. Try `solve_newton()` — quadratic convergence
+1. Try `relaxation=0.5`, more conservative but stable
+2. Try `solve_newton()`, quadratic convergence
 3. Improve initial guess with `sys.set()` before solving
 
 ### `solve_newton` with poor initial guess
@@ -61,14 +61,14 @@ For linear systems, Gauss-Seidel convergence rate is linear (geometric). With `r
 Newton's method can diverge if the initial guess is far from the solution:
 
 ```python
-# Newton on a system with multiple solutions — may find wrong one
+# Newton on a system with multiple solutions, may find wrong one
 sys.set(x=0.0)   # near a saddle point
 sys.solve_newton()  # may fail or find wrong root
 ```
 
 **Workaround:** Use `solve_gauss_seidel()` first to get close, then refine with `solve_newton()`.
 
-### Warm-starting between sweep points — ✓ fixed
+### Warm-starting between sweep points, ✓ fixed
 
 `sweep()` now accepts `warm_start=True`. Each successful solve's outputs are carried forward as initial guesses for the next point:
 
@@ -84,18 +84,18 @@ Reduces iteration count significantly for slowly varying parameters. Incompatibl
 
 ## 2. Quantity Gotchas
 
-### Celsius and Fahrenheit — offset arithmetic ✓ supported (v1.3+)
+### Celsius and Fahrenheit, offset arithmetic ✓ supported (v1.3+)
 
 `degC`, `°C`, `degF`, `°F` are now registered as offset units with full conversion:
 
 ```python
-Q(25, "degC").si          # 298.15 K — correct
+Q(25, "degC").si          # 298.15 K, correct
 Q(25, "degC").to("K")     # 298.15 K
 Q(25, "degC").to("degF")  # 77.00 degF
 Q(32, "degF").to("K")     # 273.15 K
 ```
 
-**Gotcha — arithmetic between offset temperatures:**
+**Gotcha, arithmetic between offset temperatures:**
 
 ```python
 Q(100, "degC") + Q(100, "degC")
@@ -103,18 +103,18 @@ Q(100, "degC") + Q(100, "degC")
 # → displayed as 746.30 K (not 200°C)
 ```
 
-Addition/subtraction operates on SI (Kelvin) values. The result has no `_unit_hint`, so it displays in K. This is the correct behaviour for absolute temperature arithmetic — adding two absolute temperatures is physically meaningful only as K. For temperature *differences*, the result is correct. If you need to display the result in °C:
+Addition/subtraction operates on SI (Kelvin) values. The result has no `_unit_hint`, so it displays in K. This is the correct behaviour for absolute temperature arithmetic, adding two absolute temperatures is physically meaningful only as K. For temperature *differences*, the result is correct. If you need to display the result in °C:
 
 ```python
 result = Q(100, "degC") + Q(0, "degC")  # purely as K arithmetic
-print(result.to("degC"))  # 100.00 degC — force display unit
+print(result.to("degC"))  # 100.00 degC, force display unit
 ```
 
-**Gotcha — `"C"` or `"F"` still create custom dimensions:**
+**Gotcha, `"C"` or `"F"` still create custom dimensions:**
 
 ```python
-Q(25, "C")   # custom dim [C] — NOT Celsius
-Q(77, "F")   # custom dim [F] — NOT Fahrenheit
+Q(25, "C")   # custom dim [C], NOT Celsius
+Q(77, "F")   # custom dim [F], NOT Fahrenheit
 ```
 
 Use `"degC"` / `"°C"` / `"degF"` / `"°F"` explicitly.
@@ -122,8 +122,8 @@ Use `"degC"` / `"°C"` / `"degF"` / `"°F"` explicitly.
 ### Adding scalar to dimensional Q
 
 ```python
-Q(10, "N") + 5    # ValueError — correct behavior
-Q(1.4) + 0.1      # OK — dimensionless
+Q(10, "N") + 5    # ValueError, correct behavior
+Q(1.4) + 0.1      # OK, dimensionless
 ```
 
 The error is correct physics. But it can surprise users who expect implicit dimensionless addition.
@@ -137,7 +137,7 @@ Q(3, "m") ** Q(2, "N")
 
 Even though the numerical result of `3**2=9` is fine, Anvil refuses because the dimension of `N` makes no physical sense as an exponent.
 
-### Cross-dimension comparison — ✓ fixed
+### Cross-dimension comparison, ✓ fixed
 
 `<`, `<=`, `>`, `>=` between incompatible-dimension Q objects now raise `TypeError`:
 
@@ -147,7 +147,7 @@ Q(10, "N") < Q(5, "K")
 #            Convert to the same unit first.
 ```
 
-Previously this returned `NotImplemented`, which Python treated as `True` in boolean contexts — a silent logic bug. `__le__` and `__ge__` operators also added. `==` still returns `False` (not an error) for dimension mismatches.
+Previously this returned `NotImplemented`, which Python treated as `True` in boolean contexts, a silent logic bug. `__le__` and `__ge__` operators also added. `==` still returns `False` (not an error) for dimension mismatches.
 
 ### `Q(None)` in arithmetic
 
@@ -173,7 +173,7 @@ print(Q(100, "N") / Q(5, "K"))  # contains [L][M][T-2][Θ-1]
 
 ## 3. Relation Gotchas
 
-### Functions that don't return a dict — ✓ fixed
+### Functions that don't return a dict, ✓ fixed
 
 ```python
 def bad(x):
@@ -260,7 +260,7 @@ Use `anvil.update()` for intentional overwrites.
 ### Seed only runs once (or when builtins missing)
 
 After initial seeding, new built-in RSQs added to `seed.py` only appear after:
-1. `from anvil.seed import seed; seed(force=True)` — force re-seed
+1. `from anvil.seed import seed; seed(force=True)`, force re-seed
 2. Or: new RSQ name added to `_SEED_ENTRIES`, then next import checks if all builtins present
 
 If you add an RSQ to `seed.py` and it doesn't appear in `anvil.R.*`, run `seed(force=True)`.
@@ -271,14 +271,14 @@ The global registry is per-user, not per-project. All Anvil sessions on the same
 
 **Implication:** `anvil.push()` in a script permanently modifies the shared DB. Use project registries (`anvil.project()`) for development RSQs.
 
-### `anvil.R.<name>` vs string lookup — ✓ fixed
+### `anvil.R.<name>` vs string lookup, ✓ fixed
 
 `anvil.push()` and `anvil.update()` now rebuild `anvil.R.*` / `anvil.S.*` / `anvil.QDB.*` automatically. The new RSQ is accessible immediately:
 
 ```python
 import anvil
 anvil.push(my_func, name="new_rsq")
-anvil.R.new_rsq(x=1.0)   # works — no restart needed
+anvil.R.new_rsq(x=1.0)   # works, no restart needed
 ```
 
 Manual rebuild still available if needed (e.g. after direct DB manipulation):
@@ -290,7 +290,7 @@ anvil.registry._rebuild_namespaces()
 
 ## 5. Solver-Specific Limits
 
-### `find_root` — no real root in bracket
+### `find_root`, no real root in bracket
 
 ```python
 solvers.find_root(lambda x: x**2 + 1, bracket=(0, 10))
@@ -299,18 +299,18 @@ solvers.find_root(lambda x: x**2 + 1, bracket=(0, 10))
 
 Brent's method requires a sign change. If your function is always positive (or always negative) in the bracket, it cannot find a root.
 
-### `solve_ode` — success flag is unreliable for stiff problems
+### `solve_ode`, success flag is unreliable for stiff problems
 
 ODE with singularity may report `success=True`:
 
 ```python
 r = solvers.solve_ode(lambda t, y: [1.0/(y[0]-0.5)], (0, 0.4), [0.0])
-r["success"]   # True — but the solution is garbage
+r["success"]   # True, but the solution is garbage
 ```
 
 **Workaround:** Check `r["message"]` and sanity-check the solution values. For stiff problems, use `solve_ode_stiff()`.
 
-### `solve_pde_heat_1d` — 1D uniform Cartesian only
+### `solve_pde_heat_1d`, 1D uniform Cartesian only
 
 Limitations:
 - 1D only (no 2D/3D)
@@ -321,7 +321,7 @@ Limitations:
 
 For any of these, use a CLI adapter wrapping OpenFOAM/FEniCS/FiPy.
 
-### `minimize` — local minima only
+### `minimize`, local minima only
 
 All methods in `solvers.minimize()` are gradient-based (or simplex-based) local optimizers. They find the nearest local minimum to `x0`.
 
@@ -329,7 +329,7 @@ All methods in `solvers.minimize()` are gradient-based (or simplex-based) local 
 # Rosenbrock has one global minimum at [1, 1]
 r = solvers.minimize(rosen, [0.0, 0.0])   # converges to [1, 1]
 
-# Multi-modal function — result depends on x0
+# Multi-modal function, result depends on x0
 def f(x): return np.sin(x[0]) + 0.1*x[0]**2
 r = solvers.minimize(f, [0.0])   # local min near x=0
 r = solvers.minimize(f, [-3.0])  # different local min
@@ -371,7 +371,7 @@ Each adapter call is stateless. If your external tool requires initialization (c
 
 All workspace values are `np.float64`. Loss of precision occurs for:
 - Very large values combined with very small (cancellation): `Q(1e20, "Pa") - Q(1e20 - 1, "Pa")` → loss of significant digits
-- Deeply chained exponentiation: `Q(x, "m") ** 0.5 ** 0.5` — compounding roundoff
+- Deeply chained exponentiation: `Q(x, "m") ** 0.5 ** 0.5`, compounding roundoff
 
 ### Unit scaling and precision
 
@@ -380,7 +380,7 @@ Q(1, "psi").to("Pa").value
 # 6894.757293168  (exact database value)
 
 Q(1, "psi").si
-# 6894.757293168  (preserved — no intermediate rounding)
+# 6894.757293168  (preserved, no intermediate rounding)
 ```
 
 Conversion chains can accumulate floating-point errors:
@@ -396,9 +396,9 @@ Q(1, "ft").to("cm").to("mm").to("m").si
 |--------|------------------|--------------------|
 | `find_root` (brent) | 1e-12 | ~12 significant digits |
 | `solve_nonlinear` | 1e-10 | ~10 significant digits |
-| `solve_ode` | rtol=1e-8, atol=1e-10 | 6–8 significant digits |
-| `solve_ode_stiff` | rtol=1e-6, atol=1e-10 | 4–6 significant digits |
-| `solve_bvp` | tol=1e-3 | 2–3 significant digits (coarse mesh) |
+| `solve_ode` | rtol=1e-8, atol=1e-10 | 6-8 significant digits |
+| `solve_ode_stiff` | rtol=1e-6, atol=1e-10 | 4-6 significant digits |
+| `solve_bvp` | tol=1e-3 | 2-3 significant digits (coarse mesh) |
 | `solve_pde_heat_1d` | dx²/12 spatial, dt²/12 temporal | 0.05% with default settings |
 | `minimize` | 1e-8 | 8 significant digits |
 
@@ -418,18 +418,18 @@ nx=200:  dx=0.005  spatial error ~ 2.5e-5
 
 | Operation | Typical time | Hard limit |
 |-----------|-------------|------------|
-| Single `forward` pass, 5 relations | <1 ms | — |
-| `gauss_seidel`, 50 iterations | ~5 ms | — |
-| `find_root` (brent) | ~10 µs | — |
+| Single `forward` pass, 5 relations | <1 ms |, |
+| `gauss_seidel`, 50 iterations | ~5 ms |, |
+| `find_root` (brent) | ~10 µs |, |
 | `sweep(50 points)`, simple system | ~50 ms | Memory scales with n_points |
 | `sweep(50 points, parallel=4)` | ~15 ms | 4 concurrent solve copies |
-| `sensitivity(5 inputs)` | ~10× single solve | — |
-| Registry SQLite lookup | ~1 ms | — |
-| Project `promote_all(1000 RSQs)` | ~1 s | — |
+| `sensitivity(5 inputs)` | ~10× single solve |, |
+| Registry SQLite lookup | ~1 ms |, |
+| Project `promote_all(1000 RSQs)` | ~1 s |, |
 
 ### Memory
 
-Each sweep point stores a full Result object with all workspace variables. For large systems (100+ variables) × 500 sweep points, this can reach 50–100 MB. Use `sweep.to_dict()` to extract arrays and release.
+Each sweep point stores a full Result object with all workspace variables. For large systems (100+ variables) × 500 sweep points, this can reach 50-100 MB. Use `sweep.to_dict()` to extract arrays and release.
 
 ---
 
@@ -448,7 +448,7 @@ Each sweep point stores a full Result object with all workspace variables. For l
 | `deg` unit not working as angle input to RSQs | ✓ **Fixed** (v1.3) | `_rad()` helper in loader handles both `Q(deg)` and plain float |
 | `viz.dependency_graph()` overlaps nodes for large systems | Open | Scale figure: `fig.set_size_inches(20, 15)` |
 | `block` relation returns all workspace keys, not just declared outputs | Open | Access only the keys you care about |
-| `_qty_compatible` cache resets on `copy()` | Open | Negligible — first call recaches |
+| `_qty_compatible` cache resets on `copy()` | Open | Negligible, first call recaches |
 | `ResourceWarning: unclosed database` on CPython 3.14+ | Open | Harmless for scripts; `store.close()` in servers |
 | Windows cp1252 encoding breaks Dim repr with Θ symbol | Open | Use `-X utf8` flag or `PYTHONIOENCODING=utf-8` |
 | `anvil.project()` prints "Project opened" in silent scripts | Open | Redirect stdout if needed |

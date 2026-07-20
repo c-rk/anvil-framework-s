@@ -1,4 +1,4 @@
-# Anvil Framework — Complete Reference Wiki
+# Anvil Framework, Complete Reference Wiki
 
 **Version 1.3.0** | Python 3.10+ | [GitHub](https://github.com/c-rk/anvil-framework-s)
 
@@ -7,17 +7,17 @@
 Anvil is an engineering computation framework: write physics as plain Python functions, wire them into solvable systems, and get results with automatic unit tracking.
 
 **Three primitives:**
-- **`Q` (Quantity)** — a number + physical dimension. Arithmetic propagates units automatically.
-- **`Relation`** — a computation block: keyword inputs → dict of outputs.
-- **`System`** — a solvable graph of Quantities and Relations with built-in solvers, sweep, and sensitivity.
+- **`Q` (Quantity)**, a number + physical dimension. Arithmetic propagates units automatically.
+- **`Relation`**, a computation block: keyword inputs → dict of outputs.
+- **`System`**, a solvable graph of Quantities and Relations with built-in solvers, sweep, and sensitivity.
 
-**Three ways to run it** — each tier is optional and builds on the previous:
+**Three ways to run it**, each tier is optional and builds on the previous:
 
-1. **Bare package** — `pip install`, then `Q`, relations, systems, solvers, sweep, sensitivity, units. No database, no server.
-2. **+ Project database** — `anvil.project()` adds a local per-project SQLite store for your own RSQs, alongside the global registry (101 built-in RSQs).
-3. **+ Web Workbench** — `python -m anvil_server` serves a browser UI (calculator + visual canvas) that reads both the project and global databases. See [Web Workbench](20_workbench.md).
+1. **Bare package**, `pip install`, then `Q`, relations, systems, solvers, sweep, sensitivity, units. No database, no server.
+2. **+ Project database**, `anvil.project()` adds a local per-project SQLite store for your own RSQs, alongside the global registry (101 built-in RSQs).
+3. **+ Web Workbench**, `python -m anvil_server` serves a browser UI (calculator + visual canvas) that reads both the project and global databases. See [Web Workbench](20_workbench.md).
 
-**Priorities:** the native core comes first — units, RSQs, sweep, sensitivity, project database, reusability, robustness. Adapters to external tools (XFOIL, SU2, Cantera, ...) are second-class conveniences: they are **real-only** (no mock fallbacks) and never required for the core to work.
+**Priorities:** the native core comes first, units, RSQs, sweep, sensitivity, project database, reusability, robustness. Adapters to external tools (XFOIL, SU2, Cantera, ...) are second-class conveniences: they are **real-only** (no mock fallbacks) and never required for the core to work.
 
 ---
 
@@ -26,21 +26,21 @@ Anvil is an engineering computation framework: write physics as plain Python fun
 | Page | What it covers |
 |------|---------------|
 | [Quick Start](01_quickstart.md) | Installation, first examples, outputs |
-| [Quantity](02_quantity.md) | `Q`, `Dim`, `UnitStub`, arithmetic, conversions — complete API |
+| [Quantity](02_quantity.md) | `Q`, `Dim`, `UnitStub`, arithmetic, conversions, complete API |
 | [Unit Engine](03_units.md) | All 101 units, compound parsing, categories, custom dims |
 | [Relation](04_relation.md) | `Relation`, `@anvil.relation`, `Relation.block`, input/output detection |
-| [System](05_system.md) | `add`, `set`, `use`, `solve`, `sweep`, `sensitivity`, `optimize`, `as_relation` — full API |
+| [System](05_system.md) | `add`, `set`, `use`, `solve`, `sweep`, `sensitivity`, `optimize`, `as_relation`, full API |
 | [Solvers](06_solvers.md) | `find_root`, `solve_nonlinear`, `solve_ode`, `solve_ode_stiff`, `solve_bvp`, `solve_pde_heat_1d`, `minimize`, `minimize_global` |
 | [Registry](07_registry.md) | SQLite store, `push`, `update`, `search`, `list`, `info`, `export`, `remove`, `check` |
 | [Project Registry](08_project.md) | `anvil.project()`, isolated stores, context manager, `promote` |
-| [Built-in RSQs](09_builtin_rsqs.md) | All 101 RSQs — signatures, domains, example outputs (includes `misc` domain: pod_analysis, dmd_analysis, abel_inverse, abel_forward, fft_spectrum, welch_psd, stft_spectrogram, bandpass_filter, envelope_detection, cross_correlation, signal_statistics) |
+| [Built-in RSQs](09_builtin_rsqs.md) | All 101 RSQs, signatures, domains, example outputs (includes `misc` domain: pod_analysis, dmd_analysis, abel_inverse, abel_forward, fft_spectrum, welch_psd, stft_spectrogram, bandpass_filter, envelope_detection, cross_correlation, signal_statistics) |
 | [Adapters](10_adapters.md) | `Adapter`, python/CLI backends, unit handling, real-only policy |
 | [Sweep & Sensitivity](11_sweep_sensitivity.md) | `sys.sweep()`, `sys.sensitivity()`, result objects, parallel |
 | [Visualization](12_visualization.md) | `viz.convergence`, `viz.sweep_plot`, `viz.variable_trace`, `viz.dependency_graph`, `viz.pod_energy`, `viz.dmd_spectrum` |
-| [Databases](13_databases.md) | `fluids`, `materials`, `const` — built-in property tables |
+| [Databases](13_databases.md) | `fluids`, `materials`, `const`, built-in property tables |
 | [Limits & Gotchas](14_limits.md) | What fails, edge cases, accuracy, known issues |
 | [Advanced](15_advanced.md) | Composition, cycles, block relations, CFD module, Watchdog |
-| [Decomposition](16_decomp.md) | `anvil.decomp` — POD, DMD, Hankel embedding, signal analysis |
+| [Decomposition](16_decomp.md) | `anvil.decomp`, POD, DMD, Hankel embedding, signal analysis |
 | [Abel Transform](17_abel.md) | `abel_forward`, `abel_three_point`, `abel_onion`, `abel_image`, `abel_center` |
 | [Signal Processing](19_signal_processing.md) | `fft_spectrum`, `welch_psd`, `stft_spectrogram`, `bandpass_filter`, `envelope_detection`, `cross_correlation`, `signal_statistics` |
 | [Web Workbench](20_workbench.md) | Browser UI: calculator, visual canvas, examples, server API |
@@ -62,7 +62,7 @@ rho = 1.225 * kg/m**3   # Q(1.225, "kg/m^3")
 # ── Unit arithmetic ───────────────────────────────────────────
 F   = Q(100, "N")
 A   = Q(0.01, "m^2")
-sig = F / A             # → Q(10000, "Pa") — dim auto-detected
+sig = F / A             # → Q(10000, "Pa"), dim auto-detected
 KE  = 0.5 * Q(10,"kg") * Q(30,"m/s")**2  # → Q(4500, "J")
 
 # ── Unit conversions ──────────────────────────────────────────
@@ -81,11 +81,11 @@ result.summary()
 
 # ── Build your own System ─────────────────────────────────────
 sys = anvil.system("rayleigh_duct")
-sys.add("M1",     0.3)
-sys.add("T01",    400.0,  "K")
-sys.add("P1",     200e3,  "Pa")
-sys.add("q_heat", 300e3,  "J/kg")
-sys.add("cp",     1005.0, "J/kg/K")
+sys.add("M1",    0.3)
+sys.add("T01",   400.0, "K")
+sys.add("P1",    200e3, "Pa")
+sys.add("q_heat", 300e3, "J/kg")
+sys.add("cp",    1005.0, "J/kg/K")
 sys.use(my_relation)
 result = sys.solve_forward()
 
@@ -135,7 +135,7 @@ src/anvil/
 ├── db/
 │   ├── __init__.py      const, fluids, materials
 │   └── properties.py    FluidDB, MaterialDB data tables
-├── help_.py             anvil.lookup() — in-REPL help
+├── help_.py             anvil.lookup(), in-REPL help
 └── cfd/                 CFD solver (mesh, BCs, flux, viz)
 
 anvil_server/            FastAPI backend for the Web Workbench (REST + WebSocket)

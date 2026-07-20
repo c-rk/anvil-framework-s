@@ -60,7 +60,7 @@ parent.use(rel)
 
 ---
 
-## Cyclic Systems — When to Use Each Solver
+## Cyclic Systems, When to Use Each Solver
 
 A system has cycles when relation A's output is relation B's input AND relation B's output is relation A's input (directly or transitively).
 
@@ -77,20 +77,20 @@ coupled = all_out & all_in
 
 | Solver | Use when |
 |--------|---------|
-| `solve_forward()` | No cycles — validated by `_has_cycles=False` |
+| `solve_forward()` | No cycles, validated by `_has_cycles=False` |
 | `solve_gauss_seidel()` | Cycles, weakly coupled (convergence factor < 1) |
 | `solve_newton()` | Cycles, strongly coupled or slow GS convergence |
 
 ### Building cyclic systems manually
 
 ```python
-# Counter-flow heat exchanger — Q_dot depends on T_hot_out, which depends on Q_dot
+# Counter-flow heat exchanger, Q_dot depends on T_hot_out, which depends on Q_dot
 sys = anvil.system("hx")
-sys.add("T_hot_in",  600, "K")
+sys.add("T_hot_in", 600, "K")
 sys.add("T_cold_in", 290, "K")
 sys.add("T_hot_out", 400, "K")   # initial guess for iteration
 sys.add("T_cold_out",350, "K")   # initial guess
-sys.add("Q_dot",  100000, "W")   # initial guess
+sys.add("Q_dot", 100000, "W")   # initial guess
 sys.add("UA", 2000, "W")
 
 def energy_hot(T_hot_in, T_hot_out, Cp_hot, mdot_hot):
@@ -124,7 +124,7 @@ result = sys.solve_gauss_seidel(relaxation=0.5, monitor=True)
 
 ### Use cases
 
-1. **Breaking up complex physics** — separate concerns into testable steps:
+1. **Breaking up complex physics**, separate concerns into testable steps:
 
 ```python
 def compute_isentropic(M, gamma=1.4):
@@ -145,7 +145,7 @@ nozzle_block = Relation.block("nozzle_physics",
     steps=[compute_isentropic, compute_exit, compute_thrust])
 ```
 
-2. **Avoiding intermediate workspace pollution** — block outputs are scoped:
+2. **Avoiding intermediate workspace pollution**, block outputs are scoped:
 
 If step 1 outputs `T0_T` and step 2 also outputs `T0_T` (corrected), only step 2's value appears in the parent workspace.
 
@@ -158,7 +158,7 @@ If step 1 outputs `T0_T` and step 2 also outputs `T0_T` (corrected), only step 2
 ```python
 nozzle_block._inputs
 # ['A_exit', 'A_throat', 'P0', 'T0', 'gamma', 'R_gas', 'P_amb', 'mdot']
-# (initial inputs to the chain — not produced by any step)
+# (initial inputs to the chain, not produced by any step)
 
 nozzle_block._outputs
 # ['T0_T', 'P0_P', 'T_exit', 'P_exit', 'a_exit', 'thrust']
@@ -170,7 +170,7 @@ nozzle_block._outputs
 ```python
 r = nozzle_block(M=3.0, T0=3500, P0=10e6, ...)
 r["thrust"]   # the output you want
-r["M"]        # also present — the input passed through
+r["M"]        # also present, the input passed through
 ```
 
 ---
@@ -185,7 +185,7 @@ def my_rsq(M, gamma=1.4):
     return {"T_ratio": 1 + (gamma-1)/2*M**2}
 
 # my_rsq is now a Relation object (not the original function)
-my_rsq(M=2.0)           # direct call — returns dict
+my_rsq(M=2.0)           # direct call, returns dict
 my_rsq._inputs          # ['M', 'gamma']
 my_rsq.name             # "my_rsq"
 anvil.R.my_rsq(M=2.0)  # also works via registry
@@ -199,14 +199,14 @@ def simple_fn(x, y):
 # Registered with name "simple_fn", no domain, no tags
 ```
 
-`register=False` — wrap without pushing to registry:
+`register=False`, wrap without pushing to registry:
 ```python
 @anvil.relation(domain="draft", register=False)
 def draft(x): return {"y": x*2}
 # draft is a Relation but NOT in anvil.R.*
 ```
 
-**Important:** If registration fails (e.g., DB error), the relation still works as a callable — `push()` failure is non-fatal by design.
+**Important:** If registration fails (e.g., DB error), the relation still works as a callable, `push()` failure is non-fatal by design.
 
 ---
 
@@ -255,7 +255,7 @@ rel = solver.as_relation(inputs=["M_inf","p_inf","T_inf"], outputs=["CL","CD"])
 
 ---
 
-## `anvil.help_.lookup()` — In-REPL Reference
+## `anvil.help_.lookup()`, In-REPL Reference
 
 ```python
 anvil.lookup("pressure")
@@ -263,7 +263,7 @@ anvil.lookup("pressure")
 # Prints matching RSQs, constants, fluid properties
 ```
 
-A convenience function for interactive use — equivalent to `anvil.search()` with more complete output.
+A convenience function for interactive use, equivalent to `anvil.search()` with more complete output.
 
 ---
 
@@ -278,8 +278,8 @@ from anvil.units import db, Dim
 db.register("furlong", 201.168, Dim(L=1))     # 1 furlong = 201.168 m
 db.register("fortnight", 1209600.0, Dim(T=1)) # 1 fortnight = 2 weeks in seconds
 
-Q(3, "furlong")                    # Q(3, "furlong") — si = 603.504 m
-Q(1, "furlong/fortnight")          # Q(1, "furlong/fortnight") — velocity
+Q(3, "furlong")                    # Q(3, "furlong"), si = 603.504 m
+Q(1, "furlong/fortnight")          # Q(1, "furlong/fortnight"), velocity
 Q(1, "furlong/fortnight").to("m/s")  # conversion
 ```
 
@@ -289,7 +289,7 @@ from anvil.units import Dim
 db.set_preferred(Dim(L=1), "furlong", "furlong")  # set as preferred SI AND Imperial
 ```
 
-**Caution:** Custom units added at runtime are not persisted — re-register each session.
+**Caution:** Custom units added at runtime are not persisted, re-register each session.
 
 ---
 
@@ -326,17 +326,17 @@ def delta_v_calc(Isp, mass_wet, mass_dry):
 
 # Wire together
 pipeline = anvil.system("engine_sizing")
-pipeline.add("OF",       6.0)
-pipeline.add("Pc_bar",   100.0)
-pipeline.add("A_throat", 0.01,  "m^2")
-pipeline.add("A_exit",   0.1,   "m^2")
-pipeline.add("P_amb",    0.0,   "Pa")  # vacuum
+pipeline.add("OF",      6.0)
+pipeline.add("Pc_bar",  100.0)
+pipeline.add("A_throat", 0.01, "m^2")
+pipeline.add("A_exit",  0.1,  "m^2")
+pipeline.add("P_amb",   0.0,  "Pa")  # vacuum
 pipeline.add("mass_wet", 100000, "kg")
-pipeline.add("mass_dry",  20000, "kg")
+pipeline.add("mass_dry", 20000, "kg")
 
 pipeline.use(combustion)
 pipeline.use(nozzle_rel, map={
-    "P0": "Pc",       # combustion outputs Pc
+    "P0": "Pc",      # combustion outputs Pc
     "T0": "Tc",
     "gamma": "gamma_c",
     "R_gas": "R_gas_c",
@@ -355,14 +355,14 @@ sweep.summary(outputs=["thrust", "Isp", "delta_v"])
 
 ---
 
-## Registry Loader — How RSQs Are Reconstituted
+## Registry Loader, How RSQs Are Reconstituted
 
 `anvil.registry.loader.load_rsq(record, store)` takes a registry record (dict from SQLite) and returns a live Python object.
 
 **For Relations (type "R"):**
 1. Source code string retrieved from `record["source"]`
 2. `exec()` in a namespace with `anvil`, `Q`, `solvers`, `np` pre-imported
-3. Looks for `export` variable in the namespace — this is the callable
+3. Looks for `export` variable in the namespace, this is the callable
 4. Wraps in `Relation(export)`
 
 ```python

@@ -23,22 +23,22 @@ anvil.materials.get("steel-4340")
 ```python
 from anvil.db import const
 
-const.c       # Q(299792458.0, "m/s") — speed of light
-const.h       # Q(6.626e-34, "J")    — Planck constant
-const.k_B     # Q(1.381e-23, "J/kg/K") — Boltzmann
-const.R       # Q(8.314, "J/mol/K")  — gas constant
-const.N_A     # Q(6.022e23, "")      — Avogadro
-const.g0      # Q(9.80665, "m/s^2")  — standard gravity
-const.sigma   # Q(5.67e-8, "W")      — Stefan-Boltzmann
-const.atm     # Q(101325.0, "Pa")    — standard atmosphere
-const.T_sl    # Q(288.15, "K")       — sea-level temperature
-const.rho_sl  # Q(1.225, "kg/m^3")  — sea-level density
-const.a_sl    # Q(340.294, "m/s")   — sea-level speed of sound
-const.gamma_air # Q(1.4, "")         — air heat ratio
-const.R_air   # Q(287.058, "J/kg/K") — air gas constant
-const.M_air   # Q(0.0289647, "kg/mol") — air molar mass
-const.cp_air  # Q(1005.0, "J/kg/K") — air specific heat
-const.pi      # Q(3.14159, "")       — π
+const.c       # Q(299792458.0, "m/s"), speed of light
+const.h       # Q(6.626e-34, "J")  , Planck constant
+const.k_B     # Q(1.381e-23, "J/kg/K"), Boltzmann
+const.R       # Q(8.314, "J/mol/K"), gas constant
+const.N_A     # Q(6.022e23, "")    , Avogadro
+const.g0      # Q(9.80665, "m/s^2"), standard gravity
+const.sigma   # Q(5.67e-8, "W")    , Stefan-Boltzmann
+const.atm     # Q(101325.0, "Pa")  , standard atmosphere
+const.T_sl    # Q(288.15, "K")     , sea-level temperature
+const.rho_sl  # Q(1.225, "kg/m^3"), sea-level density
+const.a_sl    # Q(340.294, "m/s") , sea-level speed of sound
+const.gamma_air # Q(1.4, "")       , air heat ratio
+const.R_air   # Q(287.058, "J/kg/K"), air gas constant
+const.M_air   # Q(0.0289647, "kg/mol"), air molar mass
+const.cp_air  # Q(1005.0, "J/kg/K"), air specific heat
+const.pi      # Q(3.14159, "")     , π
 
 # List all constants
 const.list()
@@ -95,22 +95,22 @@ co2 = fluids.get("co2", T=300)
 
 | Name | Description | T range |
 |------|-------------|---------|
-| `"air"` | Dry air at 1 atm | 200–2000 K |
-| `"nitrogen"` | N₂ | 200–2000 K |
-| `"helium"` | He | 50–2000 K |
-| `"hydrogen"` | H₂ | 200–3000 K |
-| `"co2"` | CO₂ | 250–1500 K |
-| `"water"` | Liquid/vapor | 280–600 K |
-| `"methane"` | CH₄ | 200–2000 K |
-| `"oxygen"` | O₂ | 200–2000 K |
-| `"argon"` | Ar | 100–2000 K |
+| `"air"` | Dry air at 1 atm | 200-2000 K |
+| `"nitrogen"` | N₂ | 200-2000 K |
+| `"helium"` | He | 50-2000 K |
+| `"hydrogen"` | H₂ | 200-3000 K |
+| `"co2"` | CO₂ | 250-1500 K |
+| `"water"` | Liquid/vapor | 280-600 K |
+| `"methane"` | CH₄ | 200-2000 K |
+| `"oxygen"` | O₂ | 200-2000 K |
+| `"argon"` | Ar | 100-2000 K |
 
 ### Property models
 
 Most gaseous fluids use:
-- **Density:** Ideal gas law — `ρ = P/(R·T)`
-- **Viscosity:** Sutherland's law — `μ = μ_ref·(T/T_ref)^1.5·(T_ref+S)/(T+S)`
-- **Conductivity:** Power law — `k = k_ref·(T/T_ref)^n`
+- **Density:** Ideal gas law, `ρ = P/(R·T)`
+- **Viscosity:** Sutherland's law, `μ = μ_ref·(T/T_ref)^1.5·(T_ref+S)/(T+S)`
+- **Conductivity:** Power law, `k = k_ref·(T/T_ref)^n`
 - **cp, γ:** Constant (approximate)
 
 These are suitable for temperature ranges away from critical point and liquid-vapor transitions. For high-accuracy near-critical or cryogenic properties, use the CoolProp adapter.
@@ -127,7 +127,7 @@ fluids.search("nitrogen")
 ```python
 fluid = fluids.get("air", T=350, P=200e3)
 sys.add("rho", float(fluid["rho"].si), "kg/m^3")
-sys.add("mu",  float(fluid["mu"].si),  "Pa*s")
+sys.add("mu", float(fluid["mu"].si), "Pa*s")
 ```
 
 ---
@@ -142,14 +142,14 @@ Structural material properties. Data from standard references (ASM, MIL-HDBK-5).
 from anvil.db import materials
 
 al = materials.get("Al-6061-T6")
-print(al["E"])         # Q(68.9e9, "Pa")  — Young's modulus
-print(al["sigma_y"])   # Q(276e6, "Pa")   — Yield strength
-print(al["sigma_u"])   # Q(310e6, "Pa")   — Ultimate tensile strength
-print(al["rho"])       # Q(2700, "kg/m^3") — Density
-print(al["nu"])        # 0.33             — Poisson's ratio
-print(al["alpha"])     # Q(23.6e-6, "1/K") — Thermal expansion
-print(al["k"])         # Q(167, "W/m/K")  — Thermal conductivity
-print(al["cp"])        # Q(896, "J/kg/K") — Specific heat
+print(al["E"])         # Q(68.9e9, "Pa"), Young's modulus
+print(al["sigma_y"])   # Q(276e6, "Pa") , Yield strength
+print(al["sigma_u"])   # Q(310e6, "Pa") , Ultimate tensile strength
+print(al["rho"])       # Q(2700, "kg/m^3"), Density
+print(al["nu"])        # 0.33           , Poisson's ratio
+print(al["alpha"])     # Q(23.6e-6, "1/K"), Thermal expansion
+print(al["k"])         # Q(167, "W/m/K"), Thermal conductivity
+print(al["cp"])        # Q(896, "J/kg/K"), Specific heat
 ```
 
 ### Available materials
@@ -188,7 +188,7 @@ print(r["P_critical"])       # N
 
 ---
 
-## `anvil.lookup()` — In-REPL Help
+## `anvil.lookup()`, In-REPL Help
 
 A quick-reference search across the full registry plus constants and fluid/material databases:
 
@@ -211,4 +211,4 @@ This is the same as `anvil.search()` but with a more complete output format.
 
 **For high-accuracy fluid properties** (near critical point, saturation, mixtures): use the CoolProp adapter.
 
-**Material properties:** Single-temperature values from standard references. Temperature-dependent properties are not available — for thermal analysis requiring T-dependent E or σ_y, use external data.
+**Material properties:** Single-temperature values from standard references. Temperature-dependent properties are not available, for thermal analysis requiring T-dependent E or σ_y, use external data.

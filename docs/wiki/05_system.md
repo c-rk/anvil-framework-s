@@ -11,14 +11,14 @@ sys = anvil.system("my_problem")
 
 ## Building a System
 
-### `.add()` — declare inputs
+### `.add()`, declare inputs
 
 ```python
 # Classic style: name, value, unit
-sys.add("P0",    6.9e6,  "Pa")
-sys.add("T0",    3500,   "K")
+sys.add("P0",   6.9e6, "Pa")
+sys.add("T0",   3500,  "K")
 sys.add("gamma", 1.25)           # dimensionless
-sys.add("T0",    Q(3500, "K"))   # Quantity object
+sys.add("T0",   Q(3500, "K"))   # Quantity object
 
 # kwargs style (unit inferred from Q)
 sys.add(T0=3500*K, P0=6.9*MPa, gamma=1.25)
@@ -37,7 +37,7 @@ sys.add("M", 2.0).add("gamma", 1.4)
 - Converts value to SI and records the unit hint for display
 - Sets `_validated = False` (forces re-validation before next solve)
 
-### `.set()` — override values
+### `.set()`, override values
 
 ```python
 sys.set(P0=8e6)              # bare number: keeps existing unit (Pa)
@@ -52,18 +52,18 @@ sys.set(P0=8e6, T0=3200, gamma=1.3)  # multiple at once
 
 ```python
 sys.add("T", 300, "K")
-sys.set(T=400)     # OK — 400 K
-sys.set(T=Q(200, "R"))  # OK — 111.11 K internally, displays as 200 R
+sys.set(T=400)     # OK, 400 K
+sys.set(T=Q(200, "R"))  # OK, 111.11 K internally, displays as 200 R
 
 sys.set(new_var=5)  # KeyError: 'new_var' not in system
 ```
 
-### `.use()` — add computation
+### `.use()`, add computation
 
 ```python
 sys.use(my_function)              # plain function
 sys.use(my_relation)             # Relation object
-sys.use(other_system)            # System — inherits its defaults, wraps as Relation
+sys.use(other_system)            # System, inherits its defaults, wraps as Relation
 sys.use("isentropic_ratios")     # registry name (string lookup)
 sys.use(my_adapter)              # Adapter object
 
@@ -76,7 +76,7 @@ When passing a **System** to `.use()`:
 1. All its `_quantities` not already in the host system are inherited as defaults
 2. It's wrapped via `.as_relation()` into a single callable Relation
 
-### `.copy()` — safe duplication
+### `.copy()`, safe duplication
 
 ```python
 nozzle_a = anvil.S.rocket_nozzle.copy()
@@ -84,9 +84,9 @@ nozzle_b = anvil.S.rocket_nozzle.copy()
 nozzle_a.set(P0=10e6)    # does not affect nozzle_b
 ```
 
-Deep-copies all quantities and relations. Shared relation function objects are referenced, not copied — pure functions are safe. Stateful relations (adapters with side effects) are not.
+Deep-copies all quantities and relations. Shared relation function objects are referenced, not copied, pure functions are safe. Stateful relations (adapters with side effects) are not.
 
-### `.validate()` — pre-solve check
+### `.validate()`, pre-solve check
 
 ```python
 warnings = sys.validate()   # raises ValidationError on errors; returns warning list
@@ -113,7 +113,7 @@ except ValidationError as e:
 #   * 'isentropic_ratios' needs 'gamma' -- not provided.
 ```
 
-Note: `gamma` has `default=1.4` in the seed RSQ — so it actually WON'T raise here. Only truly un-defaulted inputs trigger this error.
+Note: `gamma` has `default=1.4` in the seed RSQ, so it actually WON'T raise here. Only truly un-defaulted inputs trigger this error.
 
 ---
 
@@ -121,7 +121,7 @@ Note: `gamma` has `default=1.4` in the seed RSQ — so it actually WON'T raise h
 
 After `validate()`, `_build_exec_order()` runs Kahn's topological sort:
 
-1. Builds `out_map[var] = relation_index` — which relation produces each variable
+1. Builds `out_map[var] = relation_index`, which relation produces each variable
 2. For each relation `i`, computes `deps[i]` = set of relations whose outputs are inputs to `i`
 3. BFS: processes zero-in-degree nodes first, building `order`
 4. If `len(order) == n` → acyclic → `_has_cycles = False`; `solve()` auto-selects `forward`
@@ -133,7 +133,7 @@ The `_exec_order` list is used by `_forward()` to call relations in dependency o
 
 ## Solvers
 
-### `.solve_forward()` — acyclic systems
+### `.solve_forward()`, acyclic systems
 
 Single pass through relations in topological order. Each relation called exactly once. No convergence needed.
 
@@ -141,21 +141,21 @@ Single pass through relations in topological order. Each relation called exactly
 result = sys.solve_forward()
 ```
 
-**When to use:** Any system where outputs flow in one direction — no feedback loops. Fastest possible solve.
+**When to use:** Any system where outputs flow in one direction, no feedback loops. Fastest possible solve.
 
 **Output:** `Result` object containing all workspace variables as Quantities.
 
-### `.solve_gauss_seidel()` — fixed-point iteration
+### `.solve_gauss_seidel()`, fixed-point iteration
 
 For systems with cycles (coupled variables). Repeatedly runs `_forward()` until convergence.
 
 ```python
 result = sys.solve_gauss_seidel(
-    relaxation=0.8,     # under-relaxation: 0 < ω ≤ 1. Lower = more stable, slower.
-    max_iter=200,       # iteration limit
-    rtol=1e-6,          # relative tolerance on max workspace change
-    monitor=True,       # print live residuals per iteration
-    verbose=False,      # brief residual print (less output than monitor)
+    relaxation=0.8,    # under-relaxation: 0 < ω ≤ 1. Lower = more stable, slower.
+    max_iter=200,      # iteration limit
+    rtol=1e-6,         # relative tolerance on max workspace change
+    monitor=True,      # print live residuals per iteration
+    verbose=False,     # brief residual print (less output than monitor)
 )
 ```
 
@@ -178,11 +178,11 @@ Stop when `max_change < rtol`.
 | System | Recommended ω |
 |--------|--------------|
 | Weakly coupled | 1.0 (no relaxation) |
-| Moderately coupled | 0.7–0.9 |
-| Strongly coupled | 0.3–0.6 |
+| Moderately coupled | 0.7-0.9 |
+| Strongly coupled | 0.3-0.6 |
 | Strongly nonlinear | Try Newton instead |
 
-### `.solve_newton()` — Newton-Raphson
+### `.solve_newton()`, Newton-Raphson
 
 For strongly nonlinear coupled systems. Identifies `coupled = all_outputs ∩ all_inputs`, sets them up as a nonlinear system `F(x) = 0` (residual = new value minus previous), and solves with SciPy's Powell hybrid method.
 
@@ -203,7 +203,7 @@ result = sys.solve_newton(
 
 **Failure:** Raises `RuntimeError` from `solve_nonlinear`.
 
-### `.solve()` — auto-select
+### `.solve()`, auto-select
 
 ```python
 result = sys.solve()                   # auto: forward or gauss_seidel
@@ -253,7 +253,7 @@ result.to_json("out.json")    # {name: {value, unit}}
 
 ---
 
-## `.as_relation()` — Composition
+## `.as_relation()`, Composition
 
 Wraps a solved System as a Relation for use inside larger Systems.
 
@@ -278,33 +278,33 @@ If `inputs` or `outputs` are omitted:
 
 ---
 
-## `.optimize()` — Design Optimization
+## `.optimize()`, Design Optimization
 
 Vary design variables to minimize (or maximize) a system output, running `solve()` inside the optimizer loop.
 
 ```python
 opt = sys.optimize(
-    objective,          # str — output quantity name to optimize
-    design_vars,        # dict — {var_name: (lo, hi)}
-    minimize=True,      # False = maximize
+    objective,         # str, output quantity name to optimize
+    design_vars,       # dict, {var_name: (lo, hi)}
+    minimize=True,     # False = maximize
     method="differential_evolution",
-    seed=None,          # int — random seed for reproducibility
+    seed=None,         # int, random seed for reproducibility
     tol=1e-6,
     maxiter=1000,
-    verbose=False,      # print progress every 25 evals
-    **solver_kwargs,    # passed to System.solve() for every evaluation
+    verbose=False,     # print progress every 25 evals
+    **solver_kwargs,   # passed to System.solve() for every evaluation
 )
 ```
 
 **`design_vars`** bounds are in the **declared display unit** of each variable (same convention as `sweep()`). The variable must already exist in the system via `.add()`.
 
-**`**solver_kwargs`** are forwarded to every `solve()` call — use this for `method="gauss_seidel"`, `relaxation=0.7`, `max_iter=200` etc. on coupled systems.
+**`**solver_kwargs`** are forwarded to every `solve()` call, use this for `method="gauss_seidel"`, `relaxation=0.7`, `max_iter=200` etc. on coupled systems.
 
 **Global methods** (no gradient, find global optimum):
-- `"differential_evolution"` (default) — robust, 10–20 variables
-- `"dual_annealing"` — fewer evaluations, good for noisy objectives
-- `"shgo"` — for tightly bounded or constrained problems
-- `"basinhopping"` — smooth, multi-modal landscapes
+- `"differential_evolution"` (default), robust, 10-20 variables
+- `"dual_annealing"`, fewer evaluations, good for noisy objectives
+- `"shgo"`, for tightly bounded or constrained problems
+- `"basinhopping"`, smooth, multi-modal landscapes
 
 **Gradient methods** (faster, smooth objectives only):
 - `"L-BFGS-B"`, `"SLSQP"`, `"Nelder-Mead"`
@@ -317,12 +317,12 @@ opt = sys.optimize(
 opt.x           # dict: {var_name: optimal_value_in_display_units}
 opt.fun         # objective value at optimum
 opt.success     # bool
-opt.message     # str — optimizer message
+opt.message     # str, optimizer message
 opt.nit         # optimizer iterations
 opt.nfev        # total System.solve() calls performed
 
-opt["thrust"]   # Quantity at optimum — same as result["thrust"]
-"Isp" in opt    # bool — check if key exists in optimum result
+opt["thrust"]   # Quantity at optimum, same as result["thrust"]
+"Isp" in opt    # bool, check if key exists in optimum result
 
 opt.summary()   # print design vars + full result table
 ```
@@ -342,7 +342,7 @@ nozzle.set(P0=8e6, T0=3200, gamma=1.25, R_gas=400, P_amb=101325)
 opt = nozzle.optimize(
     objective="thrust",
     design_vars={
-        "A_throat": (0.002, 0.030),   # bounds in m² (declared unit)
+        "A_throat": (0.002, 0.030),  # bounds in m² (declared unit)
         "A_exit":   (0.010, 0.300),
     },
     minimize=False,
@@ -375,7 +375,7 @@ opt_hx = hx.optimize(
     minimize=False,
     method="differential_evolution",
     # These go to System.solve():
-    method_solve="gauss_seidel",   # ← note: solver_kwargs cannot reuse 'method'
+    method_solve="gauss_seidel",  # ← note: solver_kwargs cannot reuse 'method'
     relaxation=0.7,
     max_iter=200,
 )
@@ -387,16 +387,16 @@ opt_hx = hx.optimize(
 
 | Situation | Typical evals |
 |-----------|--------------|
-| 2 design vars, DE | 500–2000 |
-| 4 design vars, DE | 2000–8000 |
-| Any n vars, L-BFGS-B (smooth) | 50–500 |
+| 2 design vars, DE | 500-2000 |
+| 4 design vars, DE | 2000-8000 |
+| Any n vars, L-BFGS-B (smooth) | 50-500 |
 | Noisy objective | Prefer DA or increase DE population |
 
 Each eval is one `System.solve()` call. For coupled systems (Gauss-Seidel), this is `O(max_iter × n_relations)` function evaluations per optimizer step.
 
 ---
 
-## `.info()` — Print Summary
+## `.info()`, Print Summary
 
 ```python
 print(sys.info())
@@ -421,7 +421,7 @@ repr(sys)
 
 ---
 
-## `anvil.solve()` — one-shot solve
+## `anvil.solve()`, one-shot solve
 
 Creates a temporary System with no name, adds all kwargs as inputs:
 
@@ -450,20 +450,20 @@ result["M2"]     # ~0.513
 
 `validate()` does not verify that the system is square (equal equations and unknowns), but it emits two targeted warnings to catch the most common mistakes:
 
-**Warning 1 — declared variable overwritten by relation:**
+**Warning 1, declared variable overwritten by relation:**
 ```python
 sys.add("T0_T", 999.0)       # declared as input
 sys.use("isentropic_ratios")  # also produces T0_T
 
 sys.validate()
-# WARNING: variable(s) declared via .add() are also produced by a relation —
+# WARNING: variable(s) declared via .add() are also produced by a relation, 
 #   declared value will be overwritten after solve: ['T0_T']
 #   (This is intentional for iterative initial guesses; for forward
 #   systems it may indicate a naming mismatch.)
 ```
 This is intentional for Gauss-Seidel initial guesses. For forward-pass systems it usually indicates a naming bug.
 
-**Warning 2 — declared variable never used:**
+**Warning 2, declared variable never used:**
 ```python
 sys.add("extra_var", 42.0)  # not an input to any relation
 
@@ -472,7 +472,7 @@ sys.validate()
 #   (Possible typo or unused parameter.)
 ```
 
-**Suppression:** Both warnings fire only once per system instance — not on every sweep iteration or repeated solve. A fresh `anvil.system()` or `sys.copy()` resets the flag.
+**Suppression:** Both warnings fire only once per system instance, not on every sweep iteration or repeated solve. A fresh `anvil.system()` or `sys.copy()` resets the flag.
 
 **What is still NOT checked:** Whether the number of relation outputs equals the number of coupled unknowns. An underdetermined system (e.g. 3 unknowns, 2 equations where nothing downstream needs the 3rd) silently produces incomplete results with no error.
 
@@ -484,6 +484,6 @@ sys.validate()
 - `solve_gauss_seidel()` converging in 33 iterations (heat exchanger): ~5 ms
 - `solve_newton()` convergence in ~5 iterations for moderate systems: ~3 ms
 - `sweep()` with 50 points, single-thread: ~linear in n_points × solve_time
-- `sweep(parallel=4)` uses `ThreadPoolExecutor` — GIL-releasing NumPy/SciPy is faster; pure Python gains limited by GIL
+- `sweep(parallel=4)` uses `ThreadPoolExecutor`, GIL-releasing NumPy/SciPy is faster; pure Python gains limited by GIL
 
 The `_qty_compatible` cache on each Relation skips the try/except overhead after the first call. For iterative solvers calling relations hundreds of times, this matters.

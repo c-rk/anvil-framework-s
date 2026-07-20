@@ -9,7 +9,7 @@ A `Relation` is a computation block: it accepts keyword arguments and returns a 
 Every function used as a Relation must:
 1. Accept **all inputs as keyword arguments** (no positional-only args)
 2. Return a **`dict`** mapping output names (strings) to values
-3. Return `Q(value, "unit")` for dimensional outputs — this enables unit propagation
+3. Return `Q(value, "unit")` for dimensional outputs, this enables unit propagation
 4. Default parameter values work: `def fn(M, gamma=1.4):`
 
 ```python
@@ -29,7 +29,7 @@ def isentropic(M, gamma=1.4):
 
 ## Creating Relations
 
-### 1. Implicit — `system.use(func)`
+### 1. Implicit, `system.use(func)`
 
 The most common approach. The System wraps any callable automatically:
 
@@ -47,7 +47,7 @@ sys.add("CL", 0.5)
 sys.use(lift)
 ```
 
-### 2. Explicit — `Relation(func, **options)`
+### 2. Explicit, `Relation(func, **options)`
 
 ```python
 from anvil.relation import Relation
@@ -60,12 +60,12 @@ thrust_rel = Relation(
 )
 
 print(thrust_rel._inputs)   # ['mdot', 'V_exit', 'P_exit', 'P_amb', 'A_exit']
-print(thrust_rel._outputs)  # [] — discovered on first call
+print(thrust_rel._outputs)  # [], discovered on first call
 thrust_rel(mdot=10, V_exit=3000, P_exit=50000, P_amb=0, A_exit=0.5)
 print(thrust_rel._outputs)  # ['thrust']
 ```
 
-### 3. Decorator — `@anvil.relation`
+### 3. Decorator, `@anvil.relation`
 
 ```python
 @anvil.relation(domain="propulsion", tags=["nozzle"])
@@ -87,7 +87,7 @@ def speed_of_sound(gamma, R_gas, T):
     return {"a": Q((gamma * R_gas * T) ** 0.5, "m/s")}
 ```
 
-`register=False` — wrap without pushing to registry:
+`register=False`, wrap without pushing to registry:
 
 ```python
 @anvil.relation(domain="test", register=False)
@@ -95,7 +95,7 @@ def draft_relation(UA, C_min):
     return {"NTU": UA / C_min}
 ```
 
-### 4. Block Relation — `Relation.block()`
+### 4. Block Relation, `Relation.block()`
 
 Groups multiple functions into a single Relation that shares a workspace. Each step's outputs become available to subsequent steps.
 
@@ -165,7 +165,7 @@ All parameters become inputs. Parameters with defaults become optional.
 
 Detected lazily (on first call or during System validation). Two-pass strategy in `_discover_outputs()`:
 
-**Pass 1 — AST inspection** (preferred, avoids side effects):
+**Pass 1, AST inspection** (preferred, avoids side effects):
 ```python
 import ast, inspect
 source = inspect.getsource(func)
@@ -175,7 +175,7 @@ tree = ast.parse(source)
 
 This works for plain `return {"key": value}` statements. Fails if the dict is constructed dynamically (e.g., `d = {}; d["key"] = val; return d`).
 
-**Pass 2 — Runtime probe** (fallback):
+**Pass 2, Runtime probe** (fallback):
 Calls the function with `1.0` for every unknown input. Reads the returned dict keys. Can fail if the function raises with dummy inputs (e.g., division by zero, domain errors).
 
 **Implication:** If output detection fails silently, the Relation has `_outputs = []` and downstream relations that need those outputs will fail at validation.
@@ -187,7 +187,7 @@ Calls the function with `1.0` for every unknown input. Reads the returned dict k
 ```python
 rel = Relation(func)
 
-rel.name        # str — function name or explicitly set
+rel.name        # str, function name or explicitly set
 rel.func        # the callable
 rel._inputs     # list of input parameter names
 rel._outputs    # list of output dict keys (populated lazily)
@@ -203,7 +203,7 @@ rel.info()      # formatted print of inputs/outputs/tags
 
 ```python
 r = anvil.R.isentropic_ratios(M=2.0, gamma=1.4)
-# Returns the raw dict — same as calling the function
+# Returns the raw dict, same as calling the function
 
 r["T0_T"]   # 1.8
 r["P0_P"]   # 7.8244
@@ -232,7 +232,7 @@ def bad_numpy(x):
     return {"y": np.sqrt(x)}  # np.sqrt(Q) fails → falls back to float
 ```
 
-In `bad_numpy`, the output `y` will be a plain float — no unit. It will display with the raw dimension `dimensionless` since no dim info is attached.
+In `bad_numpy`, the output `y` will be a plain float, no unit. It will display with the raw dimension `dimensionless` since no dim info is attached.
 
 ---
 
@@ -268,7 +268,7 @@ sys.solve_forward()
 
 Always return `{"output_name": value}`.
 
-**Exception — single-output convenience:** If a relation has exactly one known output and returns a bare scalar, Anvil accepts it silently. This is narrow; prefer dict returns.
+**Exception, single-output convenience:** If a relation has exactly one known output and returns a bare scalar, Anvil accepts it silently. This is narrow; prefer dict returns.
 
 ### Quantity as dict key
 
@@ -292,4 +292,4 @@ def bad_positional(x, y, /):   # positional-only (Python 3.8+)
 
 ### Side effects in relations
 
-Relations should be pure functions. Side effects (file I/O, global state) in iterative solvers (Gauss-Seidel, Newton) cause N calls per iteration — the side effect runs N × max_iter times.
+Relations should be pure functions. Side effects (file I/O, global state) in iterative solvers (Gauss-Seidel, Newton) cause N calls per iteration, the side effect runs N × max_iter times.

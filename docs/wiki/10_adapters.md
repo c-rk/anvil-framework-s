@@ -1,6 +1,6 @@
 # Adapters
 
-An `Adapter` wraps an external tool — Python library, CLI executable, Fortran solver — as a native Anvil Relation. Once wrapped, it plugs into Systems, participates in solves, sweeps, and sensitivity analysis, identically to plain Python functions.
+An `Adapter` wraps an external tool, Python library, CLI executable, Fortran solver, as a native Anvil Relation. Once wrapped, it plugs into Systems, participates in solves, sweeps, and sensitivity analysis, identically to plain Python functions.
 
 `Adapter` is a subclass of `Relation`. It appears as a normal Relation to all System machinery.
 
@@ -25,7 +25,7 @@ adapter = Adapter("adapter_name",
     call=_wrapper_function,
     inputs={
         "param1": {"unit": "Pa", "desc": "Pressure", "default": 101325},
-        "param2": {"unit": "K",  "desc": "Temperature"},
+        "param2": {"unit": "K", "desc": "Temperature"},
     },
     outputs={
         "out1": {"unit": "kg/m^3", "desc": "Density"},
@@ -56,8 +56,8 @@ adapter = Adapter("adapter_name",
 **Inputs arrive as raw SI floats.** The adapter automatically converts from SI to the tool's declared unit:
 
 ```python
-# Declared: "P": {"unit": "Pa"}  — same as SI, no conversion needed
-# Declared: "T_C": {"unit": "K"}  — if tool wants Celsius, convert INSIDE wrapper:
+# Declared: "P": {"unit": "Pa"}, same as SI, no conversion needed
+# Declared: "T_C": {"unit": "K"}, if tool wants Celsius, convert INSIDE wrapper:
 
 def _wrapper(P, T_C):
     T_celsius = T_C - 273.15   # convert K → °C inside wrapper
@@ -106,7 +106,7 @@ def _wrapper(r_x, r_y, r_z, v_x, v_y, v_z, dt, mu):
 
 ### Real-only availability pattern (NO mock fallbacks)
 
-**Policy: adapters are real-only.** An adapter's result must always come from the actual tool it wraps. If the tool is missing, the adapter raises a clear error with install instructions — it never silently substitutes an approximation. If you want the closed-form physics, use the native RSQs (e.g. `anvil.R.hohmann_transfer` instead of `poliastro_hohmann`).
+**Policy: adapters are real-only.** An adapter's result must always come from the actual tool it wraps. If the tool is missing, the adapter raises a clear error with install instructions, it never silently substitutes an approximation. If you want the closed-form physics, use the native RSQs (e.g. `anvil.R.hohmann_transfer` instead of `poliastro_hohmann`).
 
 Every built-in adapter module follows this two-function pattern:
 
@@ -141,13 +141,13 @@ def _wrapper(P, T):
 - Import the external library **inside** the wrapper function (lazy import). The adapter file loads and the adapter object is created even when the library is missing; the error surfaces at call time.
 - `is_available()` lets callers (examples, UIs, tests) check up front and skip gracefully: `if not module.is_available(): ...skip with install hint...`.
 - CLI-backed adapters (XFOIL, SU2, NASTRAN) check for the binary on PATH the same way and raise `RuntimeError` with a download link when absent.
-- Never return placeholder values — a wrong number that looks real is worse than a clear error.
+- Never return placeholder values, a wrong number that looks real is worse than a clear error.
 
 ### How outputs are processed
 
 If the wrapper returns a `Q` object, it's used directly. If it returns a plain float with a declared unit, the adapter wraps it as `Q(v, unit)`. If no unit is declared, it's passed through as a raw float.
 
-### Full example — CoolProp water properties
+### Full example, CoolProp water properties
 
 ```python
 def _coolprop_water(P, T):
@@ -167,14 +167,14 @@ water_props = Adapter("coolprop_water",
     backend="python",
     call=_coolprop_water,
     inputs={
-        "P": {"unit": "Pa", "desc": "Pressure",    "default": 101325},
-        "T": {"unit": "K",  "desc": "Temperature", "default": 300},
+        "P": {"unit": "Pa", "desc": "Pressure",   "default": 101325},
+        "T": {"unit": "K", "desc": "Temperature", "default": 300},
     },
     outputs={
         "rho": {"unit": "kg/m^3", "desc": "Density"},
-        "mu":  {"unit": "Pa*s",   "desc": "Dynamic viscosity"},
+        "mu":  {"unit": "Pa*s",  "desc": "Dynamic viscosity"},
         "cp":  {"unit": "J/kg/K", "desc": "Specific heat"},
-        "k":   {"unit": "W/m/K",  "desc": "Thermal conductivity"},
+        "k":   {"unit": "W/m/K", "desc": "Thermal conductivity"},
     },
     desc="Water thermophysical properties via CoolProp",
     tags=["fluid", "water", "coolprop"],
@@ -190,27 +190,27 @@ water_props = Adapter("coolprop_water",
 ```python
 adapter = Adapter("su2_airfoil",
     backend="cli",
-    command="SU2_CFD flow.cfg",     # runs in workdir; no format placeholders needed
+    command="SU2_CFD flow.cfg",    # runs in workdir; no format placeholders needed
     inputs={"mach": {}, "alpha_deg": {}, "Re": {}},
     outputs={"CL": {}, "CD": {}, "CM": {}},
-    setup=write_config_fn,          # function(inputs_dict, workdir) — write config
-    parse=read_results_fn,          # function(workdir) → dict — read outputs
-    timeout=300,                    # seconds before kill
-    cwd="./su2_runs",               # persistent workdir; None = temp dir (auto-deleted)
+    setup=write_config_fn,         # function(inputs_dict, workdir), write config
+    parse=read_results_fn,         # function(workdir) → dict, read outputs
+    timeout=300,                   # seconds before kill
+    cwd="./su2_runs",              # persistent workdir; None = temp dir (auto-deleted)
 )
 ```
 
 ### Execution sequence
 
-1. `setup(inputs_dict, workdir)` — write all config files, meshes, etc.
-2. `subprocess.run(command, cwd=workdir, timeout=timeout)` — run the executable
-3. `parse(workdir) → dict` — read all output files
+1. `setup(inputs_dict, workdir)`, write all config files, meshes, etc.
+2. `subprocess.run(command, cwd=workdir, timeout=timeout)`, run the executable
+3. `parse(workdir) → dict`, read all output files
 4. Outputs wrapped with declared units
 5. If `cwd=None`: temp dir created, cleaned up after each call
 
 **Return code check:** If exit code ≠ 0, raises `RuntimeError` with stdout/stderr excerpt (200 chars).
 
-### Full example — SU2 Euler solver
+### Full example, SU2 Euler solver
 
 ```python
 import os
@@ -261,10 +261,10 @@ Once created, adapters work exactly like any other Relation:
 
 ```python
 pipe = anvil.system("pipe_flow")
-pipe.add("P",      500e3, "Pa")
-pipe.add("T",      350,   "K")
-pipe.add("D_pipe", 0.05,  "m")
-pipe.add("V_flow", 2.0,   "m/s")
+pipe.add("P",     500e3, "Pa")
+pipe.add("T",     350,  "K")
+pipe.add("D_pipe", 0.05, "m")
+pipe.add("V_flow", 2.0,  "m/s")
 
 pipe.use(water_props)                          # rho, mu, cp, k from CoolProp
 pipe.use("reynolds_number", map={             # uses rho, mu from adapter
@@ -340,7 +340,7 @@ Located in `anvil/adapters/cantera_thermo.py`. Require `conda install -c cantera
 from cantera_thermo import cea_rocket, equilibrium_flame, register
 ```
 
-### `cea_rocket` — Rocket equilibrium
+### `cea_rocket`, Rocket equilibrium
 
 Inputs: `fuel`, `oxidizer`, `OF`, `Pc`, `T_fuel`, `T_ox`
 Outputs: `Tc [K]`, `gamma_c`, `R_gas_c [J/kg/K]`, `MW_c [kg/mol]`, `rho_c [kg/m³]`, `cstar [m/s]`
@@ -350,12 +350,12 @@ r = cea_rocket(fuel="H2", oxidizer="O2", OF=6.0, Pc=10e6)
 # Tc ≈ 3400 K  gamma_c ≈ 1.2  cstar ≈ 2380 m/s
 ```
 
-### `equilibrium_flame` — Adiabatic flame temperature
+### `equilibrium_flame`, Adiabatic flame temperature
 
 Inputs: `fuel`, `oxidizer`, `phi`, `T_init`, `P`
 Outputs: `T_ad [K]`, `gamma`, `MW [kg/mol]`, `rho [kg/m³]`
 
-### `register()` — push both to global registry
+### `register()`, push both to global registry
 
 ```python
 register()   # pushes cea_rocket and equilibrium_flame under domain "propulsion.combustion"
@@ -382,7 +382,7 @@ proj.R.coolprop_water(P=101325, T=300)
 
 ```python
 """
-Anvil adapter for CoolProp — water thermophysical properties.
+Anvil adapter for CoolProp, water thermophysical properties.
 
 Requirements:
     pip install CoolProp
@@ -402,7 +402,7 @@ def _call(P, T):
 adapter = Adapter("coolprop_water",
     backend="python", call=_call,
     inputs={"P": {"unit": "Pa", "default": 101325},
-            "T": {"unit": "K",  "default": 300}},
+            "T": {"unit": "K", "default": 300}},
     outputs={"rho": {"unit": "kg/m^3", "desc": "Water density"}},
     desc="Water density via CoolProp",
     tags=["fluid", "water", "coolprop"],
@@ -456,7 +456,7 @@ For the outputs spec:
 - If wrapper returns plain float and no `"unit"` → raw float in workspace
 
 ```python
-# Celsius example — degC / °C are supported since v1.3
+# Celsius example, degC / °C are supported since v1.3
 inputs={"T": {"unit": "degC"}}   # wrapper receives value in °C
 # Or declare in K and convert inside:
 inputs={"T": {"unit": "K"}}
@@ -472,13 +472,13 @@ def _wrapper(T):   # T arrives in Kelvin (SI)
 
 ## poliastro Adapter (Orbital Mechanics)
 
-Located in `anvil/adapters/poliastro_orbits.py`. Requires `pip install poliastro astropy` — real only, no mock fallback (`is_available()` to check). The equivalent closed-form two-body math lives in the native orbital RSQs (`hohmann_transfer`, `vis_viva`, `orbital_period`, ...).
+Located in `anvil/adapters/poliastro_orbits.py`. Requires `pip install poliastro astropy`, real only, no mock fallback (`is_available()` to check). The equivalent closed-form two-body math lives in the native orbital RSQs (`hohmann_transfer`, `vis_viva`, `orbital_period`, ...).
 
 ```python
 from anvil.adapters.poliastro_orbits import poliastro_orbit, poliastro_hohmann, poliastro_propagate, register
 ```
 
-### `poliastro_orbit` — Keplerian elements to ECI state
+### `poliastro_orbit`, Keplerian elements to ECI state
 
 Inputs: `a [m]`, `ecc`, `inc [rad]`, `raan [rad]`, `argp [rad]`, `nu [rad]`, `mu (default: Earth)`
 Outputs: `r_x, r_y, r_z [m]`, `v_x, v_y, v_z [m/s]`, `r_mag [m]`, `v_mag [m/s]`, `period [s]`, `r_apoapsis [m]`, `r_periapsis [m]`
@@ -490,7 +490,7 @@ r = poliastro_orbit(a=6778e3, ecc=0.0, inc=math.radians(51.6),
 # period ≈ 5556 s   v_mag ≈ 7669 m/s
 ```
 
-### `poliastro_hohmann` — Hohmann transfer delta-v
+### `poliastro_hohmann`, Hohmann transfer delta-v
 
 Inputs: `a_i [m]`, `a_f [m]`, `mu (default: Earth)`
 Outputs: `dv_1 [m/s]`, `dv_2 [m/s]`, `dv_total [m/s]`, `t_transfer [s]`, `a_transfer [m]`
@@ -500,7 +500,7 @@ r = poliastro_hohmann(a_i=6578e3, a_f=42164e3)
 # dv_total ≈ 3930 m/s   t_transfer ≈ 18928 s (5.26 h)
 ```
 
-### `poliastro_propagate` — Orbit propagation by time
+### `poliastro_propagate`, Orbit propagation by time
 
 Inputs: Keplerian elements + `dt [s]`, `mu (default: Earth)`
 Outputs: `r_x, r_y, r_z [m]`, `v_x, v_y, v_z [m/s]`, `nu_f [rad]`
@@ -511,7 +511,7 @@ r = poliastro_propagate(a=6778e3, ecc=0.0, inc=0.0, raan=0.0, argp=0.0,
 # nu_f ≈ π/2  (90 deg)
 ```
 
-### `register()` — push to global registry
+### `register()`, push to global registry
 
 ```python
 register()   # domain "orbital.poliastro"
@@ -524,7 +524,7 @@ See `examples/ex21_poliastro_adapter.py` for a full demonstration including Syst
 
 ## pykep Adapter (Trajectory Design)
 
-Located in `anvil/adapters/pykep_trajectories.py`. Requires `pip install pykep` — real only, no mock fallback; every adapter raises `ImportError` when pykep is missing (`is_available()` to check).
+Located in `anvil/adapters/pykep_trajectories.py`. Requires `pip install pykep`, real only, no mock fallback; every adapter raises `ImportError` when pykep is missing (`is_available()` to check).
 
 ```python
 from anvil.adapters.pykep_trajectories import pykep_lambert, pykep_propagate, pykep_planet_state, register
@@ -532,7 +532,7 @@ from anvil.adapters.pykep_trajectories import pykep_lambert, pykep_propagate, py
 
 All inputs and outputs are in SI (m, m/s, s, m³/s²). pykep uses SI natively.
 
-### `pykep_planet_state` — Planet heliocentric state
+### `pykep_planet_state`, Planet heliocentric state
 
 Inputs: `planet` (string: "earth", "mars", "venus", ...), `epoch_mjd2000` (days since 2000-01-01.5)
 Outputs: `r_x, r_y, r_z [m]`, `v_x, v_y, v_z [m/s]`, `r_mag [m]`, `v_mag [m/s]`
@@ -542,7 +542,7 @@ r = pykep_planet_state(planet="earth", epoch_mjd2000=0.0)
 # r_mag ≈ 1.496e11 m (1 AU)   v_mag ≈ 29780 m/s
 ```
 
-### `pykep_propagate` — Cartesian state propagation
+### `pykep_propagate`, Cartesian state propagation
 
 Inputs: `r_x, r_y, r_z [m]`, `v_x, v_y, v_z [m/s]`, `dt [s]`, `mu (default: Earth)`
 Outputs: `r_x_f, r_y_f, r_z_f [m]`, `v_x_f, v_y_f, v_z_f [m/s]`, `r_mag_f [m]`, `v_mag_f [m/s]`
@@ -552,7 +552,7 @@ r = pykep_propagate(r_x=r0[0], r_y=r0[1], r_z=r0[2],
                      v_x=v0[0], v_y=v0[1], v_z=v0[2], dt=3600.0)
 ```
 
-### `pykep_lambert` — Lambert arc *(pykep required)*
+### `pykep_lambert`, Lambert arc *(pykep required)*
 
 Inputs: `r0_x, r0_y, r0_z [m]`, `r1_x, r1_y, r1_z [m]`, `tof [s]`, `mu (default: Sun)`, `cw`, `multi_revs`
 Outputs: `v_dep_x, v_dep_y, v_dep_z [m/s]`, `v_arr_x, v_arr_y, v_arr_z [m/s]`, `dv_dep [m/s]`, `dv_arr [m/s]`, `dv_total [m/s]`
@@ -560,13 +560,13 @@ Outputs: `v_dep_x, v_dep_y, v_dep_z [m/s]`, `v_arr_x, v_arr_y, v_arr_z [m/s]`, `
 ```python
 sol = pykep_lambert(
     r0_x=r_earth["r_x"].si, r0_y=r_earth["r_y"].si, r0_z=r_earth["r_z"].si,
-    r1_x=r_mars["r_x"].si,  r1_y=r_mars["r_y"].si,  r1_z=r_mars["r_z"].si,
+    r1_x=r_mars["r_x"].si, r1_y=r_mars["r_y"].si, r1_z=r_mars["r_z"].si,
     tof=200 * 86400,
 )
 # dv_dep ≈ 30.1 km/s  (heliocentric departure speed)
 ```
 
-### `register()` — push to global registry
+### `register()`, push to global registry
 
 ```python
 register()   # domain "trajectory.pykep"
@@ -578,13 +578,13 @@ See `examples/ex22_pykep_adapter.py` for a full demonstration including Lambert 
 
 ## XFOIL Adapter (2D Airfoil)
 
-Located in `anvil/adapters/xfoil_airfoil.py`. Requires the XFOIL binary on PATH (`xfoil` or `xfoil.exe`) — real only, no mock fallback; a missing binary raises `RuntimeError` with the download link (`is_available()` to check). Get XFOIL: https://web.mit.edu/drela/Public/web/xfoil/
+Located in `anvil/adapters/xfoil_airfoil.py`. Requires the XFOIL binary on PATH (`xfoil` or `xfoil.exe`), real only, no mock fallback; a missing binary raises `RuntimeError` with the download link (`is_available()` to check). Get XFOIL: https://web.mit.edu/drela/Public/web/xfoil/
 
 ```python
 from anvil.adapters.xfoil_airfoil import xfoil_polar, xfoil_alpha_sweep, register
 ```
 
-### `xfoil_polar` — Single operating point
+### `xfoil_polar`, Single operating point
 
 Inputs: `airfoil` (NACA designation like "NACA2412", or .dat path), `Re`, `alpha_deg`, `Mach`, `Ncrit`
 Outputs: `CL`, `CD`, `CM`, `xtr_top`, `xtr_bot`
@@ -594,7 +594,7 @@ r = xfoil_polar(airfoil="NACA2412", Re=1e6, alpha_deg=4.0, Mach=0.1)
 print(r["CL"], r["CD"], r["CM"])
 ```
 
-### `xfoil_alpha_sweep` — Full polar
+### `xfoil_alpha_sweep`, Full polar
 
 Inputs: `airfoil`, `Re`, `alpha_min`, `alpha_max`, `alpha_step`, `Mach`, `Ncrit`
 Outputs: `alpha_array`, `CL_array`, `CD_array`, `CM_array`, `CL_max`, `LD_max`, `n_converged`
@@ -607,19 +607,19 @@ r = xfoil_alpha_sweep(airfoil="NACA2412", Re=1.5e6,
 print(f"L/D max = {r['LD_max']:.1f}   CL_max = {r['CL_max']:.3f}")
 ```
 
-### `register()` — domain `aero.xfoil`
+### `register()`, domain `aero.xfoil`
 
 ---
 
 ## OpenFOAM CFD Adapter
 
-Located in `anvil/adapters/openfoam_cfd.py`. Requires OpenFOAM installed with the solver on PATH — real only, no mock fallback; a missing solver or case directory raises a clear error (`is_available()` to check).
+Located in `anvil/adapters/openfoam_cfd.py`. Requires OpenFOAM installed with the solver on PATH, real only, no mock fallback; a missing solver or case directory raises a clear error (`is_available()` to check).
 
 ```python
 from anvil.adapters.openfoam_cfd import openfoam_incompressible, openfoam_compressible, register
 ```
 
-### `openfoam_incompressible` — simpleFoam (low-speed)
+### `openfoam_incompressible`, simpleFoam (low-speed)
 
 Inputs: `case_path`, `U_inf [m/s]`, `alpha_deg`, `rho [kg/m³]`, `nu [m²/s]`, `L_ref [m]`, `A_ref [m²]`, `n_cores`, `solver`
 Outputs: `CL`, `CD`, `CM`, `F_lift [N]`, `F_drag [N]`, `Re`, `source`
@@ -631,7 +631,7 @@ print(r["CL"], r["CD"], r["F_lift"])
 
 **Case requirements:** prepared OpenFOAM case with mesh (blockMesh or snappyHexMesh already run), `0/U`, `0/p`, `system/controlDict` with `forceCoeffs` function object.
 
-### `openfoam_compressible` — rhoSimpleFoam (transonic/supersonic)
+### `openfoam_compressible`, rhoSimpleFoam (transonic/supersonic)
 
 Inputs: `case_path`, `U_inf [m/s]`, `alpha_deg`, `p_inf [Pa]`, `T_inf [K]`, `gamma`, `L_ref`, `A_ref`, `n_cores`, `solver`
 Outputs: `CL`, `CD`, `CM`, `Mach`, `F_lift [N]`, `F_drag [N]`, `source`
@@ -642,19 +642,19 @@ print(r["CL"], r["Mach"])
 # Mach ≈ 0.80  CL ≈ 0.196
 ```
 
-### `register()` — domain `cfd.openfoam`
+### `register()`, domain `cfd.openfoam`
 
 ---
 
 ## SU2 CFD Adapter
 
-Located in `anvil/adapters/su2_aero.py`. Requires `SU2_CFD` on PATH plus a `.cfg` template and `.su2` mesh — real only, no mock fallback; missing binary or files raise clear errors (`is_available()` to check).
+Located in `anvil/adapters/su2_aero.py`. Requires `SU2_CFD` on PATH plus a `.cfg` template and `.su2` mesh, real only, no mock fallback; missing binary or files raise clear errors (`is_available()` to check).
 
 ```python
 from anvil.adapters.su2_aero import su2_euler, su2_rans, register
 ```
 
-### `su2_euler` — Inviscid Euler
+### `su2_euler`, Inviscid Euler
 
 Inputs: `cfg_template` (.cfg file path), `mesh` (.su2 mesh path), `Mach`, `AoA_deg`, `sideslip_deg`, `alpha0_deg`
 Outputs: `CL`, `CD`, `CM`, `Mach`, `source`
@@ -666,7 +666,7 @@ print(r["CL"], r["CD"])
 # CL ≈ 0.439   CD ≈ 0.00129 (induced only, no friction)
 ```
 
-### `su2_rans` — Turbulent RANS (Spalart-Allmaras)
+### `su2_rans`, Turbulent RANS (Spalart-Allmaras)
 
 Inputs: same as `su2_euler` + `Reynolds`
 Outputs: `CL`, `CD`, `CM`, `Mach`, `Re`, `source`
@@ -680,19 +680,19 @@ print(r["CL"], r["CD"])
 
 **Config patching:** The adapter patches `MACH_NUMBER`, `AOA`, `SIDESLIP_ANGLE`, and optionally `REYNOLDS_NUMBER` in the template. All other settings (numerics, mesh filename path handling, BCs) come from the template.
 
-### `register()` — domain `cfd.su2`
+### `register()`, domain `cfd.su2`
 
 ---
 
 ## OpenMDAO MDO Adapter
 
-Located in `anvil/adapters/openmdo_wrap.py`. Requires `pip install openmdao` — real only, no mock fallback (`is_available()` to check).
+Located in `anvil/adapters/openmdo_wrap.py`. Requires `pip install openmdao`, real only, no mock fallback (`is_available()` to check).
 
 ```python
 from anvil.adapters.openmdo_wrap import make_openmdo_adapter, openmdo_sellar, openmdo_beam, register
 ```
 
-### `make_openmdo_adapter` — Factory for any OpenMDAO Problem
+### `make_openmdo_adapter`, Factory for any OpenMDAO Problem
 
 ```python
 def build_prob():
@@ -707,12 +707,12 @@ adapter = make_openmdo_adapter(
     input_vars={"x": {"unit": "1", "desc": "Input", "default": 0.0}},
     output_vars={"f": {"unit": "1", "desc": "Output"}},
     name="my_mdo",
-    run_driver=False,     # True = optimize, False = single analysis
+    run_driver=False,    # True = optimize, False = single analysis
 )
 r = adapter(x=3.0)
 ```
 
-### `openmdo_sellar` — Sellar coupled MDO benchmark
+### `openmdo_sellar`, Sellar coupled MDO benchmark
 
 Inputs: `x1`, `z1`, `z2` (dimensionless)
 Outputs: `f` (objective), `g1`, `g2` (constraints ≤ 0), `y1`, `y2` (coupling), `source`
@@ -723,7 +723,7 @@ print(r["f"], r["g1"], r["g2"])
 # f ≈ 28.6  g1 ≈ -22.4 (feasible)  g2 ≈ -12.1 (feasible)
 ```
 
-### `openmdo_beam` — Cantilever beam ExplicitComponent
+### `openmdo_beam`, Cantilever beam ExplicitComponent
 
 Inputs: `F_tip [N]`, `L_beam [m]`, `E [Pa]`, `b [m]`, `h [m]`
 Outputs: `deflection [m]`, `max_stress [Pa]`, `I_moment [m⁴]`, `source`
@@ -734,19 +734,19 @@ print(r["deflection"], r["max_stress"])
 # deflection ≈ 0.0366 m   max_stress ≈ 480 MPa
 ```
 
-### `register()` — domain `mdo.openmdao`
+### `register()`, domain `mdo.openmdao`
 
 ---
 
 ## FEniCSx FEM Adapter
 
-Located in `anvil/adapters/fenics_fem.py`. Requires `conda install -c conda-forge fenics-dolfinx mpich` — real only, no mock fallback; missing dolfinx raises `ImportError` (`is_available()` to check).
+Located in `anvil/adapters/fenics_fem.py`. Requires `conda install -c conda-forge fenics-dolfinx mpich`, real only, no mock fallback; missing dolfinx raises `ImportError` (`is_available()` to check).
 
 ```python
 from anvil.adapters.fenics_fem import fenics_linear_elasticity, fenics_heat_conduction, register
 ```
 
-### `fenics_linear_elasticity` — 3D box linear elasticity
+### `fenics_linear_elasticity`, 3D box linear elasticity
 
 Inputs: `E [Pa]`, `nu`, `Lx [m]`, `Ly [m]`, `Lz [m]`, `F_distributed [Pa]`, `nx`, `ny`, `nz`
 Outputs: `max_displacement [m]`, `max_von_mises [Pa]`, `source`
@@ -761,7 +761,7 @@ print(r["max_displacement"], r["max_von_mises"])
 
 **Setup:** Cantilever fixed at `x=0`, distributed traction on top face (`z=Lz`).
 
-### `fenics_heat_conduction` — 3D steady heat conduction
+### `fenics_heat_conduction`, 3D steady heat conduction
 
 Inputs: `k [W/m/K]`, `Lx`, `Ly`, `Lz [m]`, `T_left [K]`, `T_right [K]`, `Q_vol [W/m³]`, `nx`, `ny`, `nz`
 Outputs: `T_max [K]`, `heat_flux [W]`, `source`
@@ -773,19 +773,19 @@ print(r["T_max"], r["heat_flux"])
 # T_max = 600 K   heat_flux ≈ 9.84 W
 ```
 
-### `register()` — domain `fem.fenics`
+### `register()`, domain `fem.fenics`
 
 ---
 
 ## pyNASTRAN / NASTRAN Adapter
 
-Located in `anvil/adapters/pynastran_fem.py`. Requires `pip install pyNastran` AND a NASTRAN-compatible solver binary on PATH (MYSTRAN free, MSC NASTRAN, NX NASTRAN, Optistruct auto-detected) — real only, no mock fallback; missing either raises a clear error (`is_available()` to check).
+Located in `anvil/adapters/pynastran_fem.py`. Requires `pip install pyNastran` AND a NASTRAN-compatible solver binary on PATH (MYSTRAN free, MSC NASTRAN, NX NASTRAN, Optistruct auto-detected), real only, no mock fallback; missing either raises a clear error (`is_available()` to check).
 
 ```python
 from anvil.adapters.pynastran_fem import nastran_linear_static, nastran_normal_modes, register
 ```
 
-### `nastran_linear_static` — SOL 101
+### `nastran_linear_static`, SOL 101
 
 Inputs: `bdf_path`, `load_case_id`, `nastran_bin` (None = auto-detect)
 Outputs: `max_displacement [m]`, `max_stress [Pa]`, `source`
@@ -795,7 +795,7 @@ r = nastran_linear_static(bdf_path="my_model.bdf", load_case_id=1)
 print(r["max_displacement"], r["max_stress"])
 ```
 
-### `nastran_normal_modes` — SOL 103
+### `nastran_normal_modes`, SOL 103
 
 Inputs: `bdf_path`, `n_modes`, `nastran_bin`
 Outputs: `frequencies [list of Q]`, `f1 [Hz]`, `f2 [Hz]`, `n_modes`, `source`
@@ -807,13 +807,13 @@ print(r["f1"], r["frequencies"])
 
 **MYSTRAN (free solver):** Download from `https://github.com/dr-bill-c/MYSTRAN`. Add `mystran.exe` to PATH. The adapter auto-detects it.
 
-### `register()` — domain `fem.nastran`
+### `register()`, domain `fem.nastran`
 
 ---
 
 ## Surrogate / Metamodel Adapters
 
-Located in `anvil/adapters/surrogate_models.py`. GP surrogates require `pip install scikit-learn` — real only, no spline fallback (`is_available()` to check). Polynomial (`numpy.polyfit`) and RBF (`scipy.interpolate.RBFInterpolator`) are real methods built on Anvil's core dependencies and always work.
+Located in `anvil/adapters/surrogate_models.py`. GP surrogates require `pip install scikit-learn`, real only, no spline fallback (`is_available()` to check). Polynomial (`numpy.polyfit`) and RBF (`scipy.interpolate.RBFInterpolator`) are real methods built on Anvil's core dependencies and always work.
 
 ```python
 from anvil.adapters.surrogate_models import (
@@ -821,7 +821,7 @@ from anvil.adapters.surrogate_models import (
 )
 ```
 
-### `make_gp_adapter` — Gaussian Process from training data
+### `make_gp_adapter`, Gaussian Process from training data
 
 ```python
 import numpy as np
@@ -840,7 +840,7 @@ print(r["y_pred"], r["y_pred_std"])   # mean prediction + uncertainty
 
 Requires scikit-learn; raises `ImportError` with the install command when missing.
 
-### `make_poly_adapter` — Polynomial chaos / polyfit
+### `make_poly_adapter`, Polynomial chaos / polyfit
 
 ```python
 poly = make_poly_adapter(X_train, y_train,
@@ -850,7 +850,7 @@ r = poly(x=3.14)
 # Works with numpy only, always available
 ```
 
-### `make_rbf_adapter` — RBF interpolation (multi-input)
+### `make_rbf_adapter`, RBF interpolation (multi-input)
 
 ```python
 X_2d = np.column_stack([aoa_vals, mach_vals])   # shape (n, 2)
@@ -864,7 +864,7 @@ r = rbf(AoA_deg=5.0, Mach=0.3)
 # Requires scipy (always available as Anvil dependency)
 ```
 
-### `gp_demo` — Pre-built demo GP (noisy sine)
+### `gp_demo`, Pre-built demo GP (noisy sine)
 
 ```python
 r = gp_demo(x=1.57)
@@ -881,35 +881,35 @@ sys_.use(gp_cd)   # gp_cd = make_gp_adapter(...)
 sweep = sys_.sweep("AoA_deg", np.linspace(-4, 14, 10))
 ```
 
-### `register()` — domain `surrogate.demo`
+### `register()`, domain `surrogate.demo`
 
 ---
 
 ## Other Bundled Adapters
 
-Brief entries — see each module's docstring for full I/O specs. All are real-only with `is_available()`.
+Brief entries, see each module's docstring for full I/O specs. All are real-only with `is_available()`.
 
-### `coolprop_props.py` — Fluid properties (`fluid.coolprop`)
+### `coolprop_props.py`, Fluid properties (`fluid.coolprop`)
 
 `coolprop_props(fluid, T, P)` → `rho`, `cp`, `mu`, `k`, ... via CoolProp. `pip install CoolProp`.
 
-### `meshing_geom.py` — Mesh generation (`geometry.meshing`)
+### `meshing_geom.py`, Mesh generation (`geometry.meshing`)
 
 `mesh_box(Lx, Ly, Lz, elem_size)` and `mesh_cylinder(radius, height, elem_size)` → element/node counts + mesh file, via gmsh. `pip install gmsh`.
 
-### `rocket_cea.py` — Rocket performance (`propulsion.rocketcea`)
+### `rocket_cea.py`, Rocket performance (`propulsion.rocketcea`)
 
 `rocket_cea(oxidizer, fuel, OF, Pc, ...)` → `Isp`, `cstar`, `Tc`, ... via RocketCEA (`pip install rocketcea`); `rocketpy_flight(thrust, burn_time, dry_mass, ...)` → apogee/velocity via RocketPy (`pip install rocketpy`).
 
-### `uq_surrogate.py` — Monte Carlo UQ (`uq.montecarlo`)
+### `uq_surrogate.py`, Monte Carlo UQ (`uq.montecarlo`)
 
-`uq_montecarlo(model, a_mean, a_std, ...)` → mean/std/quantiles + surrogate R². The Monte Carlo path is native numpy and always runs (this is NOT a mock — numpy is a core dependency); only `surrogate="sklearn"` needs scikit-learn.
+`uq_montecarlo(model, a_mean, a_std, ...)` → mean/std/quantiles + surrogate R². The Monte Carlo path is native numpy and always runs (this is NOT a mock, numpy is a core dependency); only `surrogate="sklearn"` needs scikit-learn.
 
 ---
 
 ## Adapter Comparison
 
-All adapters are **real-only** — the Requires column must be satisfied or calls raise with install instructions.
+All adapters are **real-only**, the Requires column must be satisfied or calls raise with install instructions.
 
 | Adapter file | Requires | Domain | Best for |
 |---|---|---|---|
@@ -927,7 +927,7 @@ All adapters are **real-only** — the Requires column must be satisfied or call
 | `coolprop_props.py` | CoolProp | `fluid.coolprop` | Thermophysical fluid properties |
 | `meshing_geom.py` | gmsh | `geometry.meshing` | Parametric box/cylinder meshes |
 | `rocket_cea.py` | RocketCEA / RocketPy | `propulsion.rocketcea` | Engine performance, flight sim |
-| `uq_surrogate.py` | — (numpy core) | `uq.montecarlo` | Monte Carlo uncertainty propagation |
+| `uq_surrogate.py` |, (numpy core) | `uq.montecarlo` | Monte Carlo uncertainty propagation |
 
 ---
 
@@ -937,10 +937,10 @@ All adapters are **real-only** — the Requires column must be satisfied or call
 |-----------|-------|
 | `"http"` backend | Not yet implemented |
 | `"shared_lib"` backend | Not yet implemented |
-| Async CLI tools | Not supported — `subprocess.run` is synchronous |
+| Async CLI tools | Not supported, `subprocess.run` is synchronous |
 | Stateful wrappers | Each call is independent; no session state between calls |
 | Nested subprocess environments | CLI adapters inherit the parent process environment; path issues may arise |
 | Thread safety | Python adapters are called from `ThreadPoolExecutor` in parallel sweeps; ensure wrapper function is thread-safe |
 | Array inputs | Anvil workspace is scalar-keyed; flatten vectors to named components |
 | String inputs in sweeps | `sys.sweep()` sweeps over numeric ranges; string parameters must be fixed at System level |
-| Registry round-trip | `anvil.push(adapter)` stores the inner wrapper closure, losing the `inputs` spec. **Do not** use `anvil.R.adapter_name` in `sys.use()` — pass the adapter object directly: `sys.use(my_adapter)`. Register for discoverability only. |
+| Registry round-trip | `anvil.push(adapter)` stores the inner wrapper closure, losing the `inputs` spec. **Do not** use `anvil.R.adapter_name` in `sys.use()`, pass the adapter object directly: `sys.use(my_adapter)`. Register for discoverability only. |

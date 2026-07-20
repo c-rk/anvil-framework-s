@@ -6,7 +6,7 @@ All inputs are dimensionless scalars or SI floats unless noted. All outputs are 
 
 ---
 
-## Constants (`const`) — Type: Q
+## Constants (`const`), Type: Q
 
 Accessed via `anvil.QDB.*`:
 
@@ -25,14 +25,14 @@ print(g0.to("ft/s^2"))  # 32.1740 ft/s^2
 
 ---
 
-## Aerodynamics — Atmosphere (`aero.atmosphere`)
+## Aerodynamics, Atmosphere (`aero.atmosphere`)
 
 ### `isa_atmosphere`
 
 International Standard Atmosphere up to 86 km altitude.
 
 ```
-Inputs:  h [m]  — geometric altitude
+Inputs:  h [m], geometric altitude
 Outputs: T_atm [K], P_atm [Pa], rho_atm [kg/m³], a_atm [m/s],
          mu_atm [Pa*s], sigma (density ratio ρ/ρ₀)
 ```
@@ -52,16 +52,16 @@ r = anvil.R.isa_atmosphere(h=85000)  # near model limit
 ```
 
 **Layers implemented:**
-- 0–11 km: Troposphere (T decreases at −6.5 K/km)
-- 11–20 km: Lower Stratosphere (T = 216.65 K, isothermal)
-- 20–32 km: Upper Stratosphere (T increases at +1 K/km)
+- 0-11 km: Troposphere (T decreases at −6.5 K/km)
+- 11-20 km: Lower Stratosphere (T = 216.65 K, isothermal)
+- 20-32 km: Upper Stratosphere (T increases at +1 K/km)
 - Above 32 km: Extended with pressure extrapolation
 
 **Limit:** Model extends to ~86 km. Outputs above this are extrapolated and should be treated as approximate.
 
 ---
 
-## Aerodynamics — Compressible (`aero.compressible`)
+## Aerodynamics, Compressible (`aero.compressible`)
 
 ### `isentropic_ratios`
 
@@ -95,10 +95,10 @@ Outputs: M_exit
 
 ```python
 anvil.R.area_mach_supersonic(area_ratio=8.0, gamma=1.25)
-# M_exit = 3.64  (approximate — depends on gamma)
+# M_exit = 3.64  (approximate, depends on gamma)
 
 anvil.R.area_mach_supersonic(area_ratio=1.0)
-# M_exit = 1.001 (barely supersonic — root is very close to 1)
+# M_exit = 1.001 (barely supersonic, root is very close to 1)
 ```
 
 ### `area_mach_subsonic`
@@ -137,7 +137,7 @@ r = anvil.R.normal_shock(M1=5.0)
 # M2 = 0.4152  P2_P1 = 29.0  T2_T1 = 5.800
 ```
 
-**Limit:** `M1` must be ≥ 1 for a physical shock. No input guard — passing M1<1 returns mathematical results that are not physically meaningful.
+**Limit:** `M1` must be ≥ 1 for a physical shock. No input guard, passing M1<1 returns mathematical results that are not physically meaningful.
 
 ### `prandtl_meyer`
 
@@ -171,7 +171,7 @@ r = anvil.R.oblique_shock(M1=3.0, theta_deg=20.0)
 # beta_deg = 37.76  M2 = 1.994  p2_p1 = 3.31  attached=True
 
 r = anvil.R.oblique_shock(M1=2.0, theta_deg=35.0)
-# attached = False  (detached shock — theta exceeds max deflection)
+# attached = False  (detached shock, theta exceeds max deflection)
 # p2_p1 = nan  T2_T1 = nan  (NaN outputs when detached)
 ```
 
@@ -179,7 +179,7 @@ r = anvil.R.oblique_shock(M1=2.0, theta_deg=35.0)
 
 ---
 
-## Aerodynamics — Performance (`aero.performance`)
+## Aerodynamics, Performance (`aero.performance`)
 
 ### `dynamic_pressure`
 
@@ -357,7 +357,7 @@ anvil.R.tsiolkovsky(Isp=315, mass_ratio=8.0)  # Falcon 9 approximate
 # delta_v = 6429.9 m/s
 ```
 
-### `rocket_nozzle` ★ — Pre-built System
+### `rocket_nozzle` ★, Pre-built System
 
 The only built-in System (type "S"). A complete quasi-1D isentropic rocket nozzle.
 
@@ -366,7 +366,7 @@ The only built-in System (type "S"). A complete quasi-1D isentropic rocket nozzl
 |------|-------|------|------|
 | `P0` | 6.9e6 | Pa | Chamber pressure |
 | `T0` | 3500 | K | Chamber temperature |
-| `gamma` | 1.25 | — | Specific heat ratio |
+| `gamma` | 1.25 |, | Specific heat ratio |
 | `R_gas` | 320 | J/kg/K | Gas constant |
 | `A_throat` | 0.01 | m² | Throat area |
 | `A_exit` | 0.08 | m² | Exit area |
@@ -776,14 +776,14 @@ anvil.R.orbital_period(mu=3.986e14, a=6.571e6)
 
 ---
 
-## Quick Reference — All 57 RSQs
+## Quick Reference, All 57 RSQs
 
 | Name | Domain | Type | Key inputs | Key outputs |
 |------|--------|------|-----------|------------|
-| `g0` | const | Q | — | 9.80665 m/s² |
-| `R_universal` | const | Q | — | 8.314 J/mol/K |
-| `atm_pressure` | const | Q | — | 101325 Pa |
-| `sigma_sb` | const | Q | — | 5.67e-8 W/m²K⁴ |
+| `g0` | const | Q |, | 9.80665 m/s² |
+| `R_universal` | const | Q |, | 8.314 J/mol/K |
+| `atm_pressure` | const | Q |, | 101325 Pa |
+| `sigma_sb` | const | Q |, | 5.67e-8 W/m²K⁴ |
 | `isa_atmosphere` | aero.atmosphere | R | h | T_atm, P_atm, rho_atm, a_atm, mu_atm |
 | `isentropic_ratios` | aero.compressible | R | M, gamma | T0_T, P0_P, rho0_rho |
 | `area_mach_supersonic` | aero.compressible | R | area_ratio, gamma | M_exit |
@@ -859,7 +859,7 @@ anvil.R.orbital_period(mu=3.986e14, a=6.571e6)
 
 ---
 
-## Orbital Mechanics — Extended (`orbital`)
+## Orbital Mechanics, Extended (`orbital`)
 
 ### `keplerian_to_cartesian`
 
@@ -867,8 +867,8 @@ Convert classical orbital elements to ECI (Earth-Centred Inertial) Cartesian sta
 
 ```
 Inputs:  a [m], e [-], i_deg [deg], RAAN_deg [deg], omega_deg [deg], nu_deg [deg], mu [m³/s²]
-Outputs: r_eci  — position vector [x, y, z] m (list)
-         v_eci  — velocity vector [vx,vy,vz] m/s (list)
+Outputs: r_eci, position vector [x, y, z] m (list)
+         v_eci, velocity vector [vx,vy,vz] m/s (list)
          r_mag [m], v_mag [m/s]
 ```
 
@@ -905,8 +905,8 @@ elems = anvil.R.cartesian_to_keplerian(
 Delta-V for a pure inclination change. Most efficient at apoapsis (lowest speed).
 
 ```
-Inputs:  v [m/s] — orbital speed at manoeuvre point
-         delta_i_deg [deg] — inclination change
+Inputs:  v [m/s], orbital speed at manoeuvre point
+         delta_i_deg [deg], inclination change
 Outputs: dv_plane_change [m/s]
 ```
 
@@ -925,14 +925,14 @@ r = anvil.R.plane_change_dv(v=7700, delta_i_deg=28.5)
 Bi-elliptic transfer via intermediate apoapsis `rb`. More efficient than Hohmann when `r2/r1 > 11.94`.
 
 ```
-Inputs:  mu [m³/s²], r1 [m], r2 [m], rb [m]  — rb must be ≥ max(r1,r2)
+Inputs:  mu [m³/s²], r1 [m], r2 [m], rb [m], rb must be ≥ max(r1,r2)
 Outputs: dv1, dv2, dv3, dv_total [m/s], tof [s]
 ```
 
 ```python
 # LEO (400 km) -> GEO via 100 000 km intermediate orbit
 r = anvil.R.bielliptic_transfer(mu=3.986e14, r1=6771e3, r2=42164e3, rb=100000e3)
-# dv_total ≈ 4228 m/s  (Hohmann: 3857 m/s — bielliptic is WORSE here since r2/r1=6.2 < 11.94)
+# dv_total ≈ 4228 m/s  (Hohmann: 3857 m/s, bielliptic is WORSE here since r2/r1=6.2 < 11.94)
 ```
 
 ---
@@ -964,7 +964,7 @@ Fraction of a circular orbit spent in the planet's cylindrical shadow.
 
 ```
 Inputs:  a [m], R_body=6.371e6 [m], beta_deg=0.0 [deg]
-         beta_deg: sun–orbit-plane angle (0 = worst case, eclipse_frac is maximum)
+         beta_deg: sun-orbit-plane angle (0 = worst case, eclipse_frac is maximum)
 Outputs: eclipse_frac [-], beta_max_deg [deg], in_eclipse_season [bool]
 ```
 
@@ -981,7 +981,7 @@ anvil.R.eclipse_fraction(a=6771e3, beta_deg=70)  # no eclipse: 0.00
 Laplace sphere of influence for patched-conic trajectory design.
 
 ```
-Inputs:  a_body [m]  — semi-major axis of body around parent
+Inputs:  a_body [m], semi-major axis of body around parent
          m_body, m_parent [kg]
 Outputs: r_SOI [m]
 ```
@@ -1070,7 +1070,7 @@ Quaternion time derivative given current attitude and body angular velocity.
 Hamilton convention: `q = [w, x, y, z]`, `|q| = 1`.
 
 ```
-Inputs:  q_w, q_x, q_y, q_z [-], omega_x/y/z [rad/s]  — body frame rates
+Inputs:  q_w, q_x, q_y, q_z [-], omega_x/y/z [rad/s], body frame rates
 Outputs: qw_dot, qx_dot, qy_dot, qz_dot [1/s], q_norm [-]
 ```
 
@@ -1091,17 +1091,17 @@ TRIAD two-vector attitude determination algorithm.
 Given two unit vectors in both body and reference frames, returns the body-to-reference DCM and quaternion.
 
 ```
-Inputs:  b1_x/y/z, b2_x/y/z  — vectors measured in body frame (e.g. sun, magnetic field)
-         r1_x/y/z, r2_x/y/z  — same vectors in reference frame (from ephemeris/model)
-Outputs: C  — 3×3 body-to-reference DCM (list of lists)
-         q_w, q_x, q_y, q_z  — corresponding quaternion
+Inputs:  b1_x/y/z, b2_x/y/z, vectors measured in body frame (e.g. sun, magnetic field)
+         r1_x/y/z, r2_x/y/z, same vectors in reference frame (from ephemeris/model)
+Outputs: C, 3×3 body-to-reference DCM (list of lists)
+         q_w, q_x, q_y, q_z, corresponding quaternion
 ```
 
 ```python
 r = anvil.R.triad_attitude(
-    b1_x=0, b1_y=1, b1_z=0,   # sun in body = +Y
-    b2_x=0, b2_y=0, b2_z=1,   # mag in body = +Z
-    r1_x=1, r1_y=0, r1_z=0,   # sun in ref  = +X
+    b1_x=0, b1_y=1, b1_z=0,  # sun in body = +Y
+    b2_x=0, b2_y=0, b2_z=1,  # mag in body = +Z
+    r1_x=1, r1_y=0, r1_z=0,  # sun in ref  = +X
     r2_x=0, r2_y=0, r2_z=1)   # mag in ref  = +Z
 # q_z ≈ 0.7071  (90-deg rotation about Z)
 ```
@@ -1115,17 +1115,17 @@ r = anvil.R.triad_attitude(
 Gravity gradient disturbance torques on a nadir-pointing satellite (linearised, small angles).
 
 ```
-Inputs:  mu [m³/s²], r [m]  — orbit radius
-         Ix, Iy, Iz [kg*m²]  — principal moments
-         theta_pitch_deg=0, phi_roll_deg=0  — attitude errors [deg]
-Outputs: T_roll, T_pitch [N*m], T_gg_max [N*m]  — worst-case (45 deg) envelope
+Inputs:  mu [m³/s²], r [m], orbit radius
+         Ix, Iy, Iz [kg*m²], principal moments
+         theta_pitch_deg=0, phi_roll_deg=0, attitude errors [deg]
+Outputs: T_roll, T_pitch [N*m], T_gg_max [N*m], worst-case (45 deg) envelope
          omega_orbital [rad/s]
 ```
 
 ```python
 r = anvil.R.gravity_gradient_torque(mu=3.986e14, r=6771e3, Ix=8, Iy=10, Iz=12,
                                       theta_pitch_deg=5)
-# T_gg_max ≈ 7e-6 N*m  — drives reaction-wheel momentum storage sizing
+# T_gg_max ≈ 7e-6 N*m, drives reaction-wheel momentum storage sizing
 ```
 
 ---
@@ -1135,10 +1135,10 @@ r = anvil.R.gravity_gradient_torque(mu=3.986e14, r=6771e3, Ix=8, Iy=10, Iz=12,
 Size a reaction wheel for a slew manoeuvre (bang-bang torque profile).
 
 ```
-Inputs:  I_sc [kg*m²]  — spacecraft MOI about slew axis
+Inputs:  I_sc [kg*m²], spacecraft MOI about slew axis
          theta_slew_deg [deg], t_slew [s], margin=1.5
-Outputs: H_rw [N*m*s]  — required angular momentum capacity
-         tau_rw [N*m]   — required peak torque
+Outputs: H_rw [N*m*s], required angular momentum capacity
+         tau_rw [N*m] , required peak torque
          omega_slew_max [rad/s], P_peak [W]
 ```
 
@@ -1182,13 +1182,13 @@ r = anvil.R.link_budget(
 Size solar panels and battery for a spacecraft in a given orbit.
 
 ```
-Inputs:  P_load_W [W]      — average power load
-         T_orbit_min [min] — orbital period
-         eclipse_frac [-]  — from eclipse_fraction RSQ
-         eta_solar=0.28    — solar cell efficiency (0.28 = GaAs triple-junction)
-         flux_solar=1361   — solar constant [W/m²]
-         DOD=0.8           — battery depth of discharge
-         eta_battery=0.9   — battery charge/discharge efficiency
+Inputs:  P_load_W [W]    , average power load
+         T_orbit_min [min], orbital period
+         eclipse_frac [-], from eclipse_fraction RSQ
+         eta_solar=0.28  , solar cell efficiency (0.28 = GaAs triple-junction)
+         flux_solar=1361 , solar constant [W/m²]
+         DOD=0.8         , battery depth of discharge
+         eta_battery=0.9 , battery charge/discharge efficiency
 Outputs: A_panel_m2 [m²], E_bat_Wh [Wh], m_bat_kg [kg], P_from_panel_W [W]
 ```
 
@@ -1203,16 +1203,16 @@ pwr = anvil.R.power_budget(P_load_W=100, T_orbit_min=92,
 
 ---
 
-## Controls — Extended (`controls`)
+## Controls, Extended (`controls`)
 
 ### `state_space_poles`
 
 Compute eigenvalues of a state matrix A and assess stability.
 
 ```
-Inputs:  A_flat  — row-major flattened list of n² floats
-         n_states — system order (int)
-Outputs: poles_real, poles_imag  — eigenvalue components (lists)
+Inputs:  A_flat, row-major flattened list of n² floats
+         n_states, system order (int)
+Outputs: poles_real, poles_imag, eigenvalue components (lists)
          stable [bool], min_damping [-]
 ```
 
@@ -1229,9 +1229,9 @@ r = anvil.R.state_space_poles(A_flat=[0, 1, -1, -1], n_states=2)
 Bryson's rule for LQR Q and R weighting matrices from maximum allowable state and input values.
 
 ```
-Inputs:  state_bounds — list of max allowable state deviations (same units as states)
-         input_bounds — list of max allowable control inputs
-Outputs: Q_diag, R_diag — diagonal entries of Q and R matrices
+Inputs:  state_bounds, list of max allowable state deviations (same units as states)
+         input_bounds, list of max allowable control inputs
+Outputs: Q_diag, R_diag, diagonal entries of Q and R matrices
 ```
 
 ```
@@ -1251,13 +1251,13 @@ r = anvil.R.lqr_bryson(state_bounds=[10, 1], input_bounds=[100])
 Gain margin (GM) and phase margin (PM) for an open-loop transfer function G(s) = num(s)/den(s).
 
 ```
-Inputs:  num_coeffs, den_coeffs — polynomial coefficients, descending order [sⁿ ... s⁰]
-         omega_lo=1e-3, omega_hi=1e4, n=2000  — frequency sweep range [rad/s]
+Inputs:  num_coeffs, den_coeffs, polynomial coefficients, descending order [sⁿ ... s⁰]
+         omega_lo=1e-3, omega_hi=1e4, n=2000, frequency sweep range [rad/s]
 Outputs: GM_dB [dB], PM_deg [deg], stable [bool]
 ```
 
 ```python
-# G(s) = 1/(s(s+1))  — integrator + first-order lag
+# G(s) = 1/(s(s+1)), integrator + first-order lag
 r = anvil.R.gain_phase_margin(num_coeffs=[1], den_coeffs=[1, 1, 0])
 # GM = inf dB  PM = 52 deg  stable = True
 

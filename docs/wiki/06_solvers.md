@@ -11,7 +11,7 @@ anvil.solvers.find_root(...)
 
 ---
 
-## `find_root` — Scalar Root Finding
+## `find_root`, Scalar Root Finding
 
 Find `x` such that `f(x) = 0`.
 
@@ -40,12 +40,12 @@ x = solvers.find_root(func, x0=None, bracket=None, method="auto", tol=1e-12, max
 ```python
 import numpy as np
 
-# Brent's method — needs sign change in bracket
+# Brent's method, needs sign change in bracket
 f = lambda x: x**3 - 2*x - 5
 root = solvers.find_root(f, bracket=(2.0, 3.0))
 # root = 2.0945514815  (exact to 1e-12)
 
-# Newton's method — needs initial guess
+# Newton's method, needs initial guess
 root = solvers.find_root(f, x0=2.5, method="newton")
 # root = 2.0945514815
 
@@ -75,7 +75,7 @@ M = solvers.find_root(residual, bracket=(1.001, 30.0))
 
 ---
 
-## `solve_nonlinear` — System of Nonlinear Equations
+## `solve_nonlinear`, System of Nonlinear Equations
 
 Find `x` such that `F(x) = 0` for vector-valued `F`.
 
@@ -96,7 +96,7 @@ x = solvers.solve_nonlinear(func, x0, method="hybr", tol=1e-10, maxiter=200, jac
 
 | Method | Best for |
 |--------|---------|
-| `"hybr"` | General nonlinear systems (Powell hybrid) — default |
+| `"hybr"` | General nonlinear systems (Powell hybrid), default |
 | `"lm"` | Overdetermined or ill-conditioned systems (Levenberg-Marquardt) |
 | `"broyden1"` | Large sparse systems (quasi-Newton) |
 
@@ -111,7 +111,7 @@ import numpy as np
 
 # Intersection of circle and line
 def F(x):
-    return [x[0]**2 + x[1]**2 - 1,   # x² + y² = 1
+    return [x[0]**2 + x[1]**2 - 1,  # x² + y² = 1
             x[0] - x[1]]               # x = y
 
 x_sol = solvers.solve_nonlinear(F, [0.5, 0.5])
@@ -120,7 +120,7 @@ x_sol = solvers.solve_nonlinear(F, [0.5, 0.5])
 
 ---
 
-## `solve_ode` — Explicit ODE (non-stiff)
+## `solve_ode`, Explicit ODE (non-stiff)
 
 Integrate `dy/dt = f(t, y)` using explicit Runge-Kutta methods.
 
@@ -162,9 +162,9 @@ r = solvers.solve_ode(func, t_span, y0,
 |-----|-------------|
 | `"t"` | Time array, shape (n_steps,) |
 | `"y"` | Solution, shape (n_states, n_steps) |
-| `"success"` | bool — converged? |
-| `"message"` | str — solver message |
-| `"nfev"` | int — function evaluations |
+| `"success"` | bool, converged? |
+| `"message"` | str, solver message |
+| `"nfev"` | int, function evaluations |
 | `"sol"` | Dense output callable: `sol.sol(t) → y(t)` |
 
 > **Note:** `"sol"` key contains the full SciPy OdeResult object. Call `r["sol"].sol(t_array)` for dense interpolation.
@@ -196,14 +196,14 @@ r = solvers.solve_ode(harmonic, (0, 10), [0.0, 1.0], events=hit_half)
 ```python
 # f blows up but ODE "succeeds"
 r = solvers.solve_ode(lambda t, y: [1.0/(y[0]-0.5)], (0, 0.4), [0.0])
-print(r["success"])   # True — SciPy says OK
+print(r["success"])   # True, SciPy says OK
 ```
 
 Always sanity-check the output.
 
 ---
 
-## `solve_ode_stiff` — Implicit ODE (stiff)
+## `solve_ode_stiff`, Implicit ODE (stiff)
 
 ```python
 r = solvers.solve_ode_stiff(func, t_span, y0,
@@ -255,7 +255,7 @@ print(r["nfev"])      # much fewer evals than RK45 would need
 
 ---
 
-## `solve_bvp` — Boundary Value Problem
+## `solve_bvp`, Boundary Value Problem
 
 Solve `dy/dx = f(x, y)` with `bc(y(a), y(b)) = 0`.
 
@@ -320,25 +320,25 @@ With default `tol=1e-3`:
 y(π/2) = 1.000000  (exact: 1.0)
 ```
 
-BVP mesh adapts automatically — more nodes where curvature is high. `max_nodes=1000` caps mesh refinement.
+BVP mesh adapts automatically, more nodes where curvature is high. `max_nodes=1000` caps mesh refinement.
 
 ---
 
-## `solve_pde_heat_1d` — 1D Parabolic PDE
+## `solve_pde_heat_1d`, 1D Parabolic PDE
 
 Solve `∂u/∂t = α · ∂²u/∂x² + f(x, t, u)` using the Crank-Nicolson scheme.
 
 ```python
 r = solvers.solve_pde_heat_1d(
-    alpha,           # diffusivity [m²/s]
-    x_span,          # (x_left, x_right)
-    t_span,          # (t_start, t_end)
-    u_init,          # callable u(x) or array of length nx
-    bc_left=None,    # Dirichlet left: float or callable(t); None = zero-flux Neumann
-    bc_right=None,   # Dirichlet right: float or callable(t); None = zero-flux Neumann
-    source=None,     # source term f(x, t, u) → array; None = no source
-    nx=100,          # spatial grid points
-    nt=None,         # time steps; auto if None (CFL-like estimate)
+    alpha,          # diffusivity [m²/s]
+    x_span,         # (x_left, x_right)
+    t_span,         # (t_start, t_end)
+    u_init,         # callable u(x) or array of length nx
+    bc_left=None,   # Dirichlet left: float or callable(t); None = zero-flux Neumann
+    bc_right=None,  # Dirichlet right: float or callable(t); None = zero-flux Neumann
+    source=None,    # source term f(x, t, u) → array; None = no source
+    nx=100,         # spatial grid points
+    nt=None,        # time steps; auto if None (CFL-like estimate)
     verbose=False,
 )
 ```
@@ -381,8 +381,8 @@ r = solvers.solve_pde_heat_1d(
     bc_right=0.0,
     nx=100,
 )
-# r["u"][-1]  — final temperature profile at t=10s
-# r["u"][0]   — initial profile
+# r["u"][-1], final temperature profile at t=10s
+# r["u"][0] , initial profile
 
 # Accuracy check: sin(πx) initial condition decays as exp(-π²αt)sin(πx)
 r2 = solvers.solve_pde_heat_1d(
@@ -400,7 +400,7 @@ r3 = solvers.solve_pde_heat_1d(
     alpha=1e-5,
     x_span=(0, 1), t_span=(0, 100),
     u_init=lambda x: np.zeros_like(x),
-    bc_left=lambda t: 100.0 * np.sin(0.1*t),  # oscillating left BC
+    bc_left=lambda t: 100.0 * np.sin(0.1*t), # oscillating left BC
     bc_right=0.0,
     nx=50,
 )
@@ -421,7 +421,7 @@ r3 = solvers.solve_pde_heat_1d(
 
 ---
 
-## `minimize` — Scalar Optimization
+## `minimize`, Scalar Optimization
 
 Minimize `f(x)` where `x` is a vector.
 
@@ -465,7 +465,7 @@ bounds=[(0, None), (0, 10), (None, None)]  # x[0]≥0, 0≤x[1]≤10, x[2] unbou
 r = solvers.minimize(lambda x: (x[0]-1)**2 + (x[1]-2)**2, [0.0, 0.0])
 # r["x"] = [1.0, 2.0]  r["fun"] = 5e-17
 
-# Rosenbrock — classic test
+# Rosenbrock, classic test
 from scipy.optimize import rosen
 r = solvers.minimize(rosen, [0.0, 0.0], method="L-BFGS-B")
 # r["x"] ≈ [1.0, 1.0]   r["fun"] ≈ 0
@@ -485,7 +485,7 @@ r = solvers.minimize(
 
 ---
 
-## `minimize_global` — Global Optimization
+## `minimize_global`, Global Optimization
 
 Minimize `f(x)` over bounded domains without requiring gradients. Uses population-based and stochastic methods that can escape local minima.
 
@@ -503,7 +503,7 @@ r = solvers.minimize_global(func, bounds,
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `func` | required | `f(x) → float`. Must accept a 1D numpy array |
-| `bounds` | required | `[(lo, hi), ...]` — one per dimension |
+| `bounds` | required | `[(lo, hi), ...]`, one per dimension |
 | `method` | `"differential_evolution"` | See table below |
 | `seed` | None | Integer seed for reproducibility |
 | `maxiter` | 1000 | Maximum iterations (DE) or function evals (DA/BH) |
@@ -519,7 +519,7 @@ r = solvers.minimize_global(func, bounds,
 | `"x"` | Optimal solution array |
 | `"fun"` | Objective value at optimum |
 | `"success"` | bool |
-| `"message"` | str — solver message |
+| `"message"` | str, solver message |
 | `"nit"` | Iterations (0 for methods that don't track this) |
 | `"nfev"` | Function evaluations |
 
@@ -539,12 +539,12 @@ r = solvers.minimize_global(func, bounds,
 ### Examples
 
 ```python
-# Himmelblau's function — 4 global minima at f=0
+# Himmelblau's function, 4 global minima at f=0
 def himmelblau(x):
     return (x[0]**2 + x[1] - 11)**2 + (x[0] + x[1]**2 - 7)**2
 
 r = solvers.minimize_global(himmelblau, bounds=[(-5,5),(-5,5)], seed=0)
-# r["fun"] ≈ 0.0,  r["x"] ≈ [3.0, 2.0]  (one of four minima)
+# r["fun"] ≈ 0.0, r["x"] ≈ [3.0, 2.0]  (one of four minima)
 
 # Maximize thrust: pass negated objective
 def neg_thrust(x):

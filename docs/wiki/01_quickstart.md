@@ -5,7 +5,7 @@
 ### Fastest: one command
 
 From a fresh clone, this provisions a virtual environment, installs Anvil plus
-the web server, launches it, and opens the workbench in your browser — no Node,
+the web server, launches it, and opens the workbench in your browser, no Node,
 no npm:
 
 ```bash
@@ -70,7 +70,7 @@ srv.call("isentropic_ratios", M=2.0, gamma=1.4) # -> {'T0_T': 1.8, ...}
 
 ## 5-Minute Tutorial
 
-### Step 1 — Create Quantities
+### Step 1, Create Quantities
 
 ```python
 import anvil
@@ -87,7 +87,7 @@ g   = 9.81 * m/s**2
 rho = 1.225 * kg/m**3
 ```
 
-### Step 2 — Arithmetic propagates units
+### Step 2, Arithmetic propagates units
 
 ```python
 F   = Q(100, "N")
@@ -102,20 +102,20 @@ print(KE.to("kJ"))       # 4.5000 kJ
 print(KE.si)             # 4500.0  (always SI float)
 ```
 
-### Step 3 — Call a built-in RSQ
+### Step 3, Call a built-in RSQ
 
 ```python
-# Direct call — no System needed
+# Direct call, no System needed
 r = anvil.R.isentropic_ratios(M=2.0, gamma=1.4)
 print(r["T0_T"])    # 1.8
 print(r["P0_P"])    # 7.8244
 print(r["rho0_rho"]) # 4.3469
 ```
 
-### Step 4 — Use a pre-built System
+### Step 4, Use a pre-built System
 
 ```python
-nozzle = anvil.S.rocket_nozzle.copy()   # deep copy — safe to modify
+nozzle = anvil.S.rocket_nozzle.copy()   # deep copy, safe to modify
 nozzle.set(P0=10e6, T0=3500)            # override values, keep units
 
 result = nozzle.solve_forward()
@@ -150,7 +150,7 @@ result.summary()
 --------------------------------------------------------
 ```
 
-### Step 5 — Build your own System
+### Step 5, Build your own System
 
 ```python
 def lift_coeff(W, S_ref, V, rho):
@@ -159,10 +159,10 @@ def lift_coeff(W, S_ref, V, rho):
     return {"q_inf": Q(q, "Pa"), "CL": CL}
 
 sys = anvil.system("wing_loading")
-sys.add("W",     50000, "N")
-sys.add("S_ref", 20,    "m^2")
-sys.add("V",     80,    "m/s")
-sys.add("rho",   1.225, "kg/m^3")
+sys.add("W",    50000, "N")
+sys.add("S_ref", 20,   "m^2")
+sys.add("V",    80,   "m/s")
+sys.add("rho",  1.225, "kg/m^3")
 sys.use(lift_coeff)
 
 result = sys.solve_forward()
@@ -170,7 +170,7 @@ result.summary()
 # CL = 0.7994, q_inf = 3920.00 Pa
 ```
 
-### Step 6 — Sweep a parameter
+### Step 6, Sweep a parameter
 
 ```python
 import numpy as np
@@ -224,12 +224,12 @@ anvil.R.dynamic_pressure(rho=1.225, V=100)
 ### Coupled/iterative system (Gauss-Seidel)
 
 ```python
-# System with a feedback loop — use solve_gauss_seidel()
+# System with a feedback loop, use solve_gauss_seidel()
 result = sys.solve_gauss_seidel(
     relaxation=0.8,
     max_iter=200,
     rtol=1e-8,
-    monitor=True,       # prints live residuals
+    monitor=True,      # prints live residuals
 )
 ```
 
@@ -239,7 +239,7 @@ result = sys.solve_gauss_seidel(
 proj = anvil.project("my_study", path="./work")
 
 proj.push(rayleigh_ratios, domain="aero.compressible")
-proj.push(rayleigh_heat,   domain="aero.compressible")
+proj.push(rayleigh_heat,  domain="aero.compressible")
 
 result = proj.R.rayleigh_heat(M1=0.3, T01=300.0, P1=101325.0,
                                q_heat=200e3, cp=1005.0)
@@ -253,8 +253,8 @@ proj.promote("rayleigh_heat")  # → global registry
 
 ## What Anvil Is NOT
 
-- **Not a symbolic solver** — no algebraic manipulation, no CAS. Relations must be written as explicit Python functions.
-- **Not a FEA/FEM framework** — the PDE solver is limited to 1D parabolic (heat/diffusion). Complex PDEs need an external adapter.
-- **Not a unit checker for general code** — units are tracked on `Q` objects only. Raw Python floats carry no dimension information.
-- **Not fully DOF-aware** — `validate()` warns when a declared variable is overwritten by a relation or goes unused, but does not verify that equations equal unknowns in the general case. A fully underdetermined system (where nothing downstream needs the missing variable) still produces no error.
-- **Not parallel by default** — `solve_gauss_seidel` and `solve_newton` are single-threaded. Use `sweep(parallel=N)` for concurrent parametric sweeps.
+- **Not a symbolic solver**, no algebraic manipulation, no CAS. Relations must be written as explicit Python functions.
+- **Not a FEA/FEM framework**, the PDE solver is limited to 1D parabolic (heat/diffusion). Complex PDEs need an external adapter.
+- **Not a unit checker for general code**, units are tracked on `Q` objects only. Raw Python floats carry no dimension information.
+- **Not fully DOF-aware**, `validate()` warns when a declared variable is overwritten by a relation or goes unused, but does not verify that equations equal unknowns in the general case. A fully underdetermined system (where nothing downstream needs the missing variable) still produces no error.
+- **Not parallel by default**, `solve_gauss_seidel` and `solve_newton` are single-threaded. Use `sweep(parallel=N)` for concurrent parametric sweeps.

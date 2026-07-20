@@ -37,7 +37,7 @@ r = anvil.R.fft_spectrum(signal, dt=1.0, window="hann")
 **Outputs**: `freqs [Hz]`, `power`, `amplitude`, `dominant_freq [Hz]`, `dominant_power`, `rms`, `thd`, `n_samples`, `f_resolution [Hz]`
 
 **Notes**
-- THD (Total Harmonic Distortion) = √(Σ harmonic power, 2nd–5th) / fundamental amplitude
+- THD (Total Harmonic Distortion) = √(Σ harmonic power, 2nd-5th) / fundamental amplitude
 - Use `"none"` window only for exactly periodic signals (integer number of cycles in window)
 - `f_resolution` = 1/(n·dt): more samples → finer resolution
 
@@ -69,7 +69,7 @@ r = anvil.R.welch_psd(signal, dt=1.0, nperseg=256, noverlap=None, window="hann")
 
 **Outputs**: `freqs`, `psd` (power/Hz), `total_power`, `dominant_freq`, `dominant_psd`, `f_resolution`
 
-**When to use over `fft_spectrum`**: noisy or stochastic signals where variance reduction matters more than exact amplitude. `psd` is in power per Hz — integrate to get total power. Good for NVH, acoustic measurements, sensor noise floors.
+**When to use over `fft_spectrum`**: noisy or stochastic signals where variance reduction matters more than exact amplitude. `psd` is in power per Hz, integrate to get total power. Good for NVH, acoustic measurements, sensor noise floors.
 
 ---
 
@@ -88,7 +88,7 @@ plt.pcolormesh(r["t"], r["freqs"], 10*np.log10(r["S"] + 1e-12))
 plt.xlabel("time (s)"); plt.ylabel("frequency (Hz)"); plt.colorbar(label="dB")
 ```
 
-**Time–frequency resolution tradeoff**: large `nperseg` → fine frequency resolution, coarse time resolution. Small `nperseg` → good time resolution, coarse frequency resolution.
+**Time-frequency resolution tradeoff**: large `nperseg` → fine frequency resolution, coarse time resolution. Small `nperseg` → good time resolution, coarse frequency resolution.
 
 ---
 
@@ -102,13 +102,13 @@ r = anvil.R.bandpass_filter(signal, dt=1.0, f_low=None, f_high=None, order=4)
 
 **Outputs**: `signal_filtered` (array), `rms_in`, `rms_out`, `attenuation_dB`
 
-**Implementation**: `scipy.signal.sosfiltfilt` (zero-phase forward+backward) — no phase distortion. Effective filter order = 2×`order`.
+**Implementation**: `scipy.signal.sosfiltfilt` (zero-phase forward+backward), no phase distortion. Effective filter order = 2×`order`.
 
 ```python
 # Lowpass at 100 Hz
 r = anvil.R.bandpass_filter(signal=noisy, dt=dt, f_high=100.0, order=5)
 
-# Bandpass 30–80 Hz
+# Bandpass 30-80 Hz
 r = anvil.R.bandpass_filter(signal=noisy, dt=dt, f_low=30, f_high=80, order=4)
 
 # Highpass at 10 Hz (remove DC drift)
@@ -173,12 +173,12 @@ r = anvil.R.signal_statistics(signal, dt=1.0)
 
 **Fault indicators** (vibration health monitoring):
 - Kurtosis > 4: impulsive content, possible bearing spalling or structural crack
-- High crest factor (> 4–5): isolated impacts superimposed on background vibration
+- High crest factor (> 4-5): isolated impacts superimposed on background vibration
 - Sine wave: kurtosis ≈ 1.5, crest factor ≈ 1.414
 
 ---
 
-## Chaining RSQs — vibration fault diagnosis example
+## Chaining RSQs, vibration fault diagnosis example
 
 ```python
 import numpy as np, anvil
@@ -195,7 +195,7 @@ s = anvil.R.signal_statistics(signal=raw, dt=dt)
 print(f"kurtosis={s['kurtosis']:.2f}  crest={s['crest_factor']:.2f}")
 # kurtosis≈2.1 (masked by noise)
 
-# Step 2: bandpass around 2 kHz carrier band (1500–2500 Hz)
+# Step 2: bandpass around 2 kHz carrier band (1500-2500 Hz)
 f = anvil.R.bandpass_filter(signal=raw, dt=dt, f_low=1500, f_high=2500, order=5)
 
 # Step 3: envelope (Hilbert)
@@ -219,7 +219,7 @@ sys_.add("dt", dt)
 sys_.add("window", "hann")
 sys_.use("fft_spectrum")
 
-# Can't sweep over array-valued inputs in sys.sweep() — sweep scalars only.
+# Can't sweep over array-valued inputs in sys.sweep(), sweep scalars only.
 # For array signals, build a loop and call the RSQ directly:
 for noise_level in [0.01, 0.1, 0.5, 1.0]:
     noisy = signal + noise_level * np.random.default_rng(0).standard_normal(len(signal))
@@ -243,4 +243,4 @@ for noise_level in [0.01, 0.1, 0.5, 1.0]:
 | `cross_correlation` | No | numpy.correlate |
 | `signal_statistics` | No | numpy only |
 
-scipy is a core Anvil dependency — all signal RSQs are always available.
+scipy is a core Anvil dependency, all signal RSQs are always available.

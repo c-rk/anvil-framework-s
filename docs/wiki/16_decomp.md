@@ -35,11 +35,11 @@ x  = np.sin(2*np.pi*3*t) + 0.4*np.sin(2*np.pi*11*t)
 # 1. Embed into Hankel matrix
 H = decomp.hankel(x, window=len(t)//4)    # (400, 1201)
 
-# 2. POD — energy decomposition
+# 2. POD, energy decomposition
 pod = decomp.pod(H, r=10)
 print(decomp.pod_rank(pod, 0.99))          # modes needed for 99% energy
 
-# 3. DMD — frequency identification
+# 3. DMD, frequency identification
 dmd = decomp.dmd(H, dt=dt, r=10)
 idx = decomp.dmd_dominant(dmd, n=4)
 print(dmd["frequencies"][idx])             # → ±3 Hz, ±11 Hz
@@ -50,7 +50,7 @@ X_hat = decomp.dmd_reconstruct(dmd, n_steps=H.shape[1])
 
 ---
 
-## `hankel` — 1D Signal Embedding
+## `hankel`, 1D Signal Embedding
 
 ```python
 H = decomp.hankel(x, window)
@@ -72,14 +72,14 @@ t = np.linspace(0, 10, 2000)
 x = np.sin(2*np.pi*5*t)
 
 H = decomp.hankel(x, window=400)   # shape (400, 1601)
-# H[:, k] = x[k : k+400]          — window starting at sample k
+# H[:, k] = x[k : k+400]        , window starting at sample k
 ```
 
-**Why Hankel?** POD and DMD are defined for multi-dimensional snapshot data. The Hankel embedding converts a 1D time series into a pseudo-spatial problem — each row corresponds to a "lag", enabling the methods to identify frequency content and reconstruct the signal.
+**Why Hankel?** POD and DMD are defined for multi-dimensional snapshot data. The Hankel embedding converts a 1D time series into a pseudo-spatial problem, each row corresponds to a "lag", enabling the methods to identify frequency content and reconstruct the signal.
 
 ---
 
-## `pod` — Proper Orthogonal Decomposition
+## `pod`, Proper Orthogonal Decomposition
 
 ```python
 result = decomp.pod(X, r=None, subtract_mean=True)
@@ -144,7 +144,7 @@ mode1_time = pod["temporal_coefficients"][0, :]
 
 ---
 
-## `pod_reconstruct` — Reconstruct from POD Modes
+## `pod_reconstruct`, Reconstruct from POD Modes
 
 ```python
 X_hat = decomp.pod_reconstruct(pod_result, r=None)
@@ -157,7 +157,7 @@ Rebuilds the snapshot matrix from `r` POD modes. Mean is added back automaticall
 | `pod_result` | Dict from `pod()` |
 | `r` | Use first r modes; None = all retained |
 
-**Returns:** `ndarray (n_space, n_time)` — `U[:,:r] @ TC[:r,:] + mean`
+**Returns:** `ndarray (n_space, n_time)`, `U[:,:r] @ TC[:r,:] + mean`
 
 ```python
 pod = decomp.pod(X)
@@ -171,7 +171,7 @@ for r in [2, 5, 10]:
 
 ---
 
-## `pod_project` — Project onto Existing Basis
+## `pod_project`, Project onto Existing Basis
 
 ```python
 coefficients = decomp.pod_project(pod_result, X_new, subtract_mean=True)
@@ -185,7 +185,7 @@ Projects new snapshot data onto a pre-computed POD basis. Useful for reduced-ord
 | `X_new` | New snapshots, shape `(n_space, n_time_new)` |
 | `subtract_mean` | Subtract training mean (default True) |
 
-**Returns:** `ndarray (r, n_time_new)` — modal amplitudes of `X_new` in the POD basis.
+**Returns:** `ndarray (r, n_time_new)`, modal amplitudes of `X_new` in the POD basis.
 
 ```python
 # Train POD on first half of data
@@ -198,7 +198,7 @@ coeff_test = decomp.pod_project(pod_train, X[:, 250:])
 
 ---
 
-## `pod_rank` — Minimum Modes for Target Energy
+## `pod_rank`, Minimum Modes for Target Energy
 
 ```python
 r = decomp.pod_rank(pod_result, target_energy=0.99)
@@ -215,7 +215,7 @@ print(decomp.pod_rank(pod, 0.999))  # 99.9%
 
 ---
 
-## `dmd` — Dynamic Mode Decomposition
+## `dmd`, Dynamic Mode Decomposition
 
 ```python
 result = decomp.dmd(X, dt=1.0, r=None, threshold=None)
@@ -238,8 +238,8 @@ Exact DMD (Tu et al. 2014). Fits a linear operator `A` such that `x(t+dt) ≈ A 
 | `"omega"` | `(r,)` complex | Continuous-time: `log(λ)/dt` |
 | `"modes"` | `(n_space, r)` complex | Spatial DMD modes |
 | `"amplitudes"` | `(r,)` complex | Initial amplitude of each mode |
-| `"frequencies"` | `(r,)` float | `Im(ω) / (2π)` — oscillation frequency in `1/dt_unit` |
-| `"growth_rates"` | `(r,)` float | `Re(ω)` — positive = growing, negative = decaying |
+| `"frequencies"` | `(r,)` float | `Im(ω) / (2π)`, oscillation frequency in `1/dt_unit` |
+| `"growth_rates"` | `(r,)` float | `Re(ω)`, positive = growing, negative = decaying |
 | `"singular_values"` | `(r,)` float | SVD singular values used |
 
 ### Rank selection
@@ -248,7 +248,7 @@ Exact DMD (Tu et al. 2014). Fits a linear operator `A` such that `x(t+dt) ≈ A 
 - `threshold` specified: keep modes where `s_i > threshold × s_max`
 - Neither: use `threshold=1e-10` (keeps nearly all non-zero modes)
 
-**Rule of thumb for noisy data:** Start with `r=2×(expected modes)` — DMD modes come in conjugate pairs for real-valued signals.
+**Rule of thumb for noisy data:** Start with `r=2×(expected modes)`, DMD modes come in conjugate pairs for real-valued signals.
 
 ### Reading eigenvalues
 
@@ -265,7 +265,7 @@ grows = dmd_r["growth_rates"]      # Re(log(λ)/dt)
 
 # Example output for a 3 Hz + 11 Hz signal:
 # freqs ≈ [+3.0, -3.0, +11.0, -11.0, ...]
-# grows ≈ [~0,   ~0,   ~0,    ~0,   ...]  (stable modes)
+# grows ≈ [~0,  ~0,  ~0,   ~0,  ...]  (stable modes)
 ```
 
 **Conjugate pairs:** Real-valued signals always produce complex-conjugate eigenvalue pairs. The positive-frequency mode is the physical one; the negative-frequency mode is its mirror image. Both have the same amplitude and growth rate.
@@ -298,7 +298,7 @@ for i in idx:
 
 ---
 
-## `dmd_reconstruct` — Reconstruct from DMD Modes
+## `dmd_reconstruct`, Reconstruct from DMD Modes
 
 ```python
 X_hat = decomp.dmd_reconstruct(dmd_result, n_steps=None, t=None)
@@ -332,7 +332,7 @@ err = np.linalg.norm(H - X_train) / np.linalg.norm(H)
 
 ---
 
-## `dmd_dominant` — Rank Modes by Importance
+## `dmd_dominant`, Rank Modes by Importance
 
 ```python
 indices = decomp.dmd_dominant(dmd_result, n=5, by="amplitude")
@@ -342,9 +342,9 @@ Returns indices of the `n` most dominant DMD modes.
 
 | `by` | Ranking criterion |
 |------|-------------------|
-| `"amplitude"` | `|b_i|` — initial amplitude (default) |
-| `"energy"` | `|b_i|²` — initial energy |
-| `"growth"` | `Re(ω_i)` — most rapidly growing first |
+| `"amplitude"` | `|b_i|`, initial amplitude (default) |
+| `"energy"` | `|b_i|²`, initial energy |
+| `"growth"` | `Re(ω_i)`, most rapidly growing first |
 
 ```python
 # Top 4 by amplitude
@@ -379,7 +379,7 @@ Two-panel figure:
 
 Complex eigenvalue plane scatter plot:
 - Marker **size and color** encode normalized amplitude
-- **Unit circle** drawn at `|λ|=1` — modes inside are stable, outside are growing
+- **Unit circle** drawn at `|λ|=1`, modes inside are stable, outside are growing
 - Colorbar shows normalized amplitude
 
 ```python
@@ -428,7 +428,7 @@ print(dmd_cfd["frequencies"][idx])
 
 1. Split: `X1 = X[:,:-1]`, `X2 = X[:,1:]`
 2. SVD of X1: `U_r, s_r, Vt_r` (truncated to rank r)
-3. Reduced operator: `Ã = U_r† X2 Vt_r† diag(1/s_r)` — shape `(r,r)`
+3. Reduced operator: `Ã = U_r† X2 Vt_r† diag(1/s_r)`, shape `(r,r)`
 4. Eigendecompose Ã: `Ã W = W diag(λ)`
 5. Exact modes: `Φ = X2 Vt_r† diag(1/s_r) W diag(1/λ)`
 6. Amplitudes b: least-squares fit `Φ b ≈ x(0)`

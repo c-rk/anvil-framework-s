@@ -1,8 +1,8 @@
 # Contributing & Extending Anvil
 
-Anything in Anvil — a unit, an RSQ, an adapter, a wiki page — is added by editing one predictable place. This page is the map.
+Anything in Anvil, a unit, an RSQ, an adapter, a wiki page, is added by editing one predictable place. This page is the map.
 
-**Priorities** (in order): native functions, sweep, sensitivity, the unit engine, the project database, re-usability, robustness. Adapters to external tools come **after** all of those — they are conveniences, never load-bearing, and they are **real-only** (no mock fallbacks; see [Adapters](10_adapters.md)).
+**Priorities** (in order): native functions, sweep, sensitivity, the unit engine, the project database, re-usability, robustness. Adapters to external tools come **after** all of those, they are conveniences, never load-bearing, and they are **real-only** (no mock fallbacks; see [Adapters](10_adapters.md)).
 
 ---
 
@@ -24,7 +24,7 @@ Anything in Anvil — a unit, an RSQ, an adapter, a wiki page — is added by ed
 
 ## Adding a Unit
 
-Units live in `src/anvil/units.py` in the `UnitDB` definitions: each unit maps a string to `(scale_to_SI, Dim)`. Find the category block (pressure, energy, ...) and add a line following its neighbours. Offset units (like `degC`, `degF`) additionally carry an offset — see how those two are defined before adding another.
+Units live in `src/anvil/units.py` in the `UnitDB` definitions: each unit maps a string to `(scale_to_SI, Dim)`. Find the category block (pressure, energy, ...) and add a line following its neighbours. Offset units (like `degC`, `degF`) additionally carry an offset, see how those two are defined before adding another.
 
 Checklist:
 
@@ -35,18 +35,18 @@ Checklist:
 
 ## Adding a Built-in RSQ
 
-Built-ins are seeded from `src/anvil/seed.py`. Each RSQ is a plain function — keyword inputs, dict of outputs (values as `Q` where dimensional) — pushed with a domain and tags. Copy the closest existing entry in the same domain.
+Built-ins are seeded from `src/anvil/seed.py`. Each RSQ is a plain function, keyword inputs, dict of outputs (values as `Q` where dimensional), pushed with a domain and tags. Copy the closest existing entry in the same domain.
 
 Rules that keep RSQs reusable:
 
 - Inputs are SI floats or dimensionless; accept `Q` transparently where the neighbours do.
-- Return `{"name": Q(value, "unit"), ...}` — declared units let Systems propagate dimensions.
+- Return `{"name": Q(value, "unit"), ...}`, declared units let Systems propagate dimensions.
 - One equation set per RSQ; compose bigger models in a `System`, not inside one function.
 - Docstring: one-line summary + the equation + input/output meaning. The wiki and the workbench catalog both surface it.
 
 Then: add it to `docs/wiki/09_builtin_rsqs.md` under its domain, bump the counts, add a test.
 
-For your **own project's** RSQs you don't edit the repo at all — use the project database:
+For your **own project's** RSQs you don't edit the repo at all, use the project database:
 
 ```python
 proj = anvil.project("my_study", path="./work")
@@ -112,6 +112,6 @@ Conventions: test files double as runnable scripts (`if __name__ == "__main__":`
 Before submitting changes:
 
 1. Full test suite passes.
-2. Any touched example still runs (`python examples/ex_*.py` — adapter examples must exit 0 with an install hint when the tool is absent).
+2. Any touched example still runs (`python examples/ex_*.py`, adapter examples must exit 0 with an install hint when the tool is absent).
 3. Wiki rebuilt if you touched `docs/wiki/`.
 4. Counts in `index.md` / `README.md` still true if you added units or RSQs.

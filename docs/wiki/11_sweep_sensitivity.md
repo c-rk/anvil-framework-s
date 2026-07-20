@@ -8,12 +8,12 @@
 
 ```python
 sweep = sys.sweep(
-    param_name,           # str — must be in sys._quantities
-    values,               # array-like of parameter values (in original declared unit)
-    skip_errors=False,    # True: failed points → None instead of raising
-    parallel=1,           # int > 1: concurrent evaluation via ThreadPoolExecutor
-    warm_start=False,     # True: carry computed outputs forward as initial guess
-    **solve_kwargs,       # passed to sys.solve(): method, relaxation, max_iter, …
+    param_name,          # str, must be in sys._quantities
+    values,              # array-like of parameter values (in original declared unit)
+    skip_errors=False,   # True: failed points → None instead of raising
+    parallel=1,          # int > 1: concurrent evaluation via ThreadPoolExecutor
+    warm_start=False,    # True: carry computed outputs forward as initial guess
+    **solve_kwargs,      # passed to sys.solve(): method, relaxation, max_iter, …
 )
 ```
 
@@ -29,7 +29,7 @@ sys.add("P0", 6.9e6, "Pa")
 sweep = sys.sweep("P0", np.linspace(5e6, 30e6, 20))
 
 sys.add("T", 300, "K")
-# values in K — not Rankine, not Celsius
+# values in K, not Rankine, not Celsius
 sweep = sys.sweep("T", np.linspace(200, 600, 20))
 ```
 
@@ -55,14 +55,14 @@ sweep = sys.sweep("UA", np.linspace(500, 5000, 30),
 ```
 
 **Restrictions:**
-- Incompatible with `parallel > 1` — raises `ValueError` (parallel order is undefined)
+- Incompatible with `parallel > 1`, raises `ValueError` (parallel order is undefined)
 - Only updates quantities declared with `.add()`, not purely computed intermediates
 - If a warm-started point fails and `skip_errors=True`, that point's guess is not carried forward
 
 ### Solver options in sweep
 
 ```python
-# Coupled system — use GS with relaxation
+# Coupled system, use GS with relaxation
 sweep = sys.sweep("UA", np.linspace(500, 5000, 20),
                   method="gauss_seidel", relaxation=0.7, max_iter=100)
 
@@ -73,7 +73,7 @@ sweep = sys.sweep("P0", values, method="newton", rtol=1e-10)
 ### Parallel sweep
 
 ```python
-# Uses ThreadPoolExecutor — best for NumPy/SciPy heavy relations
+# Uses ThreadPoolExecutor, best for NumPy/SciPy heavy relations
 sweep = sys.sweep("M", np.linspace(0.5, 3.0, 50), parallel=4)
 ```
 
@@ -165,8 +165,8 @@ CSV format: one column per variable, one row per sweep point.
 
 ```python
 sens = sys.sensitivity(
-    outputs=None,     # list of output names; None = all computed outputs
-    step=0.01,        # fractional perturbation (1% default)
+    outputs=None,    # list of output names; None = all computed outputs
+    step=0.01,       # fractional perturbation (1% default)
 )
 ```
 
@@ -215,8 +215,8 @@ sens.summary()
 ```
 
 Interpretation for `P0_P`:
-- `M`: Mach has 3.1× leverage on P0/P — a 1% increase in M → ~3.1% increase in P0/P
-- `gamma`: γ has ~0.3× leverage — relatively insensitive
+- `M`: Mach has 3.1× leverage on P0/P, a 1% increase in M → ~3.1% increase in P0/P
+- `gamma`: γ has ~0.3× leverage, relatively insensitive
 
 ### `sens.top(output, n=5)`
 
@@ -292,4 +292,4 @@ for name, val in sens.top("Isp", n=3):
 | `sensitivity(5 inputs, 1 output)` | ~10 × single_solve_time (2 solves per input) |
 | `sensitivity(5 inputs, 5 outputs)` | ~10 × single_solve_time (outputs evaluated in same solves) |
 
-`sensitivity()` always runs single-threaded. The number of outputs doesn't increase the number of solves — they all come from the same +/- perturbation runs.
+`sensitivity()` always runs single-threaded. The number of outputs doesn't increase the number of solves, they all come from the same +/- perturbation runs.

@@ -2,7 +2,7 @@
 
 The Web Workbench is Anvil's browser UI: a **Calculator** for calling any registered RSQ with units, and a **Canvas** for building solvable systems visually. One local server serves the UI, the JSON/WebSocket API, and this wiki from a single origin.
 
-The workbench is the third (optional) run tier — the core package and the project database work without it. See [Overview](index.md).
+The workbench is the third (optional) run tier, the core package and the project database work without it. See [Overview](index.md).
 
 ---
 
@@ -32,9 +32,9 @@ python -m anvil_server.run --project ./my_study
 |---------|---------|---------|
 | `ANVIL_HOST` | `127.0.0.1` | Bind address |
 | `ANVIL_PORT` | `8000` | Port |
-| `ANVIL_PROJECT` | — | Same as `--project` |
+| `ANVIL_PROJECT` |, | Same as `--project` |
 | `NATIVE_ONLY` | off | Tier B: hide adapter RSQs, sandbox execution |
-| `ANVIL_CORS_ORIGINS` | — | Extra CORS origins (comma-separated) |
+| `ANVIL_CORS_ORIGINS` |, | Extra CORS origins (comma-separated) |
 
 For frontend development, run `npm run dev` in `anvil_web/` (Vite dev server on port 5173, proxying to the API at 8000).
 
@@ -42,19 +42,19 @@ For frontend development, run `npm run dev` in `anvil_web/` (Vite dev server on 
 
 ## Calculator Page
 
-- **Catalog** — browse every RSQ from the global registry (and the mounted project registry), grouped by domain. Categories are collapsible. Each entry links to its wiki section.
-- **Calc pad** — pick an RSQ, fill inputs (units accepted, e.g. `500 kPa`), get outputs with units and LaTeX-rendered relations (KaTeX).
-- **Sweep panel** — sweep any input over a range and plot the response inline.
+- **Catalog**, browse every RSQ from the global registry (and the mounted project registry), grouped by domain. Categories are collapsible. Each entry links to its wiki section.
+- **Calc pad**, pick an RSQ, fill inputs (units accepted, e.g. `500 kPa`), get outputs with units and LaTeX-rendered relations (KaTeX).
+- **Sweep panel**, sweep any input over a range and plot the response inline.
 
 ## Canvas Page
 
 A node-graph editor (React Flow) where quantity blocks wire into relation blocks to form a System:
 
-- **Palette** — add quantity nodes and relation/adapter nodes; grouped by domain, collapsible.
-- **Solve** — runs the graph server-side; iterative solves stream residuals live over WebSocket.
-- **Auto-align** — one click re-lays the graph left-to-right by dependency depth (quantities → relations → outputs) so nothing overlaps.
-- **Script bridge** — every canvas serializes to a plain Python script and back. `GET /api/example-scripts` lists the repo's `examples/*.py` that parse into non-empty canvases; loading one populates the graph.
-- **Save/load** — canvases persist server-side as scripts (`PUT /api/canvases/{name}`).
+- **Palette**, add quantity nodes and relation/adapter nodes; grouped by domain, collapsible.
+- **Solve**, runs the graph server-side; iterative solves stream residuals live over WebSocket.
+- **Auto-align**, one click re-lays the graph left-to-right by dependency depth (quantities → relations → outputs) so nothing overlaps.
+- **Script bridge**, every canvas serializes to a plain Python script and back. `GET /api/example-scripts` lists the repo's `examples/*.py` that parse into non-empty canvases; loading one populates the graph.
+- **Save/load**, canvases persist server-side as scripts (`PUT /api/canvases/{name}`).
 
 ---
 
@@ -111,4 +111,4 @@ anvil_web/               React 18 + TypeScript + Vite frontend
     └── lib/             API client, docs links, graph layout
 ```
 
-The canvas ↔ script bridge is the design centre: the canvas is never a separate format — it **is** a Python script, so anything built visually runs headless with plain `python`, and any example script opens as a canvas.
+The canvas ↔ script bridge is the design centre: the canvas is never a separate format, it **is** a Python script, so anything built visually runs headless with plain `python`, and any example script opens as a canvas.

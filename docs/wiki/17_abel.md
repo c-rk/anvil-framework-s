@@ -64,7 +64,7 @@ Fy = decomp.abel_forward(fr, dr=1.0)
 
 Computes the Abel projection using exact analytical pixel-strip integration.
 
-**Returns:** `ndarray (N,)` — projection values `F(y[k])` at `y[k] = k * dr`.
+**Returns:** `ndarray (N,)`, projection values `F(y[k])` at `y[k] = k * dr`.
 
 **Analytic check:** for `f(r) = exp(-r^2/s^2)`:
 ```
@@ -110,7 +110,7 @@ fr_smooth = decomp.abel_three_point(Fy_smooth, dr=dr)
 fr = decomp.abel_onion(Fy, dr=1.0)
 ```
 
-Backward substitution on the forward Abel matrix, working from the outermost shell inward. Each shell's error propagates to all inner shells — noise amplifies toward the center.
+Backward substitution on the forward Abel matrix, working from the outermost shell inward. Each shell's error propagates to all inner shells, noise amplifies toward the center.
 
 **When to use:** High SNR data, or when an exact matrix-inversion approach is needed. For noisy data, prefer `abel_three_point`.
 
@@ -186,8 +186,8 @@ result = decomp.abel_image(frame, half="left")
 ```
 
 **`half` parameter:**
-- `"average"` (default): averages both halves before inversion — best SNR, assumes good symmetry
-- `"right"` / `"left"`: uses only one side — useful when the other is blocked or noisy
+- `"average"` (default): averages both halves before inversion, best SNR, assumes good symmetry
+- `"right"` / `"left"`: uses only one side, useful when the other is blocked or noisy
 - Both sides are always written to the output image (mirrored)
 
 ---
@@ -260,7 +260,7 @@ result = decomp.abel_image(
     frame,
     method="three_point",
     center=(cr, cc),
-    dr=0.05,          # 50 microns per pixel
+    dr=0.05,         # 50 microns per pixel
     half="average",
 )
 
@@ -302,4 +302,4 @@ Both methods are O(N^2) per row (matrix operations). For a 500-column image with
 | Edge effects | The outermost 2-3 pixels of the inverted image are unreliable (boundary treatment). Trim them before analysis. |
 | Background | Non-zero background in F(y) introduces a spike at r=0 in the inversion. Subtract background from Fy before inverting. |
 | Memory | Each `abel_image()` call builds an N x N matrix per row. For N=1000: 8 MB per row. Use `half="right"` or `half="left"` (smaller N) for very wide images. |
-| Layer 2 (PyAbel) | BASEX, rbasex, DAUN (regularized), Hansen-Law — higher accuracy for difficult data — will be added as a PyAbel adapter. |
+| Layer 2 (PyAbel) | BASEX, rbasex, DAUN (regularized), Hansen-Law, higher accuracy for difficult data, will be added as a PyAbel adapter. |

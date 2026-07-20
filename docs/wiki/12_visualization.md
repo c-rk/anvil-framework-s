@@ -1,6 +1,6 @@
 # Visualization
 
-All visualization functions are in `anvil.viz`. They require `matplotlib`. Import is deferred — Anvil loads without matplotlib; only `viz.*` calls trigger the import.
+All visualization functions are in `anvil.viz`. They require `matplotlib`. Import is deferred, Anvil loads without matplotlib; only `viz.*` calls trigger the import.
 
 ```python
 from anvil import viz
@@ -53,7 +53,7 @@ If `system.history()` returns an empty list (no `monitor=True` solve), prints:
 
 **Convergence example output (from ex02_heat_exchanger.py):**
 
-The HX system converges in 33 iterations with residual dropping from 2.0 to 6.9×10⁻¹¹. The convergence curve is exponentially decaying — typical for linear Gauss-Seidel on this system.
+The HX system converges in 33 iterations with residual dropping from 2.0 to 6.9×10⁻¹¹. The convergence curve is exponentially decaying, typical for linear Gauss-Seidel on this system.
 
 ---
 
@@ -97,7 +97,7 @@ viz.sweep_plot(sweep, y=["thrust", "Isp", "mdot"])
 | `sweep_result` | required | `SweepResult` from `sys.sweep()` |
 | `y` | None | Output names to plot; None = first 4 outputs |
 | `x_label` | None | X-axis label; None = parameter name |
-| `ax` | None | Axes (ignored if multiple outputs — creates figure internally) |
+| `ax` | None | Axes (ignored if multiple outputs, creates figure internally) |
 | `show` | True | Call `plt.show()` |
 
 **Layout:**
@@ -153,7 +153,7 @@ viz.dependency_graph(sys, show=False, save="graph.png")
 - For large systems (>20 relations), output node positions compress and labels become unreadable at default figure size. Scale `figsize` manually using matplotlib after the call.
 - Cycles are not visually distinguishable from acyclic connections.
 
-**Example — rocket nozzle dependency graph:**
+**Example, rocket nozzle dependency graph:**
 
 Input column (7 nodes): P0, T0, gamma, R_gas, A_throat, A_exit, P_amb
 
@@ -232,7 +232,7 @@ viz.dmd_spectrum(dmd_r)
 import matplotlib.pyplot as plt
 fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 viz.dmd_spectrum(dmd_before, ax=axes[0], show=False)
-viz.dmd_spectrum(dmd_after,  ax=axes[1], show=False)
+viz.dmd_spectrum(dmd_after, ax=axes[1], show=False)
 axes[0].set_title("Before treatment")
 axes[1].set_title("After treatment")
 plt.tight_layout()
@@ -270,16 +270,16 @@ fig.savefig("abel_compare.png", dpi=150, bbox_inches="tight")
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `image` | required | 2D ndarray — original camera image (projection) |
+| `image` | required | 2D ndarray, original camera image (projection) |
 | `abel_result` | required | Dict from `anvil.decomp.abel_image()` |
 | `ax` | None | Array of 2 Axes `[ax_raw, ax_radial]`; creates figure if None |
 | `show` | True | Call `plt.show()` |
-| `cmap` | `"hot"` | Colormap — `"hot"` for flames, `"gray"` for absorption, `"viridis"` for plasma density |
+| `cmap` | `"hot"` | Colormap, `"hot"` for flames, `"gray"` for absorption, `"viridis"` for plasma density |
 | `log_scale` | False | Apply `log1p` to both images before display |
 
 **Returns:** The Figure object.
 
-**When to use `log_scale=True`:** Flame cores and plasma jets can be 3–4 orders of magnitude brighter than the edges. Without log scale, the outer structure is invisible. With log scale, both core and edge features are visible in the same frame.
+**When to use `log_scale=True`:** Flame cores and plasma jets can be 3-4 orders of magnitude brighter than the edges. Without log scale, the outer structure is invisible. With log scale, both core and edge features are visible in the same frame.
 
 ---
 
@@ -298,7 +298,7 @@ plt.savefig("convergence.png", dpi=150)
 
 # Sweep
 fig = viz.sweep_plot(sweep, y=["thrust", "Isp"], show=False)
-plt.suptitle("Parametric Study — P0 variation", y=1.02)
+plt.suptitle("Parametric Study, P0 variation", y=1.02)
 fig.savefig("sweep_study.png", dpi=200, bbox_inches="tight")
 
 # Dependency graph
@@ -316,6 +316,6 @@ import matplotlib
 matplotlib.use("inline")   # or use %matplotlib inline magic
 ```
 
-Then call `viz.*` with `show=True` (default) — figures display inline automatically.
+Then call `viz.*` with `show=True` (default), figures display inline automatically.
 
 For notebooks: the `SweepResult._repr_html_()`, `SensitivityResult._repr_html_()`, `Result._repr_html_()`, and `Q._repr_html_()` methods provide rich table/chart displays without matplotlib.

@@ -128,7 +128,7 @@ HTML_TEMPLATE = """\
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anvil Framework — Wiki</title>
+<title>Anvil Framework Wiki</title>
 <style>
 /* ── Reset & Base ───────────────────────────────────────────────────────────── */
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
@@ -300,7 +300,7 @@ PYGMENTS_CSS_PLACEHOLDER
 <nav id="sidebar">
   <div class="sb-brand" onclick="showPage('index')">
     Anvil Framework
-    <small>Developer Wiki — v1.3</small>
+    <small>Developer Wiki, v1.3</small>
   </div>
   <div class="sb-search">
     <input id="sb-search-input" type="text" placeholder="Search wiki..."
