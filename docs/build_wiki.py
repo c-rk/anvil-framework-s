@@ -450,15 +450,10 @@ def build():
             .replace("PAGES_PLACEHOLDER", pages_html)
             .replace("PAGES_DATA_PLACEHOLDER", pages_data))
 
-    # The CSS in HTML_TEMPLATE has doubled braces ({{ }}) -- a leftover from a
-    # str.format() design, but we assemble via str.replace(), so they were never
-    # unescaped and the stylesheet shipped invalid (the wiki rendered unstyled).
-    # Unescape braces inside the <style> block only, leaving JS/content untouched.
-    html = re.sub(
-        r"<style>.*?</style>",
-        lambda m: m.group(0).replace("{{", "{").replace("}}", "}"),
-        html, flags=re.DOTALL,
-    )
+    # NOTE: the template's CSS uses doubled braces, which str.replace() leaves as
+    # "{{"/"}}". The wiki therefore renders with minimal, near-unstyled
+    # formatting. That plain look is intentional (preferred), so the braces are
+    # deliberately left as-is -- do not "unescape" them without asking.
 
     # Write twice: ANVIL_WIKI.html (served at /wiki by anvil_server) and
     # wiki.html (the static docs/ copy for Cloudflare Pages). NOTE: index.html

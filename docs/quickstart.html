@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quick start — Anvil</title>
+<title>Quick start: Anvil</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="alternate icon" href="favicon.svg">
 <meta name="description" content="From a fresh clone to solving real engineering systems with Anvil in about ten minutes.">
 <style>
 :root{
@@ -146,7 +148,7 @@ footer{position:relative;z-index:1;padding:40px 0 60px}
   <section class="step">
     <div class="rail"><div class="idx">01</div><h2>Install</h2></div>
     <div class="body">
-      <p>The fastest path — one command from the cloned repo. It creates a virtual environment, installs Anvil plus the web server, launches it, and opens the workbench in your browser. No Node, no npm.</p>
+      <p>The fastest path is one command from the cloned repo. It creates a virtual environment, installs Anvil plus the web server, launches it, and opens the workbench in your browser. No Node, no npm.</p>
       <div class="code glass"><div class="fname mono"><span>terminal</span><span>bash</span></div>
 <pre><span class="pr">$</span> python start_anvil.py</pre></div>
       <p class="note">Prefer the library only, without the server? Install with pip and skip to step 02:</p>
@@ -160,7 +162,7 @@ footer{position:relative;z-index:1;padding:40px 0 60px}
   <section class="step">
     <div class="rail"><div class="idx">02</div><h2>Your first calculation</h2></div>
     <div class="body">
-      <p>Every built-in relation lives under <code>anvil.R</code>. Call one directly — here, isentropic flow ratios for Mach 2 air:</p>
+      <p>Every built-in relation lives under <code>anvil.R</code>. Call one directly. Here, isentropic flow ratios for Mach 2 air:</p>
       <div class="code glass"><div class="fname mono"><span>python</span><span>&gt;&gt;&gt;</span></div>
 <pre><span class="kw">import</span> anvil
 
@@ -173,7 +175,7 @@ anvil.R.<span class="fn">isentropic_ratios</span>(M=<span class="nu">2.0</span>,
   <section class="step">
     <div class="rail"><div class="idx">03</div><h2>Quantities carry units</h2></div>
     <div class="body">
-      <p>Wrap values in <code>Q</code> and dimensions follow through every operation — conversions, arithmetic, even offset temperatures like degrees Celsius. Unit mistakes surface as errors instead of silent wrong answers.</p>
+      <p>Wrap values in <code>Q</code> and dimensions follow through every operation: conversions, arithmetic, even offset temperatures like degrees Celsius. Unit mistakes surface as errors instead of silent wrong answers.</p>
       <div class="code glass"><div class="fname mono"><span>python</span><span>&gt;&gt;&gt;</span></div>
 <pre><span class="kw">from</span> anvil <span class="kw">import</span> Q
 
@@ -232,7 +234,7 @@ hx.<span class="fn">sensitivity</span>(outputs=[<span class="st">"effectiveness"
   </section>
 
   <section class="step">
-    <div class="rail"><div class="idx">06</div><h2>Open the workbench — call it anywhere</h2></div>
+    <div class="rail"><div class="idx">06</div><h2>Open the workbench, call it anywhere</h2></div>
     <div class="body">
       <p>If you started with <code>python start_anvil.py</code>, the workbench is already running at <code>http://127.0.0.1:8000</code>: a calculator with spotlight search over every relation, and a node-graph canvas where you wire systems visually and watch solver residuals live. Canvases save as runnable Python.</p>
       <p>The same running server is a REST API, so any code can drive it. From Python, use the built-in client:</p>
@@ -260,7 +262,7 @@ srv.<span class="fn">call</span>(<span class="st">"isentropic_ratios"</span>, M=
 
 <footer>
   <div class="wrap foot">
-    <span class="sig">Anvil — from equations to engineering tools</span>
+    <span class="sig">Anvil, from equations to engineering tools</span>
     <nav>
       <a href="index.html">Home</a>
       <a href="ANVIL_GUIDE.html">Guide</a>

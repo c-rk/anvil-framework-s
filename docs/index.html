@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anvil — From equations to engineering tools</title>
+<title>Anvil: From equations to engineering tools</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="alternate icon" href="favicon.svg">
 <meta name="description" content="Anvil is a computation framework for engineering and scientific research. Write physics as plain Python, wire it into solvable systems, get results with automatic unit tracking.">
 <style>
 :root{
@@ -11,7 +13,7 @@
   --panel:rgba(24,25,28,.55); --panel-solid:#141519;
   --line:rgba(236,231,221,.13); --line-soft:rgba(236,231,221,.07);
   --ink:#ece7dd; --ink-2:#d3cdc1; --muted:#928c81; --faint:#5c574f;
-  --accent:#f5f0e7;               /* monochrome — brightest ink, interaction only */
+  --accent:#f5f0e7;               /* monochrome, brightest ink, interaction only */
   --code-bg:#08090b; --radius:2px;
   --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
   --mono:ui-monospace,SFMono-Regular,"Cascadia Code",Menlo,Consolas,"Liberation Mono",monospace;
@@ -111,7 +113,7 @@ section{position:relative;z-index:1;padding:74px 0}
 .sec-top .aside{padding-top:8px}
 .sec-top .aside p{color:var(--muted);font-size:16px;margin-top:14px;max-width:34ch}
 
-/* primitives — newspaper columns split by vertical rules */
+/* primitives: newspaper columns split by vertical rules */
 .cols3{display:grid;grid-template-columns:repeat(3,1fr)}
 .cols3>article{padding:0 30px;border-left:1px solid var(--line)}
 .cols3>article:first-child{padding-left:0;border-left:0}
@@ -197,7 +199,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:40px
 
     <div class="deck rise d2">
       <div>
-        <p class="lede">Write physics as plain Python functions, wire them into solvable systems, and get results with automatic unit tracking — from a quick calculation to a coupled multi-physics study.</p>
+        <p class="lede">Write physics as plain Python functions, wire them into solvable systems, and get results with automatic unit tracking, from a quick calculation to a coupled multi-physics study.</p>
       </div>
       <div class="install">
         <span class="lbl">One command</span>
@@ -235,7 +237,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:40px
       <article>
         <div class="sym">Q</div>
         <h3>Quantity</h3>
-        <p>A value with units. Dimensions track automatically through every operation — 101 units, offset temperatures, no silent unit errors.</p>
+        <p>A value with units. Dimensions track automatically through every operation: 101 units, offset temperatures, no silent unit errors.</p>
       </article>
       <article>
         <div class="sym">Relation</div>
@@ -245,7 +247,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:40px
       <article>
         <div class="sym">System</div>
         <h3>System</h3>
-        <p>Wire relations into a solvable graph. Anvil detects coupling and picks the solver — forward, Gauss–Seidel, or Newton.</p>
+        <p>Wire relations into a solvable graph. Anvil detects coupling and picks the solver: forward, Gauss-Seidel, or Newton.</p>
       </article>
     </div>
   </section>
@@ -256,7 +258,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:40px
     <div class="sec-top">
       <div class="aside">
         <div class="lbl">In practice</div>
-        <p>Pre-built systems, parametric sweeps, and sensitivity analysis — exportable to CSV or JSON.</p>
+        <p>Pre-built systems, parametric sweeps, and sensitivity analysis, exportable to CSV or JSON.</p>
       </div>
       <h2>Load a system, customize, solve.</h2>
     </div>
@@ -281,7 +283,7 @@ nozzle.<span class="fn">sensitivity</span>(outputs=[<span class="st">"thrust"</s
       </div>
       <div class="say">
         <p>Everything is plain Python. A relation is an ordinary function; a system is a graph of them.</p>
-        <p class="small">Anvil orders the computation, tracks units through every step, and switches to an iterative solver when it detects coupling — without you configuring anything.</p>
+        <p class="small">Anvil orders the computation, tracks units through every step, and switches to an iterative solver when it detects coupling, without you configuring anything.</p>
       </div>
     </div>
   </section>
@@ -296,10 +298,10 @@ nozzle.<span class="fn">sensitivity</span>(outputs=[<span class="st">"thrust"</s
     </div>
     <div class="defs">
       <div class="row"><dt>Physics library</dt><h4>101 relations</h4><dd>Aero, propulsion, structures, heat transfer, orbital, thermo, controls, combustion, signal processing, UQ.</dd></div>
-      <div class="row"><dt>Solvers</dt><h4>Forward to Newton</h4><dd>Coupled systems, ODE/BVP/PDE (RK45, BDF, Radau, Crank–Nicolson), global optimizers.</dd></div>
+      <div class="row"><dt>Solvers</dt><h4>Forward to Newton</h4><dd>Coupled systems, ODE/BVP/PDE (RK45, BDF, Radau, Crank-Nicolson), global optimizers.</dd></div>
       <div class="row"><dt>Studies</dt><h4>Sweeps &amp; sensitivity</h4><dd>Parallel parametric sweeps, normalized sensitivity, formatted tables, CSV/JSON export.</dd></div>
       <div class="row"><dt>Workbench</dt><h4>Web canvas</h4><dd>Calculator and node-graph editor, live solver residuals, canvases saved as runnable Python.</dd></div>
-      <div class="row"><dt>Adapters</dt><h4>Real tools, wrapped</h4><dd>XFOIL, SU2, OpenFOAM, FEniCSx, NASTRAN, OpenMDAO, Cantera, CoolProp, gmsh — as native relations.</dd></div>
+      <div class="row"><dt>Adapters</dt><h4>Real tools, wrapped</h4><dd>XFOIL, SU2, OpenFOAM, FEniCSx, NASTRAN, OpenMDAO, Cantera, CoolProp, and gmsh, as native relations.</dd></div>
       <div class="row"><dt>Registry</dt><h4>Per-project store</h4><dd>Isolated SQLite registry per project; promote your relations to global when ready.</dd></div>
     </div>
   </section>
@@ -313,7 +315,7 @@ nozzle.<span class="fn">sensitivity</span>(outputs=[<span class="st">"thrust"</s
 
 <footer>
   <div class="wrap foot">
-    <span class="sig">Anvil — from equations to engineering tools</span>
+    <span class="sig">Anvil, from equations to engineering tools</span>
     <nav>
       <a href="quickstart.html">Quick start</a>
       <a href="ANVIL_GUIDE.html">Guide</a>
