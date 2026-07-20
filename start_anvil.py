@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -75,6 +76,15 @@ def venv_python(venv_dir: Path) -> Path:
     return venv_dir / "bin" / "python"
 
 
+def venv_has_pip(py: Path) -> bool:
+    """True when `py -m pip` works (a venv left without pip is unusable)."""
+    r = subprocess.run(
+        [str(py), "-m", "pip", "--version"],
+        capture_output=True, text=True,
+    )
+    return r.returncode == 0
+
+
 # --------------------------------------------------------------------------- #
 # Step 2: pick / create the target environment
 # --------------------------------------------------------------------------- #
@@ -91,8 +101,13 @@ def get_target_python(no_venv: bool = False) -> Path:
 
     py = venv_python(VENV_DIR)
     if py.exists():
-        say(f"Reusing existing environment: {VENV_DIR}")
-        return py
+        if venv_has_pip(py):
+            say(f"Reusing existing environment: {VENV_DIR}")
+            return py
+        # A previous failed run (e.g. missing python3-venv) can leave a .venv
+        # that has a python but no pip. Recreating it from scratch is the fix.
+        say(f"Existing {VENV_DIR} is incomplete (no pip); rebuilding it.")
+        shutil.rmtree(VENV_DIR, ignore_errors=True)
 
     say(f"Creating virtual environment: {VENV_DIR} (one-time, ~30 s)")
     result = subprocess.run(
@@ -118,6 +133,20 @@ def get_target_python(no_venv: bool = False) -> Path:
             f"Command output:\n{result.stdout}\n{result.stderr}\n"
             f"On Debian/Ubuntu you may need: sudo apt install python{pyver}-venv"
         )
+
+    # Creation reported success but occasionally lands without pip; bootstrap it.
+    if not venv_has_pip(py):
+        subprocess.run(
+            [str(py), "-m", "ensurepip", "--upgrade"],
+            capture_output=True, text=True,
+        )
+        if not venv_has_pip(py):
+            pyver = f"{sys.version_info.major}.{sys.version_info.minor}"
+            fail(
+                "The virtual environment was created but has no pip.\n\n"
+                f"  Install:  sudo apt install python{pyver}-venv\n"
+                "  Or run:   python3 start_anvil.py --no-venv"
+            )
     return py
 
 
