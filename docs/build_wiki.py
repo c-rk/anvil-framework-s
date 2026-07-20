@@ -109,10 +109,28 @@ def build_sidebar():
 
 
 # ── Build all page content ────────────────────────────────────────────────────
+# Map each page's markdown filename (e.g. "01_quickstart.md") to its page id.
+_MD_TO_PID = {os.path.basename(path): pid for pid, _label, path in PAGES}
+
+
+def rewrite_md_links(html):
+    """Turn in-content links to other wiki pages (e.g. href="01_quickstart.md")
+    into single-page navigation (showPage), so they switch pages instead of
+    navigating the browser to a non-existent .md file (which lands on Overview)."""
+    def repl(m):
+        target = m.group(1)
+        filename = target.split("#")[0]
+        pid = _MD_TO_PID.get(filename)
+        if pid:
+            return f'href="#{pid}" onclick="showPage(\'{pid}\'); return false;"'
+        return m.group(0)
+    return re.sub(r'href="([^"]+\.md(?:#[^"]*)?)"', repl, html)
+
+
 def build_pages():
     parts = []
     for pid, label, path in PAGES:
-        html = read_page(path)
+        html = rewrite_md_links(read_page(path))
         parts.append(
             f'<section id="page-{pid}" class="wiki-page" style="display:none">'
             f'{html}'

@@ -318,7 +318,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <ol>
 <li><strong>Bare package</strong>, <code>pip install</code>, then <code>Q</code>, relations, systems, solvers, sweep, sensitivity, units. No database, no server.</li>
 <li><strong>+ Project database</strong>, <code>anvil.project()</code> adds a local per-project SQLite store for your own RSQs, alongside the global registry (101 built-in RSQs).</li>
-<li><strong>+ Web Workbench</strong>, <code>python -m anvil_server</code> serves a browser UI (calculator + visual canvas) that reads both the project and global databases. See <a href="20_workbench.md">Web Workbench</a>.</li>
+<li><strong>+ Web Workbench</strong>, <code>python -m anvil_server</code> serves a browser UI (calculator + visual canvas) that reads both the project and global databases. See <a href="#20" onclick="showPage('20'); return false;">Web Workbench</a>.</li>
 </ol>
 <p><strong>Priorities:</strong> the native core comes first, units, RSQs, sweep, sensitivity, project database, reusability, robustness. Adapters to external tools (XFOIL, SU2, Cantera, ...) are second-class conveniences: they are <strong>real-only</strong> (no mock fallbacks) and never required for the core to work.</p>
 <hr />
@@ -332,83 +332,83 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </thead>
 <tbody>
 <tr>
-<td><a href="01_quickstart.md">Quick Start</a></td>
+<td><a href="#01" onclick="showPage('01'); return false;">Quick Start</a></td>
 <td>Installation, first examples, outputs</td>
 </tr>
 <tr>
-<td><a href="02_quantity.md">Quantity</a></td>
+<td><a href="#02" onclick="showPage('02'); return false;">Quantity</a></td>
 <td><code>Q</code>, <code>Dim</code>, <code>UnitStub</code>, arithmetic, conversions, complete API</td>
 </tr>
 <tr>
-<td><a href="03_units.md">Unit Engine</a></td>
+<td><a href="#03" onclick="showPage('03'); return false;">Unit Engine</a></td>
 <td>All 101 units, compound parsing, categories, custom dims</td>
 </tr>
 <tr>
-<td><a href="04_relation.md">Relation</a></td>
+<td><a href="#04" onclick="showPage('04'); return false;">Relation</a></td>
 <td><code>Relation</code>, <code>@anvil.relation</code>, <code>Relation.block</code>, input/output detection</td>
 </tr>
 <tr>
-<td><a href="05_system.md">System</a></td>
+<td><a href="#05" onclick="showPage('05'); return false;">System</a></td>
 <td><code>add</code>, <code>set</code>, <code>use</code>, <code>solve</code>, <code>sweep</code>, <code>sensitivity</code>, <code>optimize</code>, <code>as_relation</code>, full API</td>
 </tr>
 <tr>
-<td><a href="06_solvers.md">Solvers</a></td>
+<td><a href="#06" onclick="showPage('06'); return false;">Solvers</a></td>
 <td><code>find_root</code>, <code>solve_nonlinear</code>, <code>solve_ode</code>, <code>solve_ode_stiff</code>, <code>solve_bvp</code>, <code>solve_pde_heat_1d</code>, <code>minimize</code>, <code>minimize_global</code></td>
 </tr>
 <tr>
-<td><a href="07_registry.md">Registry</a></td>
+<td><a href="#07" onclick="showPage('07'); return false;">Registry</a></td>
 <td>SQLite store, <code>push</code>, <code>update</code>, <code>search</code>, <code>list</code>, <code>info</code>, <code>export</code>, <code>remove</code>, <code>check</code></td>
 </tr>
 <tr>
-<td><a href="08_project.md">Project Registry</a></td>
+<td><a href="#08" onclick="showPage('08'); return false;">Project Registry</a></td>
 <td><code>anvil.project()</code>, isolated stores, context manager, <code>promote</code></td>
 </tr>
 <tr>
-<td><a href="09_builtin_rsqs.md">Built-in RSQs</a></td>
+<td><a href="#09" onclick="showPage('09'); return false;">Built-in RSQs</a></td>
 <td>All 101 RSQs, signatures, domains, example outputs (includes <code>misc</code> domain: pod_analysis, dmd_analysis, abel_inverse, abel_forward, fft_spectrum, welch_psd, stft_spectrogram, bandpass_filter, envelope_detection, cross_correlation, signal_statistics)</td>
 </tr>
 <tr>
-<td><a href="10_adapters.md">Adapters</a></td>
+<td><a href="#10" onclick="showPage('10'); return false;">Adapters</a></td>
 <td><code>Adapter</code>, python/CLI backends, unit handling, real-only policy</td>
 </tr>
 <tr>
-<td><a href="11_sweep_sensitivity.md">Sweep &amp; Sensitivity</a></td>
+<td><a href="#11" onclick="showPage('11'); return false;">Sweep &amp; Sensitivity</a></td>
 <td><code>sys.sweep()</code>, <code>sys.sensitivity()</code>, result objects, parallel</td>
 </tr>
 <tr>
-<td><a href="12_visualization.md">Visualization</a></td>
+<td><a href="#12" onclick="showPage('12'); return false;">Visualization</a></td>
 <td><code>viz.convergence</code>, <code>viz.sweep_plot</code>, <code>viz.variable_trace</code>, <code>viz.dependency_graph</code>, <code>viz.pod_energy</code>, <code>viz.dmd_spectrum</code></td>
 </tr>
 <tr>
-<td><a href="13_databases.md">Databases</a></td>
+<td><a href="#13" onclick="showPage('13'); return false;">Databases</a></td>
 <td><code>fluids</code>, <code>materials</code>, <code>const</code>, built-in property tables</td>
 </tr>
 <tr>
-<td><a href="14_limits.md">Limits &amp; Gotchas</a></td>
+<td><a href="#14" onclick="showPage('14'); return false;">Limits &amp; Gotchas</a></td>
 <td>What fails, edge cases, accuracy, known issues</td>
 </tr>
 <tr>
-<td><a href="15_advanced.md">Advanced</a></td>
+<td><a href="#15" onclick="showPage('15'); return false;">Advanced</a></td>
 <td>Composition, cycles, block relations, CFD module, Watchdog</td>
 </tr>
 <tr>
-<td><a href="16_decomp.md">Decomposition</a></td>
+<td><a href="#16" onclick="showPage('16'); return false;">Decomposition</a></td>
 <td><code>anvil.decomp</code>, POD, DMD, Hankel embedding, signal analysis</td>
 </tr>
 <tr>
-<td><a href="17_abel.md">Abel Transform</a></td>
+<td><a href="#17" onclick="showPage('17'); return false;">Abel Transform</a></td>
 <td><code>abel_forward</code>, <code>abel_three_point</code>, <code>abel_onion</code>, <code>abel_image</code>, <code>abel_center</code></td>
 </tr>
 <tr>
-<td><a href="19_signal_processing.md">Signal Processing</a></td>
+<td><a href="#19" onclick="showPage('19'); return false;">Signal Processing</a></td>
 <td><code>fft_spectrum</code>, <code>welch_psd</code>, <code>stft_spectrogram</code>, <code>bandpass_filter</code>, <code>envelope_detection</code>, <code>cross_correlation</code>, <code>signal_statistics</code></td>
 </tr>
 <tr>
-<td><a href="20_workbench.md">Web Workbench</a></td>
+<td><a href="#20" onclick="showPage('20'); return false;">Web Workbench</a></td>
 <td>Browser UI: calculator, visual canvas, examples, server API</td>
 </tr>
 <tr>
-<td><a href="21_contributing.md">Contributing</a></td>
+<td><a href="#21" onclick="showPage('21'); return false;">Contributing</a></td>
 <td>How to add units, RSQs, adapters, wiki pages; project conventions</td>
 </tr>
 </tbody>
@@ -845,7 +845,7 @@ anvil<span class="w"> </span>version<span class="w">    </span><span class="c1">
 <span class="n">v</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;velocity&quot;</span><span class="p">)</span>       <span class="c1"># → m/s internally</span>
 </code></pre></div>
 
-<p>Category aliases resolve to the preferred SI unit for that dimension. Full list: see <a href="03_units.md#categories">Unit Engine</a>.</p>
+<p>Category aliases resolve to the preferred SI unit for that dimension. Full list: see <a href="#03" onclick="showPage('03'); return false;">Unit Engine</a>.</p>
 <h3 id="raw-dimension-string">Raw dimension string<a class="headerlink" href="#raw-dimension-string" title="Permanent link">&para;</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="c1"># Standard (separate brackets)</span>
 <span class="n">d1</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;[L][M][T-2]&quot;</span><span class="p">)</span>   <span class="c1"># → 1 N</span>
@@ -6521,7 +6521,7 @@ Outputs: <code>T_ad [K]</code>, <code>gamma</code>, <code>MW [kg/mol]</code>, <c
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;rho&quot;</span><span class="p">:</span> <span class="n">Q</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;rho&quot;</span><span class="p">],</span> <span class="s2">&quot;kg/m^3&quot;</span><span class="p">)}</span>
 </code></pre></div>
 
-<p><strong>Supported units for <code>"unit"</code> field:</strong> Any unit string in the Anvil unit database (see <a href="03_units.md#complete-unit-table">Unit Engine</a> for full list). Compound units like <code>"g/s"</code>, <code>"W/m^2"</code> also work.</p>
+<p><strong>Supported units for <code>"unit"</code> field:</strong> Any unit string in the Anvil unit database (see <a href="#03" onclick="showPage('03'); return false;">Unit Engine</a> for full list). Compound units like <code>"g/s"</code>, <code>"W/m^2"</code> also work.</p>
 <hr />
 <h2 id="poliastro-adapter-orbital-mechanics">poliastro Adapter (Orbital Mechanics)<a class="headerlink" href="#poliastro-adapter-orbital-mechanics" title="Permanent link">&para;</a></h2>
 <p>Located in <code>anvil/adapters/poliastro_orbits.py</code>. Requires <code>pip install poliastro astropy</code>, real only, no mock fallback (<code>is_available()</code> to check). The equivalent closed-form two-body math lives in the native orbital RSQs (<code>hohmann_transfer</code>, <code>vis_viva</code>, <code>orbital_period</code>, ...).</p>
@@ -10520,7 +10520,7 @@ Converged in 3246 iterations (res = 9.98e-07)
 <p>scipy is a core Anvil dependency, all signal RSQs are always available.</p></section>
 <section id="page-20" class="wiki-page" style="display:none"><h1 id="web-workbench">Web Workbench<a class="headerlink" href="#web-workbench" title="Permanent link">&para;</a></h1>
 <p>The Web Workbench is Anvil's browser UI: a <strong>Calculator</strong> for calling any registered RSQ with units, and a <strong>Canvas</strong> for building solvable systems visually. One local server serves the UI, the JSON/WebSocket API, and this wiki from a single origin.</p>
-<p>The workbench is the third (optional) run tier, the core package and the project database work without it. See <a href="index.md">Overview</a>.</p>
+<p>The workbench is the third (optional) run tier, the core package and the project database work without it. See <a href="#index" onclick="showPage('index'); return false;">Overview</a>.</p>
 <hr />
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="c1"># 1. Server dependencies (FastAPI + uvicorn)</span>
@@ -10723,7 +10723,7 @@ python<span class="w"> </span>-m<span class="w"> </span>anvil_server.run
 <p>The canvas ↔ script bridge is the design centre: the canvas is never a separate format, it <strong>is</strong> a Python script, so anything built visually runs headless with plain <code>python</code>, and any example script opens as a canvas.</p></section>
 <section id="page-21" class="wiki-page" style="display:none"><h1 id="contributing-extending-anvil">Contributing &amp; Extending Anvil<a class="headerlink" href="#contributing-extending-anvil" title="Permanent link">&para;</a></h1>
 <p>Anything in Anvil, a unit, an RSQ, an adapter, a wiki page, is added by editing one predictable place. This page is the map.</p>
-<p><strong>Priorities</strong> (in order): native functions, sweep, sensitivity, the unit engine, the project database, re-usability, robustness. Adapters to external tools come <strong>after</strong> all of those, they are conveniences, never load-bearing, and they are <strong>real-only</strong> (no mock fallbacks; see <a href="10_adapters.md">Adapters</a>).</p>
+<p><strong>Priorities</strong> (in order): native functions, sweep, sensitivity, the unit engine, the project database, re-usability, robustness. Adapters to external tools come <strong>after</strong> all of those, they are conveniences, never load-bearing, and they are <strong>real-only</strong> (no mock fallbacks; see <a href="#10" onclick="showPage('10'); return false;">Adapters</a>).</p>
 <hr />
 <h2 id="repo-layout-what-to-touch-for-what">Repo Layout (what to touch for what)<a class="headerlink" href="#repo-layout-what-to-touch-for-what" title="Permanent link">&para;</a></h2>
 <table>
@@ -10799,7 +10799,7 @@ python<span class="w"> </span>-m<span class="w"> </span>anvil_server.run
 </code></pre></div>
 
 <h2 id="adding-an-adapter">Adding an Adapter<a class="headerlink" href="#adding-an-adapter" title="Permanent link">&para;</a></h2>
-<p>Follow the real-only pattern in <a href="10_adapters.md">Adapters</a> exactly:</p>
+<p>Follow the real-only pattern in <a href="#10" onclick="showPage('10'); return false;">Adapters</a> exactly:</p>
 <ol>
 <li><code>src/anvil/adapters/&lt;lib&gt;.py</code> with <code>_require_&lt;lib&gt;()</code> (raises <code>ImportError</code>/<code>RuntimeError</code> with the install command) and <code>is_available() -&gt; bool</code>.</li>
 <li>Lazy-import the library <strong>inside</strong> the wrapper; the module must import cleanly without the dependency.</li>
