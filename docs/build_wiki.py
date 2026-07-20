@@ -53,6 +53,7 @@ PAGES = [
     ("19",       "Signal Processing",      "wiki/19_signal_processing.md"),
     ("20",       "Web Workbench",          "wiki/20_workbench.md"),
     ("21",       "Contributing",           "wiki/21_contributing.md"),
+    ("22",       "Examples",               "wiki/22_examples.md"),
 ]
 
 # ── Markdown → HTML conversion ────────────────────────────────────────────────
@@ -85,6 +86,7 @@ def read_page(rel_path):
 # ── Sidebar HTML ──────────────────────────────────────────────────────────────
 SECTION_GROUPS = [
     ("Getting Started",  ["index", "01"]),
+    ("Examples",         ["22"]),
     ("Core Primitives",  ["02", "03", "04", "05"]),
     ("Computation",      ["06", "07", "08"]),
     ("RSQs & Adapters",  ["09", "10"]),

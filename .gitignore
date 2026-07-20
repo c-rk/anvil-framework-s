@@ -58,3 +58,6 @@ anvil_web_v1/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated build fragment (injected into ANVIL_GUIDE.html)
+docs/_examples_section.html
