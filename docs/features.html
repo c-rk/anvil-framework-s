@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anvil: Features</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="alternate icon" href="favicon.svg">
+<meta name="description" content="The complete feature map of Anvil: units, relations, solvers, sweeps, decomposition, CFD, adapters, the web workbench, and an open-source, LLM-friendly development model.">
+<style>
+:root{
+  --bg:#0b0c0e; --bg-2:#0e0f12;
+  --panel:rgba(24,25,28,.55); --panel-solid:#141519;
+  --line:rgba(236,231,221,.13); --line-soft:rgba(236,231,221,.07);
+  --ink:#ece7dd; --ink-2:#d3cdc1; --muted:#928c81; --faint:#5c574f;
+  --accent:#f5f0e7;
+  --code-bg:#08090b; --radius:2px;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,"Cascadia Code",Menlo,Consolas,"Liberation Mono",monospace;
+}
+:root[data-theme="light"]{
+  --bg:#f2efe9; --bg-2:#ece8e0;
+  --panel:rgba(255,255,255,.62); --panel-solid:#fbf9f5;
+  --line:rgba(23,21,15,.16); --line-soft:rgba(23,21,15,.08);
+  --ink:#17150f; --ink-2:#332f26; --muted:#6b6459; --faint:#a49d90;
+  --accent:#0a0906; --code-bg:#111114;
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f2efe9; --bg-2:#ece8e0;
+    --panel:rgba(255,255,255,.62); --panel-solid:#fbf9f5;
+    --line:rgba(23,21,15,.16); --line-soft:rgba(23,21,15,.08);
+    --ink:#17150f; --ink-2:#332f26; --muted:#6b6459; --faint:#a49d90;
+    --accent:#0a0906; --code-bg:#111114;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--serif);
+  font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;overflow-x:hidden;
+}
+.mono{font-family:var(--mono)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:0 40px}
+@media(max-width:640px){.wrap{padding:0 22px}}
+
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(70% 45% at 50% -5%,rgba(236,231,221,.05),transparent 60%)}
+
+.lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+
+header{position:sticky;top:0;z-index:40;
+  backdrop-filter:blur(18px) saturate(1.1);-webkit-backdrop-filter:blur(18px) saturate(1.1);
+  background:color-mix(in srgb,var(--bg) 72%,transparent);border-bottom:1px solid var(--line)}
+.mast{display:flex;align-items:center;gap:30px;height:70px}
+.brand{display:flex;align-items:center;gap:11px;color:var(--ink)}
+.brand svg{width:24px;height:24px;display:block;color:var(--ink)}
+.brand .name{font-family:var(--mono);font-size:16px;letter-spacing:.16em;text-transform:uppercase;font-weight:500}
+nav{margin-left:auto;display:flex;align-items:center;gap:28px}
+nav a{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);transition:color .16s}
+nav a:hover,nav a.here{color:var(--ink)}
+.tgl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);background:none;border:1px solid var(--line);border-radius:2px;
+  padding:6px 10px;cursor:pointer;transition:color .16s,border-color .16s}
+.tgl:hover{color:var(--ink);border-color:var(--accent)}
+@media(max-width:820px){nav a.opt{display:none}}
+
+.hero{position:relative;z-index:1;padding:76px 0 0}
+.hero .eyebrow{margin-bottom:30px}
+.hero h1{
+  font-size:clamp(44px,7.6vw,82px);line-height:1;letter-spacing:-.025em;
+  font-weight:600;text-wrap:balance;max-width:16ch;font-feature-settings:"liga" 1,"kern" 1;
+}
+.hero h1 em{font-style:italic}
+.deck{display:grid;grid-template-columns:1.6fr 1fr;gap:0;border-top:1px solid var(--line);margin-top:44px}
+.deck>div{padding:34px 34px 40px;border-left:1px solid var(--line)}
+.deck>div:first-child{padding-left:0;border-left:0}
+.deck .lede{font-size:22px;line-height:1.5;color:var(--ink-2)}
+.deck .meta .lbl{display:block;margin-bottom:14px}
+.deck .meta dl{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;font-family:var(--mono);font-size:13px}
+.deck .meta dt{color:var(--faint)}
+.deck .meta dd{color:var(--ink-2);text-align:right}
+@media(max-width:860px){
+  .deck{grid-template-columns:1fr}
+  .deck>div{border-left:0;border-top:1px solid var(--line);padding:30px 0 34px}
+  .deck>div:first-child{border-top:0;padding-top:34px}
+}
+
+section{position:relative;z-index:1;padding:64px 0}
+.sec-top{display:grid;grid-template-columns:200px 1fr;gap:40px;margin-bottom:40px}
+@media(max-width:760px){.sec-top{grid-template-columns:1fr;gap:14px;margin-bottom:30px}}
+.sec-top h2{font-size:clamp(26px,4vw,42px);line-height:1.05;letter-spacing:-.02em;font-weight:600;text-wrap:balance}
+.sec-top .aside{padding-top:8px}
+.sec-top .aside .num{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.06em}
+.sec-top .aside p{color:var(--muted);font-size:16px;margin-top:12px;max-width:34ch}
+
+.rule{height:1px;background:var(--line);border:0}
+
+.defs{columns:3;column-gap:44px}
+@media(max-width:860px){.defs{columns:2}}
+@media(max-width:560px){.defs{columns:1}}
+.defs .row{break-inside:avoid;padding:20px 0;border-top:1px solid var(--line-soft)}
+.defs .row:first-child{border-top:0;padding-top:0}
+.defs dt{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.defs h4{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.defs dd{color:var(--muted);font-size:15px;margin-top:6px;line-height:1.5}
+.defs dd code{font-family:var(--mono);font-size:.82em;color:var(--ink-2)}
+
+.split{display:grid;grid-template-columns:1.65fr 1fr;gap:44px;align-items:start}
+@media(max-width:860px){.split{grid-template-columns:1fr;gap:24px}}
+.glass{background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--line);border-radius:var(--radius)}
+.code .fname{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);
+  padding:14px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.code pre{margin:0;padding:22px;background:var(--code-bg);font-family:var(--mono);
+  font-size:13px;line-height:1.8;color:#c7c0b3;overflow-x:auto;border-radius:0 0 var(--radius) var(--radius)}
+pre .kw{color:#ece7dd}pre .fn{color:#ece7dd}pre .st{color:#9d968a}pre .nu{color:#bdb6a9}pre .cm{color:#5f5a51}
+.split .say p{color:var(--ink-2);font-size:17px;margin-bottom:16px}
+.split .say p.small{color:var(--muted);font-size:15px}
+
+.creed{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:52px 0}
+.creed .lbl{display:block;margin-bottom:20px}
+.creed p{font-size:clamp(22px,3.2vw,32px);line-height:1.32;letter-spacing:-.015em;max-width:26ch;font-weight:500}
+.creed p em{font-style:italic}
+.creed .sub{font-size:17px;line-height:1.55;color:var(--muted);max-width:58ch;margin-top:20px;font-weight:400}
+.creed code{font-family:var(--mono);font-size:.82em;color:var(--accent);border:1px solid var(--line);padding:1px 7px;border-radius:2px}
+.two-creed{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.two-creed>div{padding:52px 44px;border-left:1px solid var(--line)}
+.two-creed>div:first-child{padding-left:0;border-left:0}
+.two-creed h3{font-size:clamp(22px,3vw,30px);line-height:1.25;letter-spacing:-.015em;font-weight:600;max-width:16ch}
+.two-creed h3 em{font-style:italic}
+.two-creed p{font-size:16.5px;line-height:1.55;color:var(--muted);margin-top:18px;max-width:44ch}
+.two-creed code{font-family:var(--mono);font-size:.82em;color:var(--accent)}
+.two-creed a.more{display:inline-block;margin-top:18px;font-family:var(--mono);font-size:12.5px;
+  letter-spacing:.06em;color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:4px;transition:color .16s,border-color .16s}
+.two-creed a.more:hover{color:var(--accent);border-color:var(--accent)}
+@media(max-width:760px){
+  .two-creed{grid-template-columns:1fr}
+  .two-creed>div{border-left:0;border-top:1px solid var(--line);padding:38px 0}
+  .two-creed>div:first-child{border-top:0;padding-top:0}
+}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:40px 0 60px}
+.foot{display:flex;flex-wrap:wrap;gap:26px;align-items:baseline}
+.foot .sig{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.foot nav{margin-left:auto}
+.foot a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.foot a:hover{color:var(--accent)}
+
+:focus-visible{outline:1px solid var(--accent);outline-offset:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap mast">
+    <a class="brand" href="index.html" aria-label="Anvil home">
+      <svg viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
+        <path d="M 6 21 C 13 18, 22 18, 28 21 L 54 21 L 54 27 L 44 27 C 42 31, 38 33, 32 33 L 38 33 L 38 37 L 26 37 L 26 33 L 20 33 L 20 27 L 10 27 C 8 26, 7 23, 6 21 Z"/>
+        <path d="M 23 39 L 41 39 L 41 42 L 50 50 L 50 53 L 14 53 L 14 50 L 23 42 Z"/>
+      </svg>
+      <span class="name">Anvil</span>
+    </a>
+    <nav>
+      <a class="opt here" href="features.html">Features</a>
+      <a class="opt" href="quickstart.html">Quick start</a>
+      <a class="opt" href="ANVIL_GUIDE.html">Guide</a>
+      <a class="opt" href="wiki.html">Wiki</a>
+      <a href="https://github.com/c-rk/anvil-framework-s">GitHub</a>
+      <button class="tgl" id="theme" aria-label="Toggle theme">Theme</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="lbl eyebrow">The complete feature map</div>
+    <h1>Everything Anvil <em>does.</em></h1>
+    <div class="deck">
+      <div>
+        <p class="lede">One small core, a large library, and the machinery to solve, sweep, decompose and serve it. Every feature below is real and shipping. Short examples throughout; the Guide and Wiki go deeper.</p>
+      </div>
+      <div class="meta">
+        <span class="lbl">At a glance</span>
+        <dl>
+          <dt>Relations</dt><dd>166 across 33 domains</dd>
+          <dt>Units</dt><dd>100+, dimensional</dd>
+          <dt>Adapters</dt><dd>15 real tools</dd>
+          <dt>Core</dt><dd>numpy · scipy</dd>
+          <dt>License</dt><dd>MIT, open source</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. Core primitives -->
+  <section>
+    <div class="sec-top">
+      <div class="aside"><div class="lbl">Foundation</div><p>Three types you learn once. Everything else composes from them.</p></div>
+      <h2>Core primitives.</h2>
+    </div>
+    <div class="split">
+      <div class="code glass">
+        <div class="fname mono"><span>primitives.py</span><span>python</span></div>
+<pre><span class="kw">import</span> anvil
+<span class="kw">from</span> anvil <span class="kw">import</span> Q, Relation, System
+
+<span class="cm"># Quantity: a value with units, tracked through every op</span>
+force = Q(<span class="nu">10</span>, <span class="st">"kg"</span>) * Q(<span class="nu">9.81</span>, <span class="st">"m/s^2"</span>)   <span class="cm"># 98.1 N</span>
+
+<span class="cm"># Relation: a physics function as a reusable component</span>
+<span class="kw">def</span> <span class="fn">kinetic</span>(m, v): <span class="kw">return</span> {<span class="st">"KE"</span>: Q(<span class="nu">0.5</span>*m*v**<span class="nu">2</span>, <span class="st">"J"</span>)}
+ke = Relation(kinetic)(m=<span class="nu">2</span>, v=<span class="nu">3</span>)             <span class="cm"># {'KE': 9.0 J}</span>
+
+<span class="cm"># System: wire relations into a solvable graph</span>
+sys = System(<span class="st">"drop"</span>)
+sys.<span class="fn">add</span>(<span class="st">"m"</span>, <span class="nu">2</span>, <span class="st">"kg"</span>); sys.<span class="fn">use</span>(kinetic)
+sys.<span class="fn">solve</span>()</pre>
+      </div>
+      <div class="say">
+        <p><strong>Quantity</strong> carries units and dimensions; incompatible operations raise instead of silently corrupting a result.</p>
+        <p><strong>Relation</strong> wraps an ordinary function, auto-extracting its inputs and outputs so it can be inspected, unit-checked and reused.</p>
+        <p class="small"><strong>System</strong> orders the computation, detects coupling, and picks the solver. No configuration.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 2. Units -->
+  <section>
+    <div class="sec-top">
+      <div class="aside"><div class="num">100+ units</div><p>SI, imperial, and derived, with full dimensional analysis.</p></div>
+      <h2>A units engine, not a lookup table.</h2>
+    </div>
+    <div class="defs">
+      <div class="row"><dt>Tracking</dt><h4>Automatic propagation</h4><dd>Units flow through arithmetic; <code>m*a</code> yields newtons without being told.</dd></div>
+      <div class="row"><dt>Safety</dt><h4>Dimension checks</h4><dd>Adding metres to seconds raises; a dimensioned value against a raw float raises.</dd></div>
+      <div class="row"><dt>Conversion</dt><h4>SI on demand</h4><dd><code>float(q)</code> gives the SI value; convert between any compatible units.</dd></div>
+      <div class="row"><dt>Temperatures</dt><h4>Offset scales</h4><dd>Kelvin, Celsius and Fahrenheit handled with correct offsets, not just factors.</dd></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 3. RSQ library -->
+  <section>
+    <div class="sec-top">
+      <div class="aside"><div class="num">166 relations</div><p>Built-in engineering and science knowledge, callable by name.</p></div>
+      <h2>A physics library across 33 domains.</h2>
+    </div>
+    <div class="split" style="margin-bottom:44px">
+      <div class="code glass">
+        <div class="fname mono"><span>library.py</span><span>python</span></div>
+<pre><span class="cm"># call any built-in relation directly</span>
+anvil.R.<span class="fn">isentropic_ratios</span>(M=<span class="nu">2.0</span>, gamma=<span class="nu">1.4</span>)
+anvil.R.<span class="fn">von_mises_stress</span>(sigma_x=<span class="nu">80e6</span>, sigma_y=<span class="nu">20e6</span>,
+                     sigma_z=<span class="nu">0</span>, tau_xy=<span class="nu">30e6</span>, tau_yz=<span class="nu">0</span>, tau_zx=<span class="nu">0</span>)
+anvil.R.<span class="fn">hohmann_transfer</span>(r1=<span class="nu">7000e3</span>, r2=<span class="nu">42164e3</span>, mu=<span class="nu">3.986e14</span>)
+anvil.R.<span class="fn">nernst_cell_potential</span>(E0=<span class="nu">1.10</span>, n=<span class="nu">2</span>, T=<span class="nu">298.15</span>, Q_rxn=<span class="nu">1e-3</span>)
+
+<span class="cm"># pre-built solvable systems, including full jet-engine cycles</span>
+tj = anvil.<span class="fn">S</span>.turbojet_cycle
+</pre>
+      </div>
+      <div class="say">
+        <p>Relations are grouped by dot-hierarchical domain and reachable as <code class="mono">anvil.R.name</code> or <code class="mono">anvil.R.domain.name</code>.</p>
+        <p class="small">Five domains ship as pre-built <strong>Systems</strong>, including GasTurb-style turbojet, turbofan, afterburner and turboprop cycles with station tables and T-s / h-s diagrams.</p>
+      </div>
+    </div>
+    <div class="defs">
+      <div class="row"><dt>Aerospace</dt><h4>Aero &amp; compressible</h4><dd>Isentropic, normal / oblique shocks, Prandtl-Meyer, Fanno, Rayleigh, lift, drag, ISA.</dd></div>
+      <div class="row"><dt>Propulsion</dt><h4>Jet &amp; rocket cycles</h4><dd>Turbojet, turbofan, afterburner, turboprop, nozzles, thrust, specific impulse.</dd></div>
+      <div class="row"><dt>Orbital</dt><h4>Astrodynamics &amp; ADCS</h4><dd>Kepler, Hohmann, bielliptic, plane change, J2, attitude, reaction wheels.</dd></div>
+      <div class="row"><dt>Structures</dt><h4>Stress &amp; stability</h4><dd>Beams, buckling, torsion, principal / von Mises stress, pressure vessels.</dd></div>
+      <div class="row"><dt>Heat transfer</dt><h4>Conduction to HX</h4><dd>Conduction, convection, radiation, fins, LMTD, effectiveness-NTU, transients.</dd></div>
+      <div class="row"><dt>Fluids</dt><h4>Internal flow</h4><dd>Reynolds, Colebrook / Haaland friction, pipe pressure drop, skin friction.</dd></div>
+      <div class="row"><dt>Thermo</dt><h4>Cycles &amp; gases</h4><dd>Ideal gas, Carnot, Brayton, speed of sound, Sutherland viscosity.</dd></div>
+      <div class="row"><dt>Controls</dt><h4>Classical &amp; state-space</h4><dd>PID tuning, step response, Routh-Hurwitz, gain / phase margin, LQR, poles.</dd></div>
+      <div class="row"><dt>Materials</dt><h4>Fatigue &amp; fracture</h4><dd>Safety factor, Basquin fatigue, Miner rule, fracture toughness, composites.</dd></div>
+      <div class="row"><dt>Physics</dt><h4>Fundamentals</h4><dd>Mechanics, electromagnetism, optics, waves, relativity, quantum.</dd></div>
+      <div class="row"><dt>Chemistry</dt><h4>General chemistry</h4><dd>Stoichiometry, gas laws, solutions, colligative, kinetics, equilibrium, electro, acid-base.</dd></div>
+      <div class="row"><dt>Data</dt><h4>Curve fitting</h4><dd>Linear, polynomial, power and exponential regression on data tables.</dd></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 4. Solvers & studies -->
+  <section>
+    <div class="sec-top">
+      <div class="aside"><div class="lbl">Compute</div><p>From a single forward pass to optimization over a coupled model.</p></div>
+      <h2>Solvers, sweeps and studies.</h2>
+    </div>
+    <div class="split" style="margin-bottom:44px">
+      <div class="code glass">
+        <div class="fname mono"><span>study.py</span><span>python</span></div>
+<pre>sys = anvil.S.rocket_nozzle.<span class="fn">copy</span>()
+sys.<span class="fn">set</span>(P0=<span class="nu">10e6</span>, T0=<span class="nu">3200</span>)
+
+sys.<span class="fn">solve</span>()                       <span class="cm"># auto: forward / Gauss-Seidel / Newton</span>
+sys.<span class="fn">sweep</span>(<span class="st">"P0"</span>, [<span class="nu">5e6</span>, <span class="nu">1e7</span>, <span class="nu">2e7</span>], parallel=<span class="nu">4</span>)
+sys.<span class="fn">sensitivity</span>(outputs=[<span class="st">"thrust"</span>]).<span class="fn">summary</span>()
+sys.<span class="fn">optimize</span>(<span class="st">"thrust"</span>, {<span class="st">"P0"</span>: (<span class="nu">5e6</span>, <span class="nu">2e7</span>)}, minimize=<span class="kw">False</span>)</pre>
+      </div>
+      <div class="say">
+        <p>The solver is chosen for you from the graph structure; you can also force forward, Gauss-Seidel or Newton.</p>
+        <p class="small">Sweeps run in parallel and export to CSV or JSON; sensitivity ranks normalized influence of each input.</p>
+      </div>
+    </div>
+    <div class="defs">
+      <div class="row"><dt>Solvers</dt><h4>Forward to Newton</h4><dd>Automatic ordering, coupling detection, iterative solve with live residuals.</dd></div>
+      <div class="row"><dt>Differential</dt><h4>ODE / BVP / PDE</h4><dd>RK45, BDF, Radau, Crank-Nicolson, boundary-value and 1D PDE patterns.</dd></div>
+      <div class="row"><dt>Optimization</dt><h4>Global &amp; local</h4><dd>Bounded optimization over any output, reusing the same solvable system.</dd></div>
+      <div class="row"><dt>Sweeps</dt><h4>Parallel parametric</h4><dd>Sweep any input over a range, multi-worker, tabulated and plottable.</dd></div>
+      <div class="row"><dt>Sensitivity</dt><h4>Ranked influence</h4><dd>Normalized derivatives of chosen outputs with respect to each input.</dd></div>
+      <div class="row"><dt>Studies</dt><h4>DOE &amp; UQ</h4><dd>Design-of-experiments sampling and uncertainty quantification via adapters.</dd></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 5. Advanced numerics -->
+  <section>
+    <div class="sec-top">
+      <div class="aside"><div class="lbl">Beyond relations</div><p>Model-order reduction, a built-in flow solver, and signal analysis.</p></div>
+      <h2>Advanced numerics, built in.</h2>
+    </div>
+    <div class="defs">
+      <div class="row"><dt>Decomposition</dt><h4>POD &amp; DMD</h4><dd>Proper orthogonal and dynamic mode decomposition for reduced-order models.</dd></div>
+      <div class="row"><dt>Inversion</dt><h4>Abel transform</h4><dd>Forward and inverse Abel for axisymmetric field reconstruction.</dd></div>
+      <div class="row"><dt>CFD</dt><h4>2D Euler solver</h4><dd>A native compressible flow solver with meshing, shocks and field visualization.</dd></div>
+      <div class="row"><dt>Signal</dt><h4>Spectra &amp; filters</h4><dd>FFT spectra, Welch PSD, STFT spectrograms, band-pass filters, correlation.</dd></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 6. Adapters -->
+  <section>
+    <div class="sec-top">
+      <div class="aside"><div class="num">15 adapters</div><p>Industry tools wrapped as native relations. Real results only.</p></div>
+      <h2>Real solvers, wrapped.</h2>
+    </div>
+    <div class="defs">
+      <div class="row"><dt>Aerodynamics</dt><h4>XFOIL · SU2</h4><dd>Airfoil analysis and CFD, called as ordinary relations.</dd></div>
+      <div class="row"><dt>CFD</dt><h4>OpenFOAM · gmsh</h4><dd>Finite-volume flow and mesh generation from the same interface.</dd></div>
+      <div class="row"><dt>Structural</dt><h4>FEniCSx · NASTRAN</h4><dd>Finite-element analysis through <code>pyNASTRAN</code> and <code>dolfinx</code>.</dd></div>
+      <div class="row"><dt>Thermochemistry</dt><h4>Cantera · CoolProp</h4><dd>Combustion, equilibrium and fluid property databases.</dd></div>
+      <div class="row"><dt>Astrodynamics</dt><h4>poliastro · pykep</h4><dd>High-fidelity orbits and interplanetary trajectory optimization.</dd></div>
+      <div class="row"><dt>Rocketry</dt><h4>NASA CEA · RocketCEA</h4><dd>Chemical-equilibrium rocket performance and detonation.</dd></div>
+      <div class="row"><dt>Design</dt><h4>OpenMDAO · surrogates</h4><dd>Multidisciplinary optimization and scikit-learn / GPy surrogate models.</dd></div>
+      <div class="row"><dt>Guarantee</dt><h4>No mock fallbacks</h4><dd>Missing a tool raises a clear install-hint error, never a fabricated number.</dd></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 7. Registry & workflow -->
+  <section>
+    <div class="sec-top">
+      <div class="aside"><div class="lbl">Your own work</div><p>Author, isolate and promote relations without touching the global set.</p></div>
+      <h2>A registry you can build on.</h2>
+    </div>
+    <div class="split">
+      <div class="code glass">
+        <div class="fname mono"><span>registry.py</span><span>python</span></div>
+<pre><span class="cm"># develop in an isolated project store</span>
+<span class="kw">with</span> anvil.<span class="fn">project</span>(<span class="st">"study"</span>, path=<span class="st">"./work"</span>) <span class="kw">as</span> proj:
+    anvil.<span class="fn">push</span>(my_relation, domain=<span class="st">"aero"</span>)   <span class="cm"># project only</span>
+    proj.R.<span class="fn">my_relation</span>(M=<span class="nu">2.0</span>)
+    anvil.R.<span class="fn">isentropic_ratios</span>(M=<span class="nu">2.0</span>)      <span class="cm"># globals still visible</span>
+
+proj.<span class="fn">promote</span>(<span class="st">"my_relation"</span>)               <span class="cm"># graduate to global</span>
+anvil.<span class="fn">check</span>(<span class="st">"my_relation"</span>)               <span class="cm"># smoke-test any relation</span></pre>
+      </div>
+      <div class="say">
+        <p>Relations are stored as Python source in a per-project SQLite registry, reconstructed into live callables on demand.</p>
+        <p class="small">Experiment in a project store, validate with <code class="mono">anvil.check</code>, then promote to the global registry when ready.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 8. Web workbench -->
+  <section>
+    <div class="sec-top">
+      <div class="aside"><div class="lbl">In the browser</div><p>A calculator and a node-graph builder over the same engine.</p></div>
+      <h2>The web workbench.</h2>
+    </div>
+    <div class="defs">
+      <div class="row"><dt>Calculator</dt><h4>Any relation, unit-aware</h4><dd>Pick an RSQ, type <code>500 kPa</code>, read outputs with units and a typeset formula.</dd></div>
+      <div class="row"><dt>Canvas</dt><h4>Node-graph builder</h4><dd>Wire quantities into relations; solve server-side with live residuals over WebSocket.</dd></div>
+      <div class="row"><dt>Packs</dt><h4>Curated collections</h4><dd>Filter the catalog to jet-cycle, compressible, heat, structures, fitting, and more.</dd></div>
+      <div class="row"><dt>Compare</dt><h4>Result tray</h4><dd>Pin runs side by side, one row per variable, export the comparison as CSV.</dd></div>
+      <div class="row"><dt>Reports</dt><h4>HTML &amp; Markdown</h4><dd>Export a solved relation as a self-contained report, alongside CSV and JSON.</dd></div>
+      <div class="row"><dt>Data tables</dt><h4>Curve fitting</h4><dd>Paste a table, map columns to array inputs, read back coefficients and fit.</dd></div>
+      <div class="row"><dt>Keypad</dt><h4>Scratch calculator</h4><dd>A scientific keypad plus memory slots and an auto-log of recent results.</dd></div>
+      <div class="row"><dt>Spotlight</dt><h4>Command palette</h4><dd>Ctrl / Cmd-K fuzzy search over every relation, with keyboard navigation.</dd></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 9. Run & integrate -->
+  <section>
+    <div class="sec-top">
+      <div class="aside"><div class="lbl">Getting running</div><p>One command to launch; call it from anywhere.</p></div>
+      <h2>Start it, then call it.</h2>
+    </div>
+    <div class="split">
+      <div class="code glass">
+        <div class="fname mono"><span>run.sh</span><span>shell + python</span></div>
+<pre><span class="pr cm">$ </span><span class="cm">python start_anvil.py       # provisions, launches, opens UI</span>
+<span class="pr cm">$ </span><span class="cm">anvil doctor                # what tools are usable here</span>
+<span class="pr cm">$ </span><span class="cm">anvil serve                 # start the API server</span>
+
+<span class="cm"># call a running server from any Python</span>
+<span class="kw">from</span> anvil.client <span class="kw">import</span> AnvilClient
+AnvilClient().<span class="fn">solve</span>(<span class="st">"isentropic_ratios"</span>, M=<span class="nu">2.0</span>, gamma=<span class="nu">1.4</span>)</pre>
+      </div>
+      <div class="say">
+        <p>The core needs only NumPy and SciPy. One command provisions and launches, no npm, no build step; the web bundle ships prebuilt.</p>
+        <p class="small">Everything is scriptable and REST-addressable: solve, sweep, and read the registry over HTTP, or export CSV and JSON.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Open source + LLM friendly -->
+  <section style="padding-top:0">
+    <div class="two-creed">
+      <div>
+        <span class="lbl">Open</span>
+        <h3>Open source, <em>MIT licensed.</em></h3>
+        <p>Anvil is free to use, read, fork and extend. The core stays lean, numpy and scipy only, with every heavier tool an optional extra. No accounts, no telemetry, no lock-in.</p>
+        <a class="more mono" href="https://github.com/c-rk/anvil-framework-s">Read the source &rarr;</a>
+      </div>
+      <div>
+        <span class="lbl">Extensible</span>
+        <h3>Built to be <em>extended by LLMs.</em></h3>
+        <p>A relation is plain Python stored as source, so an LLM can author one from a page of equations. Anvil ships a feed-me prompt, <code>docs/RSQ_AUTHORING_PROMPT.md</code>, and a pipeline guide; the physics and chemistry packs were authored this way and validated against textbook values before shipping.</p>
+        <a class="more mono" href="ANVIL_GUIDE.html">See the pipeline &rarr;</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="sig">Anvil, from equations to engineering tools</span>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="quickstart.html">Quick start</a>
+      <a href="ANVIL_GUIDE.html">Guide</a>
+      <a href="wiki.html">Wiki</a>
+      <a href="https://github.com/c-rk/anvil-framework-s">GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var root=document.documentElement, key="anvil-docs-theme", s=localStorage.getItem(key);
+  if(s)root.setAttribute("data-theme",s);
+  document.getElementById("theme").addEventListener("click",function(){
+    var c=root.getAttribute("data-theme");
+    if(!c)c=matchMedia("(prefers-color-scheme:light)").matches?"light":"dark";
+    var n=c==="dark"?"light":"dark";root.setAttribute("data-theme",n);localStorage.setItem(key,n);
+  });
+})();
+</script>
+</body>
+</html>
