@@ -295,6 +295,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <a href="#19" onclick="showPage('19')">Signal Processing</a>
 <div class="sb-section">Propulsion</div>
 <a href="#23" onclick="showPage('23')">Propulsion Cycles</a>
+<div class="sb-section">Physics</div>
+<a href="#24" onclick="showPage('24')">Physics</a>
 <div class="sb-section">Workbench & Dev</div>
 <a href="#20" onclick="showPage('20')">Web Workbench</a>
 <a href="#21" onclick="showPage('21')">Contributing</a>
@@ -4640,7 +4642,7 @@ Calls the function with <code>1.0</code> for every unknown input. Reads the retu
 </tbody>
 </table></section>
 <section id="page-09" class="wiki-page" style="display:none"><h1 id="built-in-rsqs">Built-in RSQs<a class="headerlink" href="#built-in-rsqs" title="Permanent link">&para;</a></h1>
-<p>132 RSQs (123 relations, 4 quantity sets, 5 systems) across 18 domains, auto-seeded into <code>~/.anvil/registry.db</code> on first import. Access via <code>anvil.R.*</code>, <code>anvil.S.*</code>, <code>anvil.QDB.*</code>, or <code>sys.use("name")</code>.</p>
+<p>148 RSQs (139 relations, 4 quantity sets, 5 systems) across 24 domains, auto-seeded into <code>~/.anvil/registry.db</code> on first import. Access via <code>anvil.R.*</code>, <code>anvil.S.*</code>, <code>anvil.QDB.*</code>, or <code>sys.use("name")</code>. Fundamental-physics relations have their own page: <a href="#24" onclick="showPage('24'); return false;">Physics</a>.</p>
 <p>All inputs are dimensionless scalars or SI floats unless noted. All outputs are SI units unless returned as <code>Q(value, "unit")</code>.</p>
 <hr />
 <h2 id="constants-const-type-q">Constants (<code>const</code>), Type: Q<a class="headerlink" href="#constants-const-type-q" title="Permanent link">&para;</a></h2>
@@ -6195,6 +6197,86 @@ stress analysis, and thermodynamic cycles.</p>
 <td><code>exp_fit</code></td>
 <td>data.fitting</td>
 <td>Exponential fit y = a e^(b x) via semi-log regression</td>
+</tr>
+<tr>
+<td><code>kinetic_energy</code></td>
+<td>physics.mechanics</td>
+<td>Translational kinetic energy 1/2 m v^2</td>
+</tr>
+<tr>
+<td><code>newton_gravitation</code></td>
+<td>physics.mechanics</td>
+<td>Newton gravitational force between two masses</td>
+</tr>
+<tr>
+<td><code>projectile_range</code></td>
+<td>physics.mechanics</td>
+<td>Projectile range over flat ground</td>
+</tr>
+<tr>
+<td><code>pendulum_period</code></td>
+<td>physics.mechanics</td>
+<td>Small-angle simple pendulum period</td>
+</tr>
+<tr>
+<td><code>coulomb_force</code></td>
+<td>physics.em</td>
+<td>Electrostatic force between two point charges</td>
+</tr>
+<tr>
+<td><code>parallel_plate_capacitor_energy</code></td>
+<td>physics.em</td>
+<td>Stored energy of a vacuum parallel-plate capacitor</td>
+</tr>
+<tr>
+<td><code>lorentz_force_magnitude</code></td>
+<td>physics.em</td>
+<td>Magnetic Lorentz force on a moving charge</td>
+</tr>
+<tr>
+<td><code>snell_refraction_angle</code></td>
+<td>physics.optics</td>
+<td>Snell law refraction angle (flags total internal reflection)</td>
+</tr>
+<tr>
+<td><code>thin_lens_image_distance</code></td>
+<td>physics.optics</td>
+<td>Thin lens image distance (infinite at d_o = f)</td>
+</tr>
+<tr>
+<td><code>photon_energy_frequency</code></td>
+<td>physics.optics</td>
+<td>Photon energy E = h f</td>
+</tr>
+<tr>
+<td><code>wave_speed</code></td>
+<td>physics.waves</td>
+<td>Wave speed v = f lambda</td>
+</tr>
+<tr>
+<td><code>relativistic_doppler_shift</code></td>
+<td>physics.waves</td>
+<td>Relativistic Doppler observed frequency</td>
+</tr>
+<tr>
+<td><code>lorentz_factor</code></td>
+<td>physics.relativity</td>
+<td>Lorentz factor gamma from speed</td>
+</tr>
+<tr>
+<td><code>mass_energy_equivalence</code></td>
+<td>physics.relativity</td>
+<td>Rest energy E = m c^2</td>
+</tr>
+<tr>
+<td><code>de_broglie_wavelength</code></td>
+<td>physics.quantum</td>
+<td>de Broglie wavelength h/p</td>
+</tr>
+<tr>
+<td><code>wien_peak_wavelength</code></td>
+<td>physics.quantum</td>
+<td>Blackbody peak wavelength (Wien displacement)</td>
 </tr>
 </tbody>
 </table>
@@ -13255,15 +13337,15 @@ python<span class="w"> </span>tests/test_v03.py<span class="w">          </span>
 <span class="o">============================================================</span>
 
 <span class="o">[</span><span class="n">1</span><span class="o">]</span><span class="w"> </span><span class="n">Opening</span><span class="w"> </span><span class="n">project</span><span class="w"> </span><span class="n">store</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="p">...</span>
-<span class="w">  </span><span class="n">Project</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="w"> </span><span class="n">opened</span><span class="w">  </span><span class="p">(</span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_1e2clxw2</span><span class="err">\</span><span class="p">.</span><span class="n">anvil</span><span class="err">\</span><span class="n">project_hx_correlations</span><span class="p">.</span><span class="n">db</span><span class="p">)</span>
-<span class="w">  </span><span class="nl">Repr</span><span class="p">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">Project</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="err">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="n">RSQs</span><span class="w"> </span><span class="k">at</span><span class="w"> </span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_1e2clxw2</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">Project</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="w"> </span><span class="n">opened</span><span class="w">  </span><span class="p">(</span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_u782vmjv</span><span class="err">\</span><span class="p">.</span><span class="n">anvil</span><span class="err">\</span><span class="n">project_hx_correlations</span><span class="p">.</span><span class="n">db</span><span class="p">)</span>
+<span class="w">  </span><span class="nl">Repr</span><span class="p">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">Project</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="err">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="n">RSQs</span><span class="w"> </span><span class="k">at</span><span class="w"> </span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_u782vmjv</span><span class="o">&gt;</span>
 
 <span class="o">[</span><span class="n">2</span><span class="o">]</span><span class="w"> </span><span class="n">Registering</span><span class="w"> </span><span class="n">draft</span><span class="w"> </span><span class="n">correlations</span><span class="p">...</span>
 <span class="w">  </span><span class="o">[</span><span class="n">hx_correlations</span><span class="o">]</span><span class="w"> </span><span class="n">Registered</span><span class="w"> </span><span class="s1">&#39;ntu_crossflow&#39;</span><span class="w"> </span><span class="p">(</span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="k">domain</span><span class="w"> </span><span class="s1">&#39;heat_transfer&#39;</span><span class="p">.</span>
 <span class="w">  </span><span class="o">[</span><span class="n">hx_correlations</span><span class="o">]</span><span class="w"> </span><span class="n">Registered</span><span class="w"> </span><span class="s1">&#39;shell_tube_ntu&#39;</span><span class="w"> </span><span class="p">(</span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="k">domain</span><span class="w"> </span><span class="s1">&#39;heat_transfer&#39;</span><span class="p">.</span>
 <span class="w">  </span><span class="o">[</span><span class="n">hx_correlations</span><span class="o">]</span><span class="w"> </span><span class="n">Registered</span><span class="w"> </span><span class="s1">&#39;log_mean_temp&#39;</span><span class="w"> </span><span class="p">(</span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="k">domain</span><span class="w"> </span><span class="s1">&#39;heat_transfer&#39;</span><span class="p">.</span>
 
-<span class="w">  </span><span class="nl">Project</span><span class="p">:</span><span class="w"> </span><span class="n">hx_correlations</span><span class="w">  </span><span class="p">(</span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_1e2clxw2</span><span class="p">)</span>
+<span class="w">  </span><span class="nl">Project</span><span class="p">:</span><span class="w"> </span><span class="n">hx_correlations</span><span class="w">  </span><span class="p">(</span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_u782vmjv</span><span class="p">)</span>
 
 <span class="w">  </span><span class="n">Relations</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="err">:</span>
 <span class="w">    </span><span class="n">log_mean_temp</span><span class="w">                   </span><span class="o">[</span><span class="n">heat_transfer</span><span class="o">]</span>
@@ -18012,6 +18094,96 @@ Parallel sweep of chamber pressure P0:
 <span class="p">...</span><span class="w"> </span><span class="p">(</span><span class="mi">9</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">lines</span><span class="p">)</span>
 </code></pre></div>
 
+<h2 id="fundamental-physics-rsqs">Fundamental Physics RSQs<a class="headerlink" href="#fundamental-physics-rsqs" title="Permanent link">&para;</a></h2>
+<p><code>examples/ex_physics.py</code>: A tour of the physics relation pack: mechanics, electromagnetism, optics,</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">anvil</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Mechanics&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Kinetic energy (2 kg at 3 m/s) : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">kinetic_energy</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="o">=</span><span class="mi">3</span><span class="p">)[</span><span class="s1">&#39;KE&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Gravity (Earth on 1 kg at surface): &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">newton_gravitation</span><span class="p">(</span><span class="n">m1</span><span class="o">=</span><span class="mf">5.972e24</span><span class="p">,</span><span class="w"> </span><span class="n">m2</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="o">=</span><span class="mf">6.371e6</span><span class="p">)[</span><span class="s1">&#39;F_grav&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Projectile range (10 m/s, 45 deg): &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">projectile_range</span><span class="p">(</span><span class="n">v0</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">angle_deg</span><span class="o">=</span><span class="mi">45</span><span class="p">)[</span><span class="s1">&#39;range&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Pendulum period (1 m)          : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">pendulum_period</span><span class="p">(</span><span class="n">L</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Electromagnetism&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Coulomb force (2x 1 uC at 0.1 m): &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">coulomb_force</span><span class="p">(</span><span class="n">q1</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span><span class="w"> </span><span class="n">q2</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)[</span><span class="s1">&#39;F_coulomb&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Capacitor energy (1 m^2, 1 mm, 100 V): &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">parallel_plate_capacitor_energy</span><span class="p">(</span><span class="n">A</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="o">=</span><span class="mi">100</span><span class="p">)[</span><span class="s1">&#39;U_stored&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Lorentz force (proton, 1e6 m/s, 0.5 T): &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">lorentz_force_magnitude</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="mf">1.602176634e-19</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)[</span><span class="s1">&#39;F_lorentz&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Optics&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="n">snell</span> <span class="o">=</span> <span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">snell_refraction_angle</span><span class="p">(</span><span class="n">n1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n2</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">theta1_deg</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Snell refraction (30 deg into glass): </span><span class="si">{</span><span class="n">snell</span><span class="p">[</span><span class="s1">&#39;theta2_deg&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> deg&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Thin lens image (f=0.1, d_o=0.3): &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">thin_lens_image_distance</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">d_o</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)[</span><span class="s1">&#39;d_i&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Photon energy (green, 5.5e14 Hz): &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">photon_energy_frequency</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="mf">5.5e14</span><span class="p">)[</span><span class="s1">&#39;E_photon&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Waves and relativity&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Wave speed (100 Hz, 3.4 m)     : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">wave_speed</span><span class="p">(</span><span class="n">frequency</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">wavelength</span><span class="o">=</span><span class="mf">3.4</span><span class="p">)[</span><span class="s1">&#39;speed&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">dop</span> <span class="o">=</span> <span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">relativistic_doppler_shift</span><span class="p">(</span><span class="n">f_src</span><span class="o">=</span><span class="mf">1e9</span><span class="p">,</span> <span class="n">v_radial</span><span class="o">=</span><span class="mf">2.99792458e7</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Relativistic Doppler (approach 0.1c): </span><span class="si">{</span><span class="n">dop</span><span class="p">[</span><span class="s1">&#39;f_obs&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (x</span><span class="si">{</span><span class="n">dop</span><span class="p">[</span><span class="s1">&#39;shift_factor&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Lorentz factor (0.6c)          : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">lorentz_factor</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="mf">0.6</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.99792458e8</span><span class="p">)[</span><span class="s1">&#39;gamma&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Rest energy of 1 kg            : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">mass_energy_equivalence</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="s1">&#39;E_rest&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Quantum&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  de Broglie wavelength (p=1e-24): &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">de_broglie_wavelength</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">1e-24</span><span class="p">)[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Wien peak (Sun, 5778 K)        : &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">wien_peak_wavelength</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">5778</span><span class="p">)[</span><span class="s1">&#39;lambda_peak&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Output:</strong></p>
+<div class="codehilite"><pre><span></span><code>============================================================
+  Mechanics
+============================================================
+  Kinetic energy (2 kg at 3 m/s) : 9.0000 J
+  Gravity (Earth on 1 kg at surface): 9.8195 N
+  Projectile range (10 m/s, 45 deg): 10.1937 m
+  Pendulum period (1 m)          : 2.0061 s
+
+============================================================
+  Electromagnetism
+============================================================
+  Coulomb force (2x 1 uC at 0.1 m): 0.898755 N
+  Capacitor energy (1 m^2, 1 mm, 100 V): 4.4271e-05 J
+  Lorentz force (proton, 1e6 m/s, 0.5 T): 8.0109e-14 N
+
+============================================================
+  Optics
+============================================================
+  Snell refraction (30 deg into glass): 19.471 deg
+  Thin lens image (f=0.1, d_o=0.3): 0.150000 m
+  Photon energy (green, 5.5e14 Hz): 3.6443e-19 J
+
+============================================================
+  Waves and relativity
+============================================================
+  Wave speed (100 Hz, 3.4 m)     : 340.00 m/s
+  Relativistic Doppler (approach 0.1c): 1.1055e+09 Hz (x1.1055)
+  Lorentz factor (0.6c)          : 1.2500
+  Rest energy of 1 kg            : 8.9876e+16 J
+
+============================================================
+  Quantum
+============================================================
+  de Broglie wavelength (p=1e-24): 6.6261e-10 m
+<span class="k">...</span> (1 more lines)
+</code></pre></div>
+
 <h2 id="example-custom-relations-project-registry">Example: Custom Relations + Project Registry<a class="headerlink" href="#example-custom-relations-project-registry" title="Permanent link">&para;</a></h2>
 <p><code>examples/ex_project_workflow.py</code>: Scenario: pipe flow design, friction factor, pressure drop, pump power.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
@@ -20172,7 +20344,7 @@ Parallel sweep of chamber pressure P0:
 
 <span class="c1">--- What&#39;s in the registry? ---</span>
 
-<span class="w">  </span><span class="n">Relations</span><span class="w"> </span><span class="p">(</span><span class="mi">137</span><span class="p">)</span><span class="err">:</span>
+<span class="w">  </span><span class="n">Relations</span><span class="w"> </span><span class="p">(</span><span class="mi">153</span><span class="p">)</span><span class="err">:</span>
 <span class="w">    </span><span class="n">hx_duty</span><span class="w">                       </span>
 <span class="w">    </span><span class="n">hx_eff_ntu</span><span class="w">                    </span>
 <span class="w">    </span><span class="n">drag_force</span><span class="w">                      </span><span class="o">[</span><span class="n">aero</span><span class="o">]</span><span class="w">  </span><span class="p">(</span><span class="n">builtin</span><span class="p">)</span>
@@ -20200,7 +20372,7 @@ Parallel sweep of chamber pressure P0:
 <span class="w">    </span><span class="n">area_mach_subsonic</span><span class="w">              </span><span class="o">[</span><span class="n">aero.compressible</span><span class="o">]</span><span class="w">  </span><span class="p">(</span><span class="n">builtin</span><span class="p">)</span>
 <span class="w">      </span><span class="n">Subsonic</span><span class="w"> </span><span class="n">Mach</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">area</span><span class="w"> </span><span class="n">ratio</span><span class="w"> </span><span class="p">(</span><span class="n">A</span><span class="o">/</span><span class="n">A</span><span class="o">*</span><span class="p">)</span>
 <span class="w">    </span><span class="n">area_mach_supersonic</span><span class="w">            </span><span class="o">[</span><span class="n">aero.compressible</span><span class="o">]</span><span class="w">  </span><span class="p">(</span><span class="n">builtin</span><span class="p">)</span>
-<span class="p">...</span><span class="w"> </span><span class="p">(</span><span class="mi">473</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">lines</span><span class="p">)</span>
+<span class="p">...</span><span class="w"> </span><span class="p">(</span><span class="mi">505</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">lines</span><span class="p">)</span>
 </code></pre></div>
 
 <h2 id="pressure-tank-blowdown-through-a-hole-half-life-drain-time-for-a-gas">Pressure-tank blowdown through a hole -- "half-life" drain time for a gas.<a class="headerlink" href="#pressure-tank-blowdown-through-a-hole-half-life-drain-time-for-a-gas" title="Permanent link">&para;</a></h2>
@@ -20765,6 +20937,204 @@ inside your own System: <code>ram_intake</code>, <code>compressor</code>, <code>
 full engines are the <code>turbojet_cycle</code>, <code>turbofan_cycle</code>, <code>turbojet_ab_cycle</code>
 and <code>turboprop_cycle</code> systems.</p>
 <p>See the <a href="#22" onclick="showPage('22'); return false;">Examples</a> page for a complete, runnable walkthrough.</p></section>
+<section id="page-24" class="wiki-page" style="display:none"><h1 id="physics">Physics<a class="headerlink" href="#physics" title="Permanent link">&para;</a></h1>
+<p>A pack of fundamental-physics relations spanning mechanics, electromagnetism, optics, waves,
+relativity and quantum. Each is a native RSQ with unit-aware inputs and outputs, reachable at
+<code>anvil.R.&lt;name&gt;</code> or by domain at <code>anvil.R.physics.&lt;subdomain&gt;.&lt;name&gt;</code>.</p>
+<p>These relations were authored with an LLM using the workflow in <code>docs/RSQ_AUTHORING_PROMPT.md</code> and
+validated against textbook values before being seeded, a worked demonstration of that pipeline.</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">anvil</span>
+
+<span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">kinetic_energy</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>                       <span class="c1"># {&quot;KE&quot;: 9.0 J}</span>
+<span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">mass_energy_equivalence</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>                   <span class="c1"># {&quot;E_rest&quot;: 8.99e16 J}</span>
+<span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">snell_refraction_angle</span><span class="p">(</span><span class="n">n1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n2</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">theta1_deg</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>  <span class="c1"># 19.47 deg</span>
+</code></pre></div>
+
+<h2 id="mechanics-physicsmechanics">Mechanics (<code>physics.mechanics</code>)<a class="headerlink" href="#mechanics-physicsmechanics" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kinetic_energy</code></td>
+<td>m, v</td>
+<td>KE</td>
+<td><code>KE = 1/2 m v^2</code></td>
+</tr>
+<tr>
+<td><code>newton_gravitation</code></td>
+<td>m1, m2, r</td>
+<td>F_grav</td>
+<td><code>F = G m1 m2 / r^2</code></td>
+</tr>
+<tr>
+<td><code>projectile_range</code></td>
+<td>v0, angle_deg, g=9.81</td>
+<td>range</td>
+<td><code>R = v0^2 sin(2 theta) / g</code></td>
+</tr>
+<tr>
+<td><code>pendulum_period</code></td>
+<td>L, g=9.81</td>
+<td>period</td>
+<td><code>T = 2 pi sqrt(L/g)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="electromagnetism-physicsem">Electromagnetism (<code>physics.em</code>)<a class="headerlink" href="#electromagnetism-physicsem" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>coulomb_force</code></td>
+<td>q1, q2, r</td>
+<td>F_coulomb</td>
+<td><code>F = q1 q2 / (4 pi eps0 r^2)</code></td>
+</tr>
+<tr>
+<td><code>parallel_plate_capacitor_energy</code></td>
+<td>A, d, V</td>
+<td>U_stored</td>
+<td><code>U = 1/2 (eps0 A / d) V^2</code></td>
+</tr>
+<tr>
+<td><code>lorentz_force_magnitude</code></td>
+<td>q, v, B, angle_deg=90</td>
+<td>F_lorentz</td>
+<td><code>F = q v B sin(theta)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="optics-physicsoptics">Optics (<code>physics.optics</code>)<a class="headerlink" href="#optics-physicsoptics" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>snell_refraction_angle</code></td>
+<td>n1, n2, theta1_deg</td>
+<td>theta2_deg, theta2_rad, total_internal_reflection</td>
+<td><code>n1 sin(theta1) = n2 sin(theta2)</code></td>
+</tr>
+<tr>
+<td><code>thin_lens_image_distance</code></td>
+<td>f, d_o</td>
+<td>d_i</td>
+<td><code>1/f = 1/d_o + 1/d_i</code></td>
+</tr>
+<tr>
+<td><code>photon_energy_frequency</code></td>
+<td>f</td>
+<td>E_photon</td>
+<td><code>E = h f</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>snell_refraction_angle</code> flags total internal reflection (returns <code>total_internal_reflection = 1.0</code>
+and NaN angles) past the critical angle. <code>thin_lens_image_distance</code> returns an infinite image
+distance when the object sits at the focal point (<code>d_o = f</code>) instead of raising.</p>
+<h2 id="waves-physicswaves">Waves (<code>physics.waves</code>)<a class="headerlink" href="#waves-physicswaves" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wave_speed</code></td>
+<td>frequency, wavelength</td>
+<td>speed</td>
+<td><code>v = f lambda</code></td>
+</tr>
+<tr>
+<td><code>relativistic_doppler_shift</code></td>
+<td>f_src, v_radial</td>
+<td>f_obs, shift_factor</td>
+<td><code>f_obs = f_src sqrt((1+beta)/(1-beta))</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="relativity-physicsrelativity">Relativity (<code>physics.relativity</code>)<a class="headerlink" href="#relativity-physicsrelativity" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lorentz_factor</code></td>
+<td>v</td>
+<td>gamma</td>
+<td><code>gamma = 1 / sqrt(1 - (v/c)^2)</code></td>
+</tr>
+<tr>
+<td><code>mass_energy_equivalence</code></td>
+<td>m</td>
+<td>E_rest</td>
+<td><code>E = m c^2</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="quantum-physicsquantum">Quantum (<code>physics.quantum</code>)<a class="headerlink" href="#quantum-physicsquantum" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>de_broglie_wavelength</code></td>
+<td>p</td>
+<td>wavelength</td>
+<td><code>lambda = h / p</code></td>
+</tr>
+<tr>
+<td><code>wien_peak_wavelength</code></td>
+<td>T</td>
+<td>lambda_peak</td>
+<td><code>lambda_peak = b / T</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Physical constants (<code>c</code>, <code>G</code>, <code>h</code>, <code>eps0</code>, Wien <code>b</code>, ...) are baked into each relation as SI
+  literals, so no constant inputs are required.</li>
+<li>Angle inputs are named <code>*_deg</code> and taken in degrees; outputs carry SI units (<code>J</code>, <code>N</code>, <code>m</code>, <code>s</code>,
+  <code>m/s</code>, <code>Hz</code>) except for dimensionless results (<code>gamma</code>, refraction angles, <code>shift_factor</code>).</li>
+<li>Run <code>examples/ex_physics.py</code> for a full tour with computed values.</li>
+</ul></section>
   </div>
 </div>
 
@@ -20778,7 +21148,7 @@ and <code>turboprop_cycle</code> systems.</p>
 
 <script>
 // ── Page data ─────────────────────────────────────────────────────────────────
-const PAGES = [["index", "Overview"], ["01", "Quick Start"], ["02", "Quantity (Q)"], ["03", "Unit Engine"], ["04", "Relation"], ["05", "System"], ["06", "Solvers"], ["07", "Registry"], ["08", "Project Registry"], ["09", "Built-in RSQs"], ["10", "Adapters"], ["11", "Sweep & Sensitivity"], ["12", "Visualization"], ["13", "Databases"], ["14", "Limits & Gotchas"], ["15", "Advanced"], ["16", "Decomposition"], ["17", "Abel Transform"], ["18", "CFD Solver"], ["19", "Signal Processing"], ["20", "Web Workbench"], ["21", "Contributing"], ["22", "Examples"], ["23", "Propulsion Cycles"]];
+const PAGES = [["index", "Overview"], ["01", "Quick Start"], ["02", "Quantity (Q)"], ["03", "Unit Engine"], ["04", "Relation"], ["05", "System"], ["06", "Solvers"], ["07", "Registry"], ["08", "Project Registry"], ["09", "Built-in RSQs"], ["10", "Adapters"], ["11", "Sweep & Sensitivity"], ["12", "Visualization"], ["13", "Databases"], ["14", "Limits & Gotchas"], ["15", "Advanced"], ["16", "Decomposition"], ["17", "Abel Transform"], ["18", "CFD Solver"], ["19", "Signal Processing"], ["20", "Web Workbench"], ["21", "Contributing"], ["22", "Examples"], ["23", "Propulsion Cycles"], ["24", "Physics"]];
 let currentIdx = 0;
 
 // ── Show a page ───────────────────────────────────────────────────────────────

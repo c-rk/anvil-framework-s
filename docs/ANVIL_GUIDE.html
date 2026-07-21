@@ -4774,15 +4774,15 @@ print(&quot;=&quot; * 60)<span class="lang-label">python</span></pre>
 ============================================================
 
 [1] Opening project store for &#x27;hx_correlations&#x27;...
-  Project &#x27;hx_correlations&#x27; opened  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_1e2clxw2\.anvil\project_hx_correlations.db)
-  Repr: &lt;Project &#x27;hx_correlations&#x27;: 0 RSQs at C:\Users\rc\AppData\Local\Temp\anvil_ex12_1e2clxw2&gt;
+  Project &#x27;hx_correlations&#x27; opened  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_u782vmjv\.anvil\project_hx_correlations.db)
+  Repr: &lt;Project &#x27;hx_correlations&#x27;: 0 RSQs at C:\Users\rc\AppData\Local\Temp\anvil_ex12_u782vmjv&gt;
 
 [2] Registering draft correlations...
   [hx_correlations] Registered &#x27;ntu_crossflow&#x27; (R) in domain &#x27;heat_transfer&#x27;.
   [hx_correlations] Registered &#x27;shell_tube_ntu&#x27; (R) in domain &#x27;heat_transfer&#x27;.
   [hx_correlations] Registered &#x27;log_mean_temp&#x27; (R) in domain &#x27;heat_transfer&#x27;.
 
-  Project: hx_correlations  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_1e2clxw2)
+  Project: hx_correlations  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_u782vmjv)
 
   Relations (3):
     log_mean_temp                   [heat_transfer]
@@ -9419,6 +9419,91 @@ print(f&quot;{&#x27;=&#x27;*W}&quot;)<span class="lang-label">python</span></pre
   margin  = 3.5000 bar
 
 ... (9 more lines)</div></div>
+<h3>Fundamental Physics RSQs</h3>
+<p class="muted"><code>examples/ex_physics.py</code>: A tour of the physics relation pack: mechanics, electromagnetism, optics,</p>
+<pre>import anvil
+
+print(&quot;=&quot; * 60)
+print(&quot;  Mechanics&quot;)
+print(&quot;=&quot; * 60)
+print(f&quot;  Kinetic energy (2 kg at 3 m/s) : {anvil.R.kinetic_energy(m=2, v=3)[&#x27;KE&#x27;]}&quot;)
+print(f&quot;  Gravity (Earth on 1 kg at surface): &quot;
+      f&quot;{anvil.R.newton_gravitation(m1=5.972e24, m2=1, r=6.371e6)[&#x27;F_grav&#x27;]}&quot;)
+print(f&quot;  Projectile range (10 m/s, 45 deg): &quot;
+      f&quot;{anvil.R.projectile_range(v0=10, angle_deg=45)[&#x27;range&#x27;]}&quot;)
+print(f&quot;  Pendulum period (1 m)          : {anvil.R.pendulum_period(L=1)[&#x27;period&#x27;]}&quot;)
+
+print(&quot;\n&quot; + &quot;=&quot; * 60)
+print(&quot;  Electromagnetism&quot;)
+print(&quot;=&quot; * 60)
+print(f&quot;  Coulomb force (2x 1 uC at 0.1 m): &quot;
+      f&quot;{anvil.R.coulomb_force(q1=1e-6, q2=1e-6, r=0.1)[&#x27;F_coulomb&#x27;]}&quot;)
+print(f&quot;  Capacitor energy (1 m^2, 1 mm, 100 V): &quot;
+      f&quot;{anvil.R.parallel_plate_capacitor_energy(A=1, d=1e-3, V=100)[&#x27;U_stored&#x27;]}&quot;)
+print(f&quot;  Lorentz force (proton, 1e6 m/s, 0.5 T): &quot;
+      f&quot;{anvil.R.lorentz_force_magnitude(q=1.602176634e-19, v=1e6, B=0.5)[&#x27;F_lorentz&#x27;]}&quot;)
+
+print(&quot;\n&quot; + &quot;=&quot; * 60)
+print(&quot;  Optics&quot;)
+print(&quot;=&quot; * 60)
+snell = anvil.R.snell_refraction_angle(n1=1, n2=1.5, theta1_deg=30)
+print(f&quot;  Snell refraction (30 deg into glass): {snell[&#x27;theta2_deg&#x27;]:.3f} deg&quot;)
+print(f&quot;  Thin lens image (f=0.1, d_o=0.3): &quot;
+      f&quot;{anvil.R.thin_lens_image_distance(f=0.1, d_o=0.3)[&#x27;d_i&#x27;]}&quot;)
+print(f&quot;  Photon energy (green, 5.5e14 Hz): &quot;
+      f&quot;{anvil.R.photon_energy_frequency(f=5.5e14)[&#x27;E_photon&#x27;]}&quot;)
+
+print(&quot;\n&quot; + &quot;=&quot; * 60)
+print(&quot;  Waves and relativity&quot;)
+print(&quot;=&quot; * 60)
+print(f&quot;  Wave speed (100 Hz, 3.4 m)     : {anvil.R.wave_speed(frequency=100, wavelength=3.4)[&#x27;speed&#x27;]}&quot;)
+dop = anvil.R.relativistic_doppler_shift(f_src=1e9, v_radial=2.99792458e7)
+print(f&quot;  Relativistic Doppler (approach 0.1c): {dop[&#x27;f_obs&#x27;]} (x{dop[&#x27;shift_factor&#x27;]:.4f})&quot;)
+print(f&quot;  Lorentz factor (0.6c)          : {anvil.R.lorentz_factor(v=0.6 * 2.99792458e8)[&#x27;gamma&#x27;]:.4f}&quot;)
+print(f&quot;  Rest energy of 1 kg            : {anvil.R.mass_energy_equivalence(m=1)[&#x27;E_rest&#x27;]}&quot;)
+
+print(&quot;\n&quot; + &quot;=&quot; * 60)
+print(&quot;  Quantum&quot;)
+print(&quot;=&quot; * 60)
+print(f&quot;  de Broglie wavelength (p=1e-24): &quot;
+      f&quot;{anvil.R.de_broglie_wavelength(p=1e-24)[&#x27;wavelength&#x27;]}&quot;)
+print(f&quot;  Wien peak (Sun, 5778 K)        : &quot;
+      f&quot;{anvil.R.wien_peak_wavelength(T=5778)[&#x27;lambda_peak&#x27;]}&quot;)<span class="lang-label">python</span></pre>
+<div class="out-wrap"><div class="out-label">Output</div><div class="out-block">============================================================
+  Mechanics
+============================================================
+  Kinetic energy (2 kg at 3 m/s) : 9.0000 J
+  Gravity (Earth on 1 kg at surface): 9.8195 N
+  Projectile range (10 m/s, 45 deg): 10.1937 m
+  Pendulum period (1 m)          : 2.0061 s
+
+============================================================
+  Electromagnetism
+============================================================
+  Coulomb force (2x 1 uC at 0.1 m): 0.898755 N
+  Capacitor energy (1 m^2, 1 mm, 100 V): 4.4271e-05 J
+  Lorentz force (proton, 1e6 m/s, 0.5 T): 8.0109e-14 N
+
+============================================================
+  Optics
+============================================================
+  Snell refraction (30 deg into glass): 19.471 deg
+  Thin lens image (f=0.1, d_o=0.3): 0.150000 m
+  Photon energy (green, 5.5e14 Hz): 3.6443e-19 J
+
+============================================================
+  Waves and relativity
+============================================================
+  Wave speed (100 Hz, 3.4 m)     : 340.00 m/s
+  Relativistic Doppler (approach 0.1c): 1.1055e+09 Hz (x1.1055)
+  Lorentz factor (0.6c)          : 1.2500
+  Rest energy of 1 kg            : 8.9876e+16 J
+
+============================================================
+  Quantum
+============================================================
+  de Broglie wavelength (p=1e-24): 6.6261e-10 m
+... (1 more lines)</div></div>
 <h3>Example: Custom Relations + Project Registry</h3>
 <p class="muted"><code>examples/ex_project_workflow.py</code>: Scenario: pipe flow design, friction factor, pressure drop, pump power.</p>
 <pre>import sys, os
@@ -11538,7 +11623,7 @@ print(&quot;=&quot; * 60)<span class="lang-label">python</span></pre>
 
 --- What&#x27;s in the registry? ---
 
-  Relations (137):
+  Relations (153):
     hx_duty                       
     hx_eff_ntu                    
     drag_force                      [aero]  (builtin)
@@ -11566,7 +11651,7 @@ print(&quot;=&quot; * 60)<span class="lang-label">python</span></pre>
     area_mach_subsonic              [aero.compressible]  (builtin)
       Subsonic Mach from area ratio (A/A*)
     area_mach_supersonic            [aero.compressible]  (builtin)
-... (473 more lines)</div></div>
+... (505 more lines)</div></div>
 <h3>Pressure-tank blowdown through a hole -- &quot;half-life&quot; drain time for a gas.</h3>
 <p class="muted"><code>examples/tank_blowdown.py</code>: Problem</p>
 <pre>from __future__ import annotations

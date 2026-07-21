@@ -2296,15 +2296,15 @@ print("=" * 60)
 ============================================================
 
 [1] Opening project store for 'hx_correlations'...
-  Project 'hx_correlations' opened  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_1e2clxw2\.anvil\project_hx_correlations.db)
-  Repr: <Project 'hx_correlations': 0 RSQs at C:\Users\rc\AppData\Local\Temp\anvil_ex12_1e2clxw2>
+  Project 'hx_correlations' opened  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_u782vmjv\.anvil\project_hx_correlations.db)
+  Repr: <Project 'hx_correlations': 0 RSQs at C:\Users\rc\AppData\Local\Temp\anvil_ex12_u782vmjv>
 
 [2] Registering draft correlations...
   [hx_correlations] Registered 'ntu_crossflow' (R) in domain 'heat_transfer'.
   [hx_correlations] Registered 'shell_tube_ntu' (R) in domain 'heat_transfer'.
   [hx_correlations] Registered 'log_mean_temp' (R) in domain 'heat_transfer'.
 
-  Project: hx_correlations  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_1e2clxw2)
+  Project: hx_correlations  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_u782vmjv)
 
   Relations (3):
     log_mean_temp                   [heat_transfer]
@@ -7168,6 +7168,102 @@ print(f"{'='*W}")
 ```
 
 
+## Fundamental Physics RSQs
+
+`examples/ex_physics.py`: A tour of the physics relation pack: mechanics, electromagnetism, optics,
+
+```python
+import anvil
+
+print("=" * 60)
+print("  Mechanics")
+print("=" * 60)
+print(f"  Kinetic energy (2 kg at 3 m/s) : {anvil.R.kinetic_energy(m=2, v=3)['KE']}")
+print(f"  Gravity (Earth on 1 kg at surface): "
+      f"{anvil.R.newton_gravitation(m1=5.972e24, m2=1, r=6.371e6)['F_grav']}")
+print(f"  Projectile range (10 m/s, 45 deg): "
+      f"{anvil.R.projectile_range(v0=10, angle_deg=45)['range']}")
+print(f"  Pendulum period (1 m)          : {anvil.R.pendulum_period(L=1)['period']}")
+
+print("\n" + "=" * 60)
+print("  Electromagnetism")
+print("=" * 60)
+print(f"  Coulomb force (2x 1 uC at 0.1 m): "
+      f"{anvil.R.coulomb_force(q1=1e-6, q2=1e-6, r=0.1)['F_coulomb']}")
+print(f"  Capacitor energy (1 m^2, 1 mm, 100 V): "
+      f"{anvil.R.parallel_plate_capacitor_energy(A=1, d=1e-3, V=100)['U_stored']}")
+print(f"  Lorentz force (proton, 1e6 m/s, 0.5 T): "
+      f"{anvil.R.lorentz_force_magnitude(q=1.602176634e-19, v=1e6, B=0.5)['F_lorentz']}")
+
+print("\n" + "=" * 60)
+print("  Optics")
+print("=" * 60)
+snell = anvil.R.snell_refraction_angle(n1=1, n2=1.5, theta1_deg=30)
+print(f"  Snell refraction (30 deg into glass): {snell['theta2_deg']:.3f} deg")
+print(f"  Thin lens image (f=0.1, d_o=0.3): "
+      f"{anvil.R.thin_lens_image_distance(f=0.1, d_o=0.3)['d_i']}")
+print(f"  Photon energy (green, 5.5e14 Hz): "
+      f"{anvil.R.photon_energy_frequency(f=5.5e14)['E_photon']}")
+
+print("\n" + "=" * 60)
+print("  Waves and relativity")
+print("=" * 60)
+print(f"  Wave speed (100 Hz, 3.4 m)     : {anvil.R.wave_speed(frequency=100, wavelength=3.4)['speed']}")
+dop = anvil.R.relativistic_doppler_shift(f_src=1e9, v_radial=2.99792458e7)
+print(f"  Relativistic Doppler (approach 0.1c): {dop['f_obs']} (x{dop['shift_factor']:.4f})")
+print(f"  Lorentz factor (0.6c)          : {anvil.R.lorentz_factor(v=0.6 * 2.99792458e8)['gamma']:.4f}")
+print(f"  Rest energy of 1 kg            : {anvil.R.mass_energy_equivalence(m=1)['E_rest']}")
+
+print("\n" + "=" * 60)
+print("  Quantum")
+print("=" * 60)
+print(f"  de Broglie wavelength (p=1e-24): "
+      f"{anvil.R.de_broglie_wavelength(p=1e-24)['wavelength']}")
+print(f"  Wien peak (Sun, 5778 K)        : "
+      f"{anvil.R.wien_peak_wavelength(T=5778)['lambda_peak']}")
+```
+
+**Output:**
+
+```
+============================================================
+  Mechanics
+============================================================
+  Kinetic energy (2 kg at 3 m/s) : 9.0000 J
+  Gravity (Earth on 1 kg at surface): 9.8195 N
+  Projectile range (10 m/s, 45 deg): 10.1937 m
+  Pendulum period (1 m)          : 2.0061 s
+
+============================================================
+  Electromagnetism
+============================================================
+  Coulomb force (2x 1 uC at 0.1 m): 0.898755 N
+  Capacitor energy (1 m^2, 1 mm, 100 V): 4.4271e-05 J
+  Lorentz force (proton, 1e6 m/s, 0.5 T): 8.0109e-14 N
+
+============================================================
+  Optics
+============================================================
+  Snell refraction (30 deg into glass): 19.471 deg
+  Thin lens image (f=0.1, d_o=0.3): 0.150000 m
+  Photon energy (green, 5.5e14 Hz): 3.6443e-19 J
+
+============================================================
+  Waves and relativity
+============================================================
+  Wave speed (100 Hz, 3.4 m)     : 340.00 m/s
+  Relativistic Doppler (approach 0.1c): 1.1055e+09 Hz (x1.1055)
+  Lorentz factor (0.6c)          : 1.2500
+  Rest energy of 1 kg            : 8.9876e+16 J
+
+============================================================
+  Quantum
+============================================================
+  de Broglie wavelength (p=1e-24): 6.6261e-10 m
+... (1 more lines)
+```
+
+
 ## Example: Custom Relations + Project Registry
 
 `examples/ex_project_workflow.py`: Scenario: pipe flow design, friction factor, pressure drop, pump power.
@@ -9366,7 +9462,7 @@ print("=" * 60)
 
 --- What's in the registry? ---
 
-  Relations (137):
+  Relations (153):
     hx_duty                       
     hx_eff_ntu                    
     drag_force                      [aero]  (builtin)
@@ -9394,7 +9490,7 @@ print("=" * 60)
     area_mach_subsonic              [aero.compressible]  (builtin)
       Subsonic Mach from area ratio (A/A*)
     area_mach_supersonic            [aero.compressible]  (builtin)
-... (473 more lines)
+... (505 more lines)
 ```
 
 

@@ -1,6 +1,6 @@
 # Built-in RSQs
 
-132 RSQs (123 relations, 4 quantity sets, 5 systems) across 18 domains, auto-seeded into `~/.anvil/registry.db` on first import. Access via `anvil.R.*`, `anvil.S.*`, `anvil.QDB.*`, or `sys.use("name")`.
+148 RSQs (139 relations, 4 quantity sets, 5 systems) across 24 domains, auto-seeded into `~/.anvil/registry.db` on first import. Access via `anvil.R.*`, `anvil.S.*`, `anvil.QDB.*`, or `sys.use("name")`. Fundamental-physics relations have their own page: [Physics](24_physics.md).
 
 All inputs are dimensionless scalars or SI floats unless noted. All outputs are SI units unless returned as `Q(value, "unit")`.
 
@@ -1297,6 +1297,22 @@ stress analysis, and thermodynamic cycles.
 | `poly_fit` | data.fitting | Polynomial least-squares fit of chosen degree with coefficients |
 | `power_fit` | data.fitting | Power-law fit y = a x^b via log-log regression |
 | `exp_fit` | data.fitting | Exponential fit y = a e^(b x) via semi-log regression |
+| `kinetic_energy` | physics.mechanics | Translational kinetic energy 1/2 m v^2 |
+| `newton_gravitation` | physics.mechanics | Newton gravitational force between two masses |
+| `projectile_range` | physics.mechanics | Projectile range over flat ground |
+| `pendulum_period` | physics.mechanics | Small-angle simple pendulum period |
+| `coulomb_force` | physics.em | Electrostatic force between two point charges |
+| `parallel_plate_capacitor_energy` | physics.em | Stored energy of a vacuum parallel-plate capacitor |
+| `lorentz_force_magnitude` | physics.em | Magnetic Lorentz force on a moving charge |
+| `snell_refraction_angle` | physics.optics | Snell law refraction angle (flags total internal reflection) |
+| `thin_lens_image_distance` | physics.optics | Thin lens image distance (infinite at d_o = f) |
+| `photon_energy_frequency` | physics.optics | Photon energy E = h f |
+| `wave_speed` | physics.waves | Wave speed v = f lambda |
+| `relativistic_doppler_shift` | physics.waves | Relativistic Doppler observed frequency |
+| `lorentz_factor` | physics.relativity | Lorentz factor gamma from speed |
+| `mass_energy_equivalence` | physics.relativity | Rest energy E = m c^2 |
+| `de_broglie_wavelength` | physics.quantum | de Broglie wavelength h/p |
+| `wien_peak_wavelength` | physics.quantum | Blackbody peak wavelength (Wien displacement) |
 
 ---
 
