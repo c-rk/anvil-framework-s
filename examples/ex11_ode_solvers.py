@@ -3,10 +3,10 @@ Example 11: ODE, BVP, and PDE Solvers
 ======================================
 
 Demonstrates:
-    - solve_ode()       — non-stiff ODE (RK45): satellite reentry drag
-    - solve_ode_stiff() — stiff ODE (BDF): chemical kinetics
-    - solve_bvp()       — boundary value problem: fin temperature profile
-    - solve_pde_heat_1d() — 1D heat equation: transient wall heating
+    - solve_ode()      , non-stiff ODE (RK45): satellite reentry drag
+    - solve_ode_stiff(), stiff ODE (BDF): chemical kinetics
+    - solve_bvp()      , boundary value problem: fin temperature profile
+    - solve_pde_heat_1d(), 1D heat equation: transient wall heating
     - Plotting results with anvil.viz (if matplotlib available)
 
 Engineering context:
@@ -28,7 +28,7 @@ print("=" * 60)
 
 
 # =====================================================
-# Part A: Non-stiff ODE — satellite reentry drag
+# Part A: Non-stiff ODE, satellite reentry drag
 #
 # State: [v, h]   v = speed (m/s), h = altitude (m)
 # dv/dt = -D/m - g*sin(gamma)     (deceleration)
@@ -41,11 +41,11 @@ print("\n" + "=" * 40)
 print("  Part A: Satellite Reentry (RK45)")
 print("=" * 40)
 
-rho0    = 1.225       # kg/m^3 — sea-level density
-H_scale = 8500.0      # m      — scale height
+rho0    = 1.225       # kg/m^3, sea-level density
+H_scale = 8500.0      # m     , scale height
 Cd      = 1.2         # drag coefficient (blunt capsule)
-A       = 10.0        # m^2    — cross-section area
-m       = 1500.0      # kg     — capsule mass
+A       = 10.0        # m^2   , cross-section area
+m       = 1500.0      # kg    , capsule mass
 g       = 9.80665     # m/s^2
 gamma   = np.radians(3.0)  # flight-path angle (shallow entry)
 
@@ -58,8 +58,8 @@ def reentry(t, y):
     dhdt = -v * np.sin(gamma)
     return [dvdt, dhdt]
 
-v0 = 7800.0   # m/s — orbital entry speed
-h0 = 120e3    # m   — entry altitude 120 km
+v0 = 7800.0   # m/s, orbital entry speed
+h0 = 120e3    # m  , entry altitude 120 km
 
 t_eval = np.linspace(0, 500, 2000)
 sol_a = solvers.solve_ode(
@@ -86,7 +86,7 @@ print(f"  ODE solved in {sol_a['nfev']} function evaluations")
 
 
 # =====================================================
-# Part B: Stiff ODE — chemical kinetics (A → B → C)
+# Part B: Stiff ODE, chemical kinetics (A → B → C)
 #
 # Classic stiff problem: two reactions with very
 # different time constants (τ1 << τ2).
@@ -111,7 +111,7 @@ def kinetics(t, y):
     dC =  k2 * B
     return [dA, dB, dC]
 
-t_end = 300.0   # s — watch the slow reaction complete
+t_end = 300.0   # s, watch the slow reaction complete
 
 sol_b = solvers.solve_ode_stiff(
     kinetics,
@@ -130,16 +130,16 @@ print(f"  At t = {t_end:.0f} s:")
 print(f"    [A] = {A_f:.6f}   (consumed by fast reaction)")
 print(f"    [B] = {B_f:.6f}   (intermediate)")
 print(f"    [C] = {C_f:.6f}   (product of slow reaction)")
-print(f"    Sum = {A_f+B_f+C_f:.8f}  (should be 1.0 — mass conservation)")
+print(f"    Sum = {A_f+B_f+C_f:.8f}  (should be 1.0, mass conservation)")
 print(f"  Solved in {sol_b['nfev']} rhs evaluations")
 
 # Compare: would RK45 fail on this stiff system?
 print(f"\n  Note: RK45 step-size constraint ≈ 1/k1 = {1/k1:.1e} s")
-print(f"  BDF adapts automatically — no user tuning needed.")
+print(f"  BDF adapts automatically, no user tuning needed.")
 
 
 # =====================================================
-# Part C: Boundary Value Problem — fin temperature
+# Part C: Boundary Value Problem, fin temperature
 #
 # Extended surface (fin) with tip insulated:
 #   d²T/dx² - m² * (T - T_inf) = 0
@@ -153,15 +153,15 @@ print("\n" + "=" * 40)
 print("  Part C: Fin Temperature (BVP)")
 print("=" * 40)
 
-T_base = 400.0    # K — fin base
-T_inf  = 300.0    # K — ambient
-h_conv = 50.0     # W/m^2/K — convection coefficient
-k_fin  = 200.0    # W/m/K — aluminum
-t_fin  = 0.002    # m — fin thickness
-L_fin  = 0.1      # m — fin length (10 cm)
+T_base = 400.0    # K, fin base
+T_inf  = 300.0    # K, ambient
+h_conv = 50.0     # W/m^2/K, convection coefficient
+k_fin  = 200.0    # W/m/K, aluminum
+t_fin  = 0.002    # m, fin thickness
+L_fin  = 0.1      # m, fin length (10 cm)
 
-P_perim = 2 * (t_fin + 0.05)   # m — perimeter (assume 5 cm width)
-A_cs    = t_fin * 0.05          # m^2 — cross section
+P_perim = 2 * (t_fin + 0.05)   # m, perimeter (assume 5 cm width)
+A_cs    = t_fin * 0.05          # m^2, cross section
 m_fin   = np.sqrt(h_conv * P_perim / (k_fin * A_cs))
 
 print(f"\n  Fin: L={L_fin*100:.0f} cm,  t={t_fin*1000:.0f} mm,  k={k_fin} W/m/K")
@@ -212,7 +212,7 @@ print(f"  Fin efficiency: {eta_fin:.3f}  ({eta_fin*100:.1f}%)")
 
 
 # =====================================================
-# Part D: 1D Heat Equation (PDE) — wall thermal soak
+# Part D: 1D Heat Equation (PDE), wall thermal soak
 #
 # Steel wall initially at T_amb. One face suddenly
 # exposed to high-temperature gas (step input).
@@ -227,11 +227,11 @@ print("\n" + "=" * 40)
 print("  Part D: Wall Thermal Soak (1D PDE)")
 print("=" * 40)
 
-T_gas   = 1200.0    # K — gas temperature (step input)
-T_amb   = 300.0     # K — initial wall / cold-face temperature
-L_wall  = 0.025     # m — 25 mm steel wall
-alpha   = 1.2e-5    # m^2/s — thermal diffusivity of steel
-rho_cp  = 3.9e6     # J/m^3/K — volumetric heat capacity (for Q calc)
+T_gas   = 1200.0    # K, gas temperature (step input)
+T_amb   = 300.0     # K, initial wall / cold-face temperature
+L_wall  = 0.025     # m, 25 mm steel wall
+alpha   = 1.2e-5    # m^2/s, thermal diffusivity of steel
+rho_cp  = 3.9e6     # J/m^3/K, volumetric heat capacity (for Q calc)
 
 print(f"\n  Wall: L={L_wall*1000:.0f} mm,  α={alpha:.2e} m²/s")
 print(f"  Step from T_amb={T_amb} K to T_gas={T_gas} K on hot face")

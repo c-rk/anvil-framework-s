@@ -5,7 +5,7 @@ Demonstrates all 7 signal processing RSQs in the misc domain:
   fft_spectrum, welch_psd, stft_spectrogram, bandpass_filter,
   envelope_detection, cross_correlation, signal_statistics
 
-No external dependencies — numpy + scipy only (both Anvil core deps).
+No external dependencies, numpy + scipy only (both Anvil core deps).
 """
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -48,7 +48,7 @@ fault     = (1 + 0.6*np.sin(2*np.pi*120*t_fault)) * np.sin(2*np.pi*2000*t_fault)
 # 1. fft_spectrum
 # ══════════════════════════════════════════════════════════════════════════════
 print("=" * 60)
-print("1. fft_spectrum — power spectrum")
+print("1. fft_spectrum, power spectrum")
 print("=" * 60)
 
 r = anvil.R.fft_spectrum(signal=sig_clean, dt=dt, window="hann")
@@ -71,7 +71,7 @@ print("  (rectangular 'none' accurate for exact-integer-cycle signals)")
 # 2. welch_psd
 # ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 60)
-print("2. welch_psd — averaged power spectral density")
+print("2. welch_psd, averaged power spectral density")
 print("=" * 60)
 
 r_fft   = anvil.R.fft_spectrum(signal=sig_noisy, dt=dt)
@@ -96,7 +96,7 @@ for nperseg in [128, 256, 512, 1024]:
 # 3. stft_spectrogram
 # ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 60)
-print("3. stft_spectrogram — time-frequency power map")
+print("3. stft_spectrogram, time-frequency power map")
 print("=" * 60)
 
 r = anvil.R.stft_spectrogram(signal=chirp, dt=dt, nperseg=256, window="hann")
@@ -125,7 +125,7 @@ print("  (STFT tracks swept frequency through time)")
 # 4. bandpass_filter
 # ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 60)
-print("4. bandpass_filter — zero-phase Butterworth")
+print("4. bandpass_filter, zero-phase Butterworth")
 print("=" * 60)
 
 # Lowpass: keep 50 Hz, suppress 150 Hz harmonic and noise
@@ -137,7 +137,7 @@ print(f"    att.    = {r_lp['attenuation_dB']:.1f} dB")
 
 # Bandpass: isolate 50 Hz ± 20 Hz band
 r_bp = anvil.R.bandpass_filter(signal=sig_noisy, dt=dt, f_low=30.0, f_high=70.0, order=4)
-print(f"\n  Bandpass (30–70 Hz, order=4):")
+print(f"\n  Bandpass (30-70 Hz, order=4):")
 print(f"    RMS in  = {r_bp['rms_in']:.4f}")
 print(f"    RMS out = {r_bp['rms_out']:.4f}  (only 50 Hz component passes)")
 print(f"    att.    = {r_bp['attenuation_dB']:.1f} dB")
@@ -150,7 +150,7 @@ print(f"    mean before filter = {drift.mean():.3f}")
 print(f"    mean after filter  = {r_hp['signal_filtered'].mean():.6f}  (~= 0)")
 
 # Order comparison
-print(f"\n  Filter order vs stopband attenuation (bandpass 30–70 Hz):")
+print(f"\n  Filter order vs stopband attenuation (bandpass 30-70 Hz):")
 for order in [2, 4, 6, 8]:
     rr = anvil.R.bandpass_filter(signal=sig_noisy, dt=dt, f_low=30, f_high=70, order=order)
     print(f"    order={order}: RMS_out={rr['rms_out']:.4f}  att={rr['attenuation_dB']:.1f} dB")
@@ -160,7 +160,7 @@ for order in [2, 4, 6, 8]:
 # 5. envelope_detection
 # ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 60)
-print("5. envelope_detection — Hilbert transform")
+print("5. envelope_detection, Hilbert transform")
 print("=" * 60)
 
 r = anvil.R.envelope_detection(signal=am, dt=dt)
@@ -193,13 +193,13 @@ print(f"  Detected fault frequency = {f_fault_det:.1f} Hz  (expected 120 Hz)")
 # 6. cross_correlation
 # ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 60)
-print("6. cross_correlation — time delay estimation")
+print("6. cross_correlation, time delay estimation")
 print("=" * 60)
 
-# Use broadband (noise) signal — xcorr on periodic sine has many equal peaks
+# Use broadband (noise) signal, xcorr on periodic sine has many equal peaks
 # making argmax unreliable without restricting the lag search window.
 delay_samples = 35
-# Use broadband signal — xcorr on a pure periodic sine has many equal-height
+# Use broadband signal, xcorr on a pure periodic sine has many equal-height
 # peaks separated by the signal period, making argmax unreliable.
 # broadband noise has a unique peak at the true delay.
 broadband = rng.standard_normal(n)
@@ -238,7 +238,7 @@ print(f"    Measured velocity = {v_measured:.2f} m/s  (lag={r_flow['lag_peak']*1
 # 7. signal_statistics
 # ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 60)
-print("7. signal_statistics — descriptive statistics")
+print("7. signal_statistics, descriptive statistics")
 print("=" * 60)
 
 signals = {
@@ -256,8 +256,8 @@ for name, (s, s_dt) in signals.items():
 
 print(f"\n  Notes:")
 print(f"    Gaussian noise: kurtosis ~= 3.0 (mesokurtic)")
-print(f"    Bearing fault:  kurtosis > 3 — impulsive content from carrier modulation")
-print(f"    Impulse train:  very high crest factor and kurtosis — sparse, large peaks")
+print(f"    Bearing fault:  kurtosis > 3, impulsive content from carrier modulation")
+print(f"    Impulse train:  very high crest factor and kurtosis, sparse, large peaks")
 print(f"    Sine: kurtosis ~= 1.5, crest factor = sqrt2 ~= 1.414")
 
 
@@ -265,7 +265,7 @@ print(f"    Sine: kurtosis ~= 1.5, crest factor = sqrt2 ~= 1.414")
 # 8. Sweep example: SNR effect on dominant frequency detection
 # ══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 60)
-print("8. Direct loop — nperseg vs Welch frequency resolution")
+print("8. Direct loop, nperseg vs Welch frequency resolution")
 print("=" * 60)
 
 # Note: sys.sweep() sweeps scalar parameters. Array inputs (signal) must be

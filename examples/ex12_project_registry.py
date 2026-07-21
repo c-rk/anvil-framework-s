@@ -3,13 +3,13 @@ Example 12: Project Registry
 ==============================
 
 Demonstrates:
-    - anvil.project() — create an isolated per-project RSQ store
-    - proj.push()     — register draft RSQs to the project store
-    - proj.R.*        — access project RSQs via namespace
-    - Context manager — routes anvil.push() to the project
-    - proj.search()   — fuzzy search within the project
-    - proj.list()     — list all project RSQs
-    - proj.promote()  — move a tested RSQ to the global registry
+    - anvil.project(), create an isolated per-project RSQ store
+    - proj.push()    , register draft RSQs to the project store
+    - proj.R.*       , access project RSQs via namespace
+    - Context manager, routes anvil.push() to the project
+    - proj.search()  , fuzzy search within the project
+    - proj.list()    , list all project RSQs
+    - proj.promote() , move a tested RSQ to the global registry
     - Multiple projects open simultaneously
 
 Engineering context:
@@ -156,7 +156,7 @@ result.summary(keys=["T_hot_in", "T_cold_in", "UA",
 
 
 # =====================================================
-# 5. Context manager — route anvil.push() to project
+# 5. Context manager, route anvil.push() to project
 # =====================================================
 print("\n[5] Context manager: push drafts inside 'with' block...")
 
@@ -179,7 +179,7 @@ with proj2:
 
     proj2.push(fouling_resistance)
 
-# Outside the with block — context no longer active
+# Outside the with block, context no longer active
 proj2.list()
 
 r_foul = proj2.R.fouling_resistance(
@@ -250,8 +250,8 @@ proj_b.push(my_rsq_v2, domain="test")
 
 ra = proj_a.R.my_rsq_v1(x=5.0)
 rb = proj_b.R.my_rsq_v2(x=5.0)
-print(f"\n  Project A — my_rsq_v1(5): y = {ra['y_v1']}")
-print(f"  Project B — my_rsq_v2(5): y = {rb['y_v2']}")
+print(f"\n  Project A, my_rsq_v1(5): y = {ra['y_v1']}")
+print(f"  Project B, my_rsq_v2(5): y = {rb['y_v2']}")
 print(f"  Global registry: unaffected (no 'my_rsq_v1' or 'my_rsq_v2' there)")
 
 

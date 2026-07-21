@@ -154,7 +154,7 @@ section("2. DEFINING RELATIONS")
 
 # --- 2a. Decorator syntax -- auto-registers in the registry ---
 @anvil.relation(domain="thermo", tags=["ideal_gas"])
-def ideal_gas_density(P, R_gas, T):
+def ideal_gas_rho(P, R_gas, T):
     """Ideal gas: rho = P / (R * T)"""
     return {"rho": Q(P / (R_gas * T), "kg/m^3")}
 
@@ -171,9 +171,9 @@ def reynolds_num(rho, V, L_char, mu):
     return {"Re": rho * V * L_char / mu}
 
 
-print(f"\n@relation auto-registered: {ideal_gas_density}")
-print(f"  inputs:  {ideal_gas_density.inputs}")
-print(f"  outputs: {ideal_gas_density.outputs}")
+print(f"\n@relation auto-registered: {ideal_gas_rho}")
+print(f"  inputs:  {ideal_gas_rho.inputs}")
+print(f"  outputs: {ideal_gas_rho.outputs}")
 
 
 # --- 2b. Relation() explicit wrap ---
@@ -215,7 +215,7 @@ print(f"  outputs: {air_props.outputs}")
 section("3. ONE-SHOT SOLVE -- anvil.solve()")
 
 # No System object needed; inputs passed as keyword arguments
-r = anvil.solve(ideal_gas_density, P=101325.0, R_gas=287.0, T=298.15)
+r = anvil.solve(ideal_gas_rho, P=101325.0, R_gas=287.0, T=298.15)
 print(f"\nOne-shot solve -- ideal gas density:")
 r.summary()
 
@@ -904,8 +904,8 @@ anvil.update(
 )
 
 # --- 14f. Export source ---
-print("\nExport source of 'ideal_gas_density':")
-anvil.registry.export("ideal_gas_density")
+print("\nExport source of 'ideal_gas_rho':")
+anvil.registry.export("ideal_gas_rho")
 
 
 # =========================================================================

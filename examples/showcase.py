@@ -6,7 +6,7 @@ Demonstrates the full RSQ workflow:
     1. Browse the built-in registry
     2. Call Relations directly
     3. Load a pre-built System with defaults
-    4. Override with .set() — no redundant .add()
+    4. Override with .set(), no redundant .add()
     5. Solve and sweep
     6. Compose systems
     7. Register your own RSQs
@@ -66,7 +66,7 @@ print(f"  T2/T1  = {shock['T2_T1']:.4f}")
 print(f"  P02/P01 = {shock['P02_P01']:.4f}")
 
 # ─────────────────────────────────────────────────
-# 4. Load a pre-built System — no .add() needed
+# 4. Load a pre-built System, no .add() needed
 # ─────────────────────────────────────────────────
 
 print("\n--- Load the rocket nozzle system ---")
@@ -78,7 +78,7 @@ print("\n--- Solve with defaults ---")
 nozzle.solve().summary()
 
 # ─────────────────────────────────────────────────
-# 5. Override with .set() — clean, no re-declaration
+# 5. Override with .set(), clean, no re-declaration
 # ─────────────────────────────────────────────────
 
 print("\n--- Override chamber pressure and solve again ---")
@@ -115,7 +115,7 @@ def delta_v(Isp, mass_ratio):
     return {"delta_v": Q(dv, "m/s")}
 
 
-# Build a stage system — use() with a System inherits its defaults
+# Build a stage system, use() with a System inherits its defaults
 # Get a fresh nozzle from the registry
 from anvil.registry.loader import load_rsq
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { RegistryEntry } from "../lib/types";
 import { groupByDomain, matchesQuery } from "../lib/grouping";
+import { entryInPack, packsWithCounts, type Pack } from "../lib/packs";
 import { rsqDocsUrl, NEW_TAB } from "../lib/docs";
 
 interface Props {
@@ -39,6 +40,9 @@ export function Catalog({ entries, selected, onSelect, loading, error }: Props) 
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [pins, setPins] = useState<string[]>(loadPins);
+  const [activePack, setActivePack] = useState<Pack | null>(null);
+
+  const packs = useMemo(() => packsWithCounts(entries), [entries]);
 
   const togglePin = (name: string) => {
     setPins((p) => {
@@ -52,10 +56,12 @@ export function Catalog({ entries, selected, onSelect, loading, error }: Props) 
     });
   };
 
-  const filtered = useMemo(
-    () => entries.filter((e) => matchesQuery(e, query.trim())),
-    [entries, query],
-  );
+  const filtered = useMemo(() => {
+    const base = activePack
+      ? entries.filter((e) => entryInPack(e, activePack))
+      : entries;
+    return base.filter((e) => matchesQuery(e, query.trim()));
+  }, [entries, query, activePack]);
   const groups = useMemo(() => groupByDomain(filtered), [filtered]);
   const pinned = useMemo(
     () => filtered.filter((e) => pins.includes(e.name)),
@@ -120,6 +126,31 @@ export function Catalog({ entries, selected, onSelect, loading, error }: Props) 
 
   return (
     <aside className="catalog">
+      {packs.length > 0 && (
+        <div className="catalog-packs" role="group" aria-label="Relation packs">
+          <button
+            className={`pack-chip ${activePack === null ? "active" : ""}`}
+            onClick={() => setActivePack(null)}
+            title="Show all RSQs"
+          >
+            All
+          </button>
+          {packs.map(({ pack, count }) => (
+            <button
+              key={pack.id}
+              className={`pack-chip ${activePack?.id === pack.id ? "active" : ""}`}
+              onClick={() =>
+                setActivePack((cur) => (cur?.id === pack.id ? null : pack))
+              }
+              title={pack.description}
+            >
+              {pack.label}
+              <span className="pack-chip-count">{count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="catalog-search">
         <input
           type="search"

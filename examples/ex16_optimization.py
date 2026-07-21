@@ -27,7 +27,7 @@ print("=" * 60)
 
 
 # --------------------------------------------------------------
-# Part 1: minimize_global — direct function optimization
+# Part 1: minimize_global, direct function optimization
 # --------------------------------------------------------------
 print("\n[1] Direct global optimization: Himmelblau's function")
 print("    f(x,y) = (x²+y-11)² + (x+y²-7)²  has 4 global minima at f=0")
@@ -43,7 +43,7 @@ for method in ["differential_evolution", "dual_annealing", "shgo", "basinhopping
     print(f"  {method:28s}  f={r['fun']:.2e}  x=[{r['x'][0]:+.4f}, {r['x'][1]:+.4f}]  [{status}]")
 
 # --------------------------------------------------------------
-# Part 2: System.optimize() — nozzle thrust maximization
+# Part 2: System.optimize(), nozzle thrust maximization
 # --------------------------------------------------------------
 print("\n[2] System.optimize(): maximize nozzle thrust")
 print("    Design variables: A_throat, A_exit")
@@ -89,7 +89,7 @@ print(f"    mdot   : {float(opt['mdot'].value):.3f} kg/s")
 print(f"    V_exit : {opt['V_exit'].to('km/s')}")
 
 # --------------------------------------------------------------
-# Part 3: Maximize Isp (efficiency) — different objective
+# Part 3: Maximize Isp (efficiency), different objective
 # --------------------------------------------------------------
 print("\n[3] Same system, different objective: maximize Isp")
 
@@ -113,7 +113,7 @@ print(f"  A_exit  : {opt_isp.x['A_exit']*1e4:.1f} cm²  (-> area ratio {opt_isp.
 print("  (Higher Isp favours large expansion ratio; thrust trades off mdot vs Ve)")
 
 # --------------------------------------------------------------
-# Part 4: Custom system — optimize a heat exchanger NTU
+# Part 4: Custom system, optimize a heat exchanger NTU
 # --------------------------------------------------------------
 print("\n[4] Custom system: optimal NTU for heat exchanger effectiveness")
 
@@ -125,7 +125,7 @@ hx.add("T_h_in", 90.0,  "K")   # hot inlet (relative, used for Q calc)
 hx.add("T_c_in", 20.0,  "K")   # cold inlet
 
 @anvil.relation
-def hx_effectiveness(NTU, Cr):
+def hx_eff_ntu(NTU, Cr):
     eps = (1 - np.exp(-NTU * (1 - Cr))) / (1 - Cr * np.exp(-NTU * (1 - Cr)))
     return {"effectiveness": eps}
 
@@ -134,7 +134,7 @@ def hx_duty(effectiveness, C_min, T_h_in, T_c_in):
     Q_max = C_min * (T_h_in - T_c_in)
     return {"Q_duty": effectiveness * Q_max}
 
-hx.use(hx_effectiveness)
+hx.use(hx_eff_ntu)
 hx.use(hx_duty)
 
 # Maximize effectiveness by tuning NTU (proxy for heat exchanger size/cost)

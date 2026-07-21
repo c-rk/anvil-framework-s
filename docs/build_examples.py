@@ -141,7 +141,7 @@ def main():
 
         # --- markdown ---
         md.append(f"\n## {title}\n")
-        md.append(f"`examples/{fname}`" + (f" — {desc}" if desc else "") + "\n")
+        md.append(f"`examples/{fname}`" + (f": {desc}" if desc else "") + "\n")
         md.append("```python\n" + code + "\n```\n")
         if status == "ok":
             md.append("**Output:**\n\n```\n" + out + "\n```\n"); n_ok += 1
@@ -158,7 +158,7 @@ def main():
         # --- guide HTML ---
         guide.append(f"<h3>{html.escape(title)}</h3>")
         guide.append(f'<p class="muted"><code>examples/{fname}</code>'
-                     + (f" &mdash; {html.escape(desc)}" if desc else "") + "</p>")
+                     + (f": {html.escape(desc)}" if desc else "") + "</p>")
         guide.append("<pre>" + html.escape(code) + '<span class="lang-label">python</span></pre>')
         if status in ("ok", "error"):
             guide.append('<div class="out-wrap"><div class="out-label">Output</div>'

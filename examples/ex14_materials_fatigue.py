@@ -1,15 +1,15 @@
 """
-Example 14: Materials — Fatigue, Fracture, and Composites
+Example 14: Materials, Fatigue, Fracture, and Composites
 ===========================================================
 
 Demonstrates:
-    - safety_factor RSQ             — margin of safety check
-    - fatigue_life_basquin RSQ      — S-N curve (Basquin's law)
-    - miners_rule RSQ               — cumulative fatigue damage (Miner's rule)
-    - fracture_toughness_check RSQ  — linear elastic fracture mechanics
-    - composite_laminate_stiffness RSQ — rule-of-mixtures composite stiffness
-    - solve_forward()               — DAG systems
-    - sweep()                       — fatigue life vs load amplitude
+    - safety_factor RSQ            , margin of safety check
+    - fatigue_life_basquin RSQ     , S-N curve (Basquin's law)
+    - miners_rule RSQ              , cumulative fatigue damage (Miner's rule)
+    - fracture_toughness_check RSQ , linear elastic fracture mechanics
+    - composite_laminate_stiffness RSQ, rule-of-mixtures composite stiffness
+    - solve_forward()              , DAG systems
+    - sweep()                      , fatigue life vs load amplitude
 
 Engineering context:
     Structural life assessment of a rotating shaft in a turbopump.
@@ -29,19 +29,19 @@ import anvil
 from anvil import Q, System
 
 print("=" * 60)
-print("  Example 14: Materials — Fatigue, Fracture, Composites")
+print("  Example 14: Materials, Fatigue, Fracture, Composites")
 print("=" * 60)
 
 
 # =====================================================
 # Material: 300M High-Strength Steel (typical turbopump shaft)
 # =====================================================
-E_steel       = 207e9      # Pa — Young's modulus
-sigma_y       = 1700e6     # Pa — 0.2% yield strength
-sigma_uts     = 1950e6     # Pa — ultimate tensile strength
-sigma_f_prime = 2100e6     # Pa — fatigue strength coefficient (Basquin)
-b_exp         = -0.07      # —   Basquin exponent (typical for high-strength steel)
-KIc           = 70e6       # Pa√m — plane strain fracture toughness
+E_steel       = 207e9      # Pa, Young's modulus
+sigma_y       = 1700e6     # Pa, 0.2% yield strength
+sigma_uts     = 1950e6     # Pa, ultimate tensile strength
+sigma_f_prime = 2100e6     # Pa, fatigue strength coefficient (Basquin)
+b_exp         = -0.07      #,   Basquin exponent (typical for high-strength steel)
+KIc           = 70e6       # Pa√m, plane strain fracture toughness
 
 print(f"\n  Material: 300M Steel")
 print(f"    E       = {E_steel/1e9:.0f} GPa")
@@ -53,11 +53,11 @@ print(f"    KIc     = {KIc/1e6:.0f} MPa√m")
 
 
 # =====================================================
-# 1. Safety Factor Check — nominal operating stress
+# 1. Safety Factor Check, nominal operating stress
 # =====================================================
-print("\n[1] Safety Factor — Nominal Operating Stress")
+print("\n[1] Safety Factor, Nominal Operating Stress")
 
-design_stress = 750e6    # Pa — stress amplitude at max load
+design_stress = 750e6    # Pa, stress amplitude at max load
 
 r_sf = anvil.R.safety_factor(allowable_stress=sigma_y, applied_stress=design_stress)
 def _v(x): return float(x.si) if hasattr(x, "si") else float(x)
@@ -80,9 +80,9 @@ sweep_sf.summary(outputs=["safety_factor", "margin_of_safety", "pass"])
 
 
 # =====================================================
-# 2. Fatigue Life — Basquin's Law  N = (σ_a / σ_f')^(1/b)
+# 2. Fatigue Life, Basquin's Law  N = (σ_a / σ_f')^(1/b)
 # =====================================================
-print("\n[2] Fatigue Life — Basquin's Law")
+print("\n[2] Fatigue Life, Basquin's Law")
 
 stress_amplitudes = [300e6, 500e6, 750e6, 1000e6, 1200e6]
 
@@ -115,12 +115,12 @@ sweep_fat.summary(outputs=["N_cycles"])
 
 
 # =====================================================
-# 3. Miner's Rule — Cumulative Fatigue Damage
+# 3. Miner's Rule, Cumulative Fatigue Damage
 #
 # Flight spectrum: 3 distinct load levels, each with
 # a known number of cycles per flight.
 # =====================================================
-print("\n[3] Miner's Rule — Cumulative Damage")
+print("\n[3] Miner's Rule, Cumulative Damage")
 
 # Flight spectrum: [stress level (Pa), cycles per flight]
 spectrum = [
@@ -185,7 +185,7 @@ print(f"  Flights to inspection limit (D=0.5): {0.5/damage_per_flight:.0f} fligh
 # =====================================================
 print("\n[4] Fracture Toughness Check (LEFM)")
 
-a_crack_ndi = 0.0008   # m — 0.8 mm crack from NDI (near detection limit)
+a_crack_ndi = 0.0008   # m, 0.8 mm crack from NDI (near detection limit)
 
 print(f"\n  Crack size from NDI: a = {a_crack_ndi*1000:.1f} mm")
 print(f"  KIc = {KIc/1e6:.0f} MPa√m")
@@ -219,12 +219,12 @@ print(f"    Safety factor: {_v(r_frac_op['safety_factor']):.2f}")
 # =====================================================
 # 5. Thermal Expansion Stress
 # =====================================================
-print("\n[5] Thermal Expansion Stress — cryogenic refueling")
+print("\n[5] Thermal Expansion Stress, cryogenic refueling")
 
 # Temperature change during LOX propellant loading
-E_al    = 72e9     # Pa — aluminum alloy
-alpha_al = 23e-6   # 1/K — thermal expansion coefficient (aluminum)
-dT_cry  = -180     # K — cryogenic cooling (ambient → -180°C delta)
+E_al    = 72e9     # Pa, aluminum alloy
+alpha_al = 23e-6   # 1/K, thermal expansion coefficient (aluminum)
+dT_cry  = -180     # K, cryogenic cooling (ambient → -180°C delta)
 
 r_th = anvil.R.thermal_expansion_stress(E=E_al, alpha_thermal=alpha_al, dT=dT_cry)
 sigma_th = abs(_v(r_th["sigma_thermal"]))
@@ -233,7 +233,7 @@ print(f"\n  Aluminum structure (E={E_al/1e9:.0f} GPa, α={alpha_al*1e6:.0f} µ/K
 print(f"  Cooling ΔT = {dT_cry} K (cryogenic LOX loading)")
 print(f"  Thermal stress: σ_th = {sigma_th/1e6:.0f} MPa")
 
-sigma_y_al = 503e6  # Pa — Al 7075-T6
+sigma_y_al = 503e6  # Pa, Al 7075-T6
 r_sf_th = anvil.R.safety_factor(allowable_stress=sigma_y_al, applied_stress=sigma_th)
 print(f"  Safety factor (Al 7075-T6, σ_y={sigma_y_al/1e6:.0f} MPa): {_v(r_sf_th['safety_factor']):.2f}")
 
@@ -244,13 +244,13 @@ print(f"  Safety factor (Al 7075-T6, σ_y={sigma_y_al/1e6:.0f} MPa): {_v(r_sf_th
 print("\n[6] Composite Laminate Stiffness (CFRP)")
 
 # Carbon fiber / epoxy composite (typical UD ply)
-Ef     = 230e9   # Pa — fiber modulus (carbon)
-Em     = 3.5e9   # Pa — matrix modulus (epoxy)
-Gf     = 90e9    # Pa — fiber shear modulus
-Gm     = 1.3e9   # Pa — matrix shear modulus
-nu_f   = 0.20    # — fiber Poisson's ratio
-nu_m   = 0.35    # — matrix Poisson's ratio
-Vf     = 0.60    # — fiber volume fraction (60%)
+Ef     = 230e9   # Pa, fiber modulus (carbon)
+Em     = 3.5e9   # Pa, matrix modulus (epoxy)
+Gf     = 90e9    # Pa, fiber shear modulus
+Gm     = 1.3e9   # Pa, matrix shear modulus
+nu_f   = 0.20    #, fiber Poisson's ratio
+nu_m   = 0.35    #, matrix Poisson's ratio
+Vf     = 0.60    #, fiber volume fraction (60%)
 
 r_comp = anvil.R.composite_laminate_stiffness(
     Ef=Ef, Em=Em, Gf=Gf, Gm=Gm, nu_f=nu_f, nu_m=nu_m, Vf=Vf
@@ -262,8 +262,8 @@ G12 = _v(r_comp["G12"])
 nu12 = _v(r_comp["nu12"])
 
 print(f"\n  CFRP UD ply (Vf = {Vf*100:.0f}%):")
-print(f"    E1   = {E1/1e9:.1f} GPa  (axial — fiber dominated)")
-print(f"    E2   = {E2/1e9:.2f} GPa  (transverse — matrix dominated)")
+print(f"    E1   = {E1/1e9:.1f} GPa  (axial, fiber dominated)")
+print(f"    E2   = {E2/1e9:.2f} GPa  (transverse, matrix dominated)")
 print(f"    G12  = {G12/1e9:.2f} GPa  (shear)")
 print(f"    ν12  = {nu12:.4f}")
 print(f"    E1/E2 ratio = {E1/E2:.1f}  (strong anisotropy)")

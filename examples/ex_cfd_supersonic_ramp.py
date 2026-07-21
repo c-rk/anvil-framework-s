@@ -1,5 +1,5 @@
 """
-Example: 2D Euler CFD — Supersonic flow over a compression ramp
+Example: 2D Euler CFD, Supersonic flow over a compression ramp
 ===============================================================
 
 M = 2.5 flow over a compression ramp (lower wall turns up 12deg).
@@ -65,7 +65,7 @@ if r['attached']:
     print(f"  M3 = {r2['M2']:.4f}   p3/p1 = {r['p2_p1']*r2['p2_p1']:.4f}")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 1 — Mesh
+# PART 1, Mesh
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 1: Mesh with named patches (flat_wall + ramp)")
@@ -105,7 +105,7 @@ mesh.plot(show=False, save_path=mesh_png)
 print(f"  Mesh plot saved: {mesh_png}")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 2 — Solve
+# PART 2, Solve
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 2: Solver run")
@@ -150,13 +150,13 @@ result = solver.run(
 result.summary()
 
 # ─────────────────────────────────────────────────────────────────
-# PART 3 — Comparison
+# PART 3, Comparison
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 3: Analytical vs Numerical comparison")
 print("=" * 60)
 
-# Sample downstream region (right half, lower half — behind first shock)
+# Sample downstream region (right half, lower half, behind first shock)
 ds_i = slice(nx // 2, nx)
 ds_j = slice(0, ny // 4)
 
@@ -173,7 +173,7 @@ if r['attached']:
     print("  (Numerical value is area-averaged; boundary-layer and mesh effects)")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 4 — Save output files
+# PART 4, Save output files
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 4: Output files")
@@ -193,7 +193,7 @@ result.to_vtk(vtk_path)
 print(f"  VTK for ParaView: {vtk_path}")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 5 — Parallel ramp-angle sweep
+# PART 5, Parallel ramp-angle sweep
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 5: Ramp-angle sweep (parallel=2)")

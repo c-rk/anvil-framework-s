@@ -112,3 +112,46 @@ anvil_web/               React 18 + TypeScript + Vite frontend
 ```
 
 The canvas ↔ script bridge is the design centre: the canvas is never a separate format, it **is** a Python script, so anything built visually runs headless with plain `python`, and any example script opens as a canvas.
+
+---
+
+## Calculator features
+
+Beyond running a single RSQ with unit-aware inputs, the Calculator page has:
+
+- **Formula rendering.** Every RSQ shows its formula typeset with KaTeX (from
+  the RSQ `latex` metadata), falling back to the Python signature when none is
+  set.
+- **Relation packs.** Chips above the catalog filter the RSQ list to a curated
+  pack (Jet Engine Cycle, Compressible Flow, Heat Transfer, Structures, Curve
+  Fitting, and more). Packs match by domain and tags, so newly seeded RSQs join
+  the right pack automatically.
+- **Curve fitting and data tables.** The fitting RSQs (`linear_regression`,
+  `poly_fit`, `power_fit`, `exp_fit`) take `x_data` and `y_data` arrays. Paste a
+  data table into the CSV box and map columns straight onto the array inputs,
+  then read back the coefficients, R-squared and fitted curve.
+- **Result comparison.** Click **+ Compare** on any result to pin it into the
+  comparison tray, which lines up every pinned run as a column with one row per
+  variable. Export the whole comparison as CSV.
+- **Report export.** Export a solved RSQ as a self-contained **HTML** report
+  (formula as MathML, inputs and results tables, ready to print) or as
+  **Markdown**, alongside the raw CSV and JSON exports.
+
+## Keypad, memory and navigation
+
+The right-hand pane of the Calculator page and a few global keys round out the
+workbench:
+
+- **Scientific keypad.** A calculator pad evaluates freeform expressions
+  (trig, logs, powers, constants) with a rad/deg angle-mode toggle, independent
+  of any RSQ.
+- **Memory plane.** Named slots plus an auto-log of recent results sit below the
+  keypad. Press **M+** on any RSQ result to drop it into memory instantly; slots
+  and history persist in `localStorage` and sync live with the calculator.
+- **Spotlight.** Press **Ctrl/Cmd-K** for a fuzzy command palette that searches
+  every RSQ by name and description. Enter opens the match in the Calculator, or
+  drops it onto the Canvas when that page is active.
+- **Keyboard shortcuts.** `?` opens the shortcuts help, `t` toggles the theme,
+  and `g` then `c` / `v` jumps between the Calculator and Canvas pages.
+- **Pinning.** The star toggle on any catalog entry pins it to a quick-access
+  group at the top of the catalog (persisted in `localStorage`).

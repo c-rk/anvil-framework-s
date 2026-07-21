@@ -28,13 +28,13 @@ nozzle = anvil.S.rocket_nozzle.copy()
 
 # LOX/LH2 propellant properties
 nozzle.set(
-    P0=20e6,         # 20 MPa chamber pressure (high-performance engine)
-    T0=3500,          # 3500 K combustion temperature
-    gamma=1.20,       # typical for LOX/LH2
-    R_gas=520,        # J/kg/K for LOX/LH2 products
-    A_throat=0.005,   # 50 cm^2 throat
-    A_exit=0.08,      # 800 cm^2 exit
-    P_amb=0,          # vacuum (space engine)
+    P0=20e6,          # 20 MPa chamber pressure (high-performance engine)
+    T0=3500,           # 3500 K combustion temperature
+    gamma=1.20,        # typical for LOX/LH2
+    R_gas=520,         # J/kg/K for LOX/LH2 products
+    A_throat=0.005,    # 50 cm^2 throat
+    A_exit=0.08,       # 800 cm^2 exit
+    P_amb=0,           # vacuum (space engine)
 )
 
 result = nozzle.solve_forward()
@@ -124,17 +124,17 @@ print("=" * 60)
 hx = System("counter_flow_hx")
 
 # Operating conditions
-hx.add("T_hot_in", 600,   "K",     desc="Hot inlet (exhaust gas)")
-hx.add("T_cold_in", 290,   "K",     desc="Cold inlet (water)")
-hx.add("UA",       2000,  "W",     desc="Overall heat transfer coefficient * area")
-hx.add("Cp_hot",   1050,  "J/kg/K", desc="Hot fluid specific heat (exhaust)")
-hx.add("Cp_cold",  4186,  "J/kg/K", desc="Cold fluid specific heat (water)")
-hx.add("mdot_hot", 0.8,   "kg/s",  desc="Hot mass flow rate")
-hx.add("mdot_cold", 0.5,   "kg/s",  desc="Cold mass flow rate")
+hx.add("T_hot_in",  600,    "K",      desc="Hot inlet (exhaust gas)")
+hx.add("T_cold_in", 290,    "K",      desc="Cold inlet (water)")
+hx.add("UA",        2000,   "W",      desc="Overall heat transfer coefficient * area")
+hx.add("Cp_hot",    1050,   "J/kg/K", desc="Hot fluid specific heat (exhaust)")
+hx.add("Cp_cold",   4186,   "J/kg/K", desc="Cold fluid specific heat (water)")
+hx.add("mdot_hot",  0.8,    "kg/s",   desc="Hot mass flow rate")
+hx.add("mdot_cold", 0.5,    "kg/s",   desc="Cold mass flow rate")
 
 # Initial guesses for the coupled variables
-hx.add("T_cold_out", 350,  "K",     desc="Cold outlet (initial guess)")
-hx.add("Q_dot",     50000, "W",     desc="Heat transfer rate (initial guess)")
+hx.add("T_cold_out", 350,   "K",      desc="Cold outlet (initial guess)")
+hx.add("Q_dot",      50000, "W",      desc="Heat transfer rate (initial guess)")
 
 # Q_dot needs T_cold_out; T_cold_out needs Q_dot -> a cycle Anvil
 # detects and solves iteratively (gauss_seidel auto-selected).
@@ -193,25 +193,36 @@ print("=" * 60)
 ============================================================
 
 [1] Pre-solve diagnostics:
-  ERROR: 'hx_effectiveness' needs 'NTU' -- not provided anywhere.
-  ERROR: 'hx_effectiveness' needs 'Cr' -- not provided anywhere.
-  INFO: Coupled variables detected: Q_dot, T_cold_out. Will use iterative solver.
+  INFO: Coupled variables detected: Q_dot, T_cold_out, T_hot_out. Will use iterative solver.
 
 [2] Solving (Gauss-Seidel with monitoring)...
-Traceback (most recent call last):
-  File "C:\Users\rc\OneDrive - University of Maryland\Documents\Personal\the-anvil-framework-main\the-anvil-framework-main\examples\ex02_heat_exchanger.py", line 59, in <module>
-    result = hx.solve_gauss_seidel(
-             ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rc\OneDrive - University of Maryland\Documents\Personal\the-anvil-framework-main\the-anvil-framework-main\src\anvil\system.py", line 1252, in solve_gauss_seidel
-    return self.solve(method="gauss_seidel", relaxation=relaxation,
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rc\OneDrive - University of Maryland\Documents\Personal\the-anvil-framework-main\the-anvil-framework-main\src\anvil\system.py", line 998, in solve
-    self.validate()
-  File "C:\Users\rc\OneDrive - University of Maryland\Documents\Personal\the-anvil-framework-main\the-anvil-framework-main\src\anvil\system.py", line 911, in validate
-    raise ValidationError("Validation failed:\n" + "\n".join(f"  * {e}" for e in errors))
-anvil.system.ValidationError: Validation failed:
-  * 'hx_effectiveness' needs 'NTU' -- not provided.
-  * 'hx_effectiveness' needs 'Cr' -- not provided.
+  WARNING: variable(s) declared via .add() are also produced by a relation, so the declared value will be overwritten after solve: ['T_cold_out', 'Q_dot']
+    (This is intentional for iterative initial guesses; for forward systems it may indicate a naming mismatch.)
+  iter    0  |  residual = 2.0000e+00  |  t = 0.000s
+  iter    1  |  residual = 2.3426e-01  |  t = 0.000s
+  iter    2  |  residual = 7.3938e-02  |  t = 0.000s
+  iter    3  |  residual = 2.9794e-02  |  t = 0.000s
+  iter    4  |  residual = 1.6573e-02  |  t = 0.000s
+  iter    5  |  residual = 8.7496e-03  |  t = 0.000s
+  iter    6  |  residual = 4.4986e-03  |  t = 0.000s
+  iter    7  |  residual = 2.2818e-03  |  t = 0.000s
+  iter    8  |  residual = 1.1494e-03  |  t = 0.000s
+  iter    9  |  residual = 5.7687e-04  |  t = 0.000s
+  iter   10  |  residual = 2.8900e-04  |  t = 0.000s
+  iter   11  |  residual = 1.4465e-04  |  t = 0.000s
+  iter   12  |  residual = 7.2362e-05  |  t = 0.000s
+  iter   13  |  residual = 3.6190e-05  |  t = 0.000s
+  iter   14  |  residual = 1.8098e-05  |  t = 0.000s
+  iter   15  |  residual = 9.0495e-06  |  t = 0.000s
+  iter   16  |  residual = 4.5249e-06  |  t = 0.000s
+  iter   17  |  residual = 2.2625e-06  |  t = 0.000s
+  iter   18  |  residual = 1.1313e-06  |  t = 0.000s
+  iter   19  |  residual = 5.6564e-07  |  t = 0.000s
+  iter   20  |  residual = 2.8282e-07  |  t = 0.000s
+  iter   21  |  residual = 1.4141e-07  |  t = 0.000s
+  iter   22  |  residual = 7.0705e-08  |  t = 0.000s
+  iter   23  |  residual = 3.5352e-08  |  t = 0.000s
+... (57 more lines)
 ```
 
 
@@ -358,9 +369,9 @@ print("  Example 4: Structural Beam Analysis")
 print("=" * 60)
 
 # Material: Aluminum 6061-T6
-E        = Q(68.9e9, "Pa")      # Young's modulus
-sigma_y  = Q(276e6,  "Pa")      # yield strength
-rho      = Q(2700,   "kg/m^3")  # density
+E        = Q(68.9e9,  "Pa")      # Young's modulus
+sigma_y  = Q(276e6,   "Pa")      # yield strength
+rho      = Q(2700,    "kg/m^3")  # density
 
 # Cross section: 50 mm x 100 mm rectangular
 b = Q(0.050, "m")
@@ -380,7 +391,7 @@ print(f"  I        = {I}")
 print(f"\n[A] Cantilever beam, 5 kN tip load:")
 
 F = Q(5000, "N")
-L = Q(2.0, "m")
+L = Q(2.0,  "m")
 
 r = anvil.R.beam_deflection_cantilever(
     F_tip=F.si, L_beam=L.si, E=E.si, I_moment=I.si
@@ -395,10 +406,10 @@ print(f"  safety vs yield = {(sigma_y / max_stress):.2f}x")
 # Sweep beam length
 print(f"\n  Sweep: deflection vs length (0.5 to 4 m):")
 cant = System("cantilever")
-cant.add("F_tip",   F.si, "N")
-cant.add("L_beam",  L.si, "m")
-cant.add("E",       E.si, "Pa")
-cant.add("I_moment", I.si, "m^4")
+cant.add("F_tip",    F.si,  "N")
+cant.add("L_beam",   L.si,  "m")
+cant.add("E",        E.si,  "Pa")
+cant.add("I_moment", I.si,  "m^4")
 cant.use("beam_deflection_cantilever")
 cant.sweep("L_beam", np.linspace(0.5, 4.0, 8)).summary(
     outputs=["deflection", "max_moment"])
@@ -638,13 +649,13 @@ print(f"\n--- Stage 1: Kerosene/LOX booster ---")
 
 stage1_nozzle = anvil.S.rocket_nozzle.copy()
 stage1_nozzle.set(
-    P0=15e6,        # 15 MPa chamber pressure
-    T0=3400,         # K
-    gamma=1.22,      # RP-1/LOX products
-    R_gas=340,       # J/kg/K
-    A_throat=0.05,   # m^2 (large booster)
-    A_exit=0.40,     # m^2
-    P_amb=101325,    # sea-level launch
+    P0=15e6,         # 15 MPa chamber pressure
+    T0=3400,          # K
+    gamma=1.22,       # RP-1/LOX products
+    R_gas=340,        # J/kg/K
+    A_throat=0.05,    # m^2 (large booster)
+    A_exit=0.40,      # m^2
+    P_amb=101325,     # sea-level launch
 )
 
 r1 = stage1_nozzle.solve_forward()
@@ -661,13 +672,13 @@ print(f"\n--- Stage 2: LOX/LH2 upper stage ---")
 
 stage2_nozzle = anvil.S.rocket_nozzle.copy()
 stage2_nozzle.set(
-    P0=8e6,          # 8 MPa
-    T0=3200,          # K
-    gamma=1.20,       # LOX/LH2 products
-    R_gas=520,        # J/kg/K
-    A_throat=0.01,    # m^2 (smaller upper stage)
-    A_exit=0.12,      # m^2 (high expansion for vacuum)
-    P_amb=0,          # vacuum
+    P0=8e6,           # 8 MPa
+    T0=3200,           # K
+    gamma=1.20,        # LOX/LH2 products
+    R_gas=520,         # J/kg/K
+    A_throat=0.01,     # m^2 (smaller upper stage)
+    A_exit=0.12,       # m^2 (high expansion for vacuum)
+    P_amb=0,           # vacuum
 )
 
 r2 = stage2_nozzle.solve_forward()
@@ -736,11 +747,11 @@ print(f"    Propellant mass: {(m_prop_1 + m_prop_2):.0f} kg")
 print(f"\n--- Same calculation as an Anvil System ---")
 
 vehicle = System("two_stage_vehicle")
-vehicle.add("Isp_1",     Isp_1,    "s", desc="Stage 1 Isp")
-vehicle.add("Isp_2",     Isp_2,    "s", desc="Stage 2 Isp")
-vehicle.add("dV_1",      dV_1,     "m/s")
-vehicle.add("dV_2",      dV_2,     "m/s")
-vehicle.add("m_payload", m_payload, "kg")
+vehicle.add("Isp_1",      Isp_1,     "s",  desc="Stage 1 Isp")
+vehicle.add("Isp_2",      Isp_2,     "s",  desc="Stage 2 Isp")
+vehicle.add("dV_1",       dV_1,      "m/s")
+vehicle.add("dV_2",       dV_2,      "m/s")
+vehicle.add("m_payload",  m_payload, "kg")
 vehicle.add("m_struct_1", m_struct_1,"kg")
 vehicle.add("m_struct_2", m_struct_2,"kg")
 
@@ -897,11 +908,11 @@ combustion = Adapter("lox_rp1_equilibrium",
         "oxidizer_name": {"desc": "Oxidizer identifier", "default": "LOX"},
     },
     outputs={
-        "Tc":     {"unit": "K",     "desc": "Chamber temperature"},
+        "Tc":     {"unit": "K",      "desc": "Chamber temperature"},
         "gamma_c": {"desc": "Ratio of specific heats"},
         "R_gas_c": {"unit": "J/kg/K", "desc": "Specific gas constant"},
-        "MW":     {"unit": "g/mol", "desc": "Mean molecular weight"},
-        "cstar":  {"unit": "m/s",   "desc": "Characteristic velocity"},
+        "MW":     {"unit": "g/mol",  "desc": "Mean molecular weight"},
+        "cstar":  {"unit": "m/s",    "desc": "Characteristic velocity"},
     },
     desc="LOX/RP-1 equilibrium combustion (empirical NASA CEA curve fits)",
     tags=["combustion", "propulsion", "curve-fit"],
@@ -924,11 +935,11 @@ print("\n[2] Integrated combustion + nozzle system:")
 engine = System("lox_rp1_engine")
 
 # Design inputs
-engine.add("Pc",      10e6,   "Pa", desc="Chamber pressure")
-engine.add("OF",      2.7,           desc="O/F ratio")
-engine.add("A_throat", 0.02,   "m^2", desc="Throat area")
-engine.add("A_exit",  0.30,   "m^2", desc="Exit area")
-engine.add("P_amb",   101325, "Pa", desc="Ambient pressure (sea level)")
+engine.add("Pc",       10e6,    "Pa",  desc="Chamber pressure")
+engine.add("OF",       2.7,            desc="O/F ratio")
+engine.add("A_throat", 0.02,    "m^2", desc="Throat area")
+engine.add("A_exit",   0.30,    "m^2", desc="Exit area")
+engine.add("P_amb",    101325,  "Pa",  desc="Ambient pressure (sea level)")
 
 # Combustion (adapter)
 engine.use(combustion)
@@ -1046,7 +1057,7 @@ print("=" * 60)
 
 ## Example 8: Research Workflow -- Thermal-Structural Coupled Analysis
 
-`examples/ex08_research_workflow.py`, the full Anvil research workflow:
+`examples/ex08_research_workflow.py`: the full Anvil research workflow
 
 ```python
 import sys, os
@@ -1090,21 +1101,21 @@ print(f"\n[3] Building coupled wall analysis system...")
 wall = System("chamber_wall")
 
 # Operating conditions
-wall.add("T_gas",     3500,    "K",     desc="Hot gas temperature")
-wall.add("h_gas",     5000,    "W",     desc="Gas-side heat transfer coeff")
-wall.add("T_coolant", 400,     "K",     desc="Coolant bulk temperature")
-wall.add("h_coolant", 15000,   "W",     desc="Coolant-side heat transfer coeff")
+wall.add("T_gas",      3500,     "K",      desc="Hot gas temperature")
+wall.add("h_gas",      5000,     "W",      desc="Gas-side heat transfer coeff")
+wall.add("T_coolant",  400,      "K",      desc="Coolant bulk temperature")
+wall.add("h_coolant",  15000,    "W",      desc="Coolant-side heat transfer coeff")
 
 # Wall geometry
-wall.add("t_wall",    0.003,   "m",     desc="Wall thickness")
-wall.add("r_inner",   0.15,    "m",     desc="Chamber inner radius")
+wall.add("t_wall",     0.003,    "m",      desc="Wall thickness")
+wall.add("r_inner",    0.15,     "m",      desc="Chamber inner radius")
 
 # Material (from database)
-wall.add("k_wall",    mat["k"].si,          desc="Wall thermal conductivity")
-wall.add("E",         mat["E"].si, "Pa",   desc="Young's modulus")
-wall.add("alpha_th",  mat["alpha"].si,       desc="Thermal expansion coeff")
-wall.add("nu_poisson", mat["nu_poisson"],     desc="Poisson's ratio")
-wall.add("sigma_y",   mat["sigma_y"].si, "Pa", desc="Yield strength")
+wall.add("k_wall",     mat["k"].si,           desc="Wall thermal conductivity")
+wall.add("E",          mat["E"].si,  "Pa",    desc="Young's modulus")
+wall.add("alpha_th",   mat["alpha"].si,        desc="Thermal expansion coeff")
+wall.add("nu_poisson", mat["nu_poisson"],      desc="Poisson's ratio")
+wall.add("sigma_y",    mat["sigma_y"].si, "Pa", desc="Yield strength")
 
 # Thermal analysis: T_hot -> T_cold through wall
 def wall_temperatures(T_gas, h_gas, T_coolant, h_coolant, k_wall, t_wall):
@@ -1253,7 +1264,7 @@ print("=" * 60)
 
 ## Example 9: Cantera Combustion + Nozzle Design
 
-`examples/ex09_cantera_cea.py`, A complete rocket engine analysis using Cantera for combustion
+`examples/ex09_cantera_cea.py`: A complete rocket engine analysis using Cantera for combustion
 
 ```python
 import sys, os
@@ -1300,11 +1311,11 @@ print(f"  c*     = {r['cstar']}")
 print("\n[2] Full H2/O2 engine system:")
 
 engine = System("h2o2_engine")
-engine.add("OF",       5.0,         desc="Oxidizer/fuel ratio")
-engine.add("Pc",       20e6, "Pa", desc="Chamber pressure")
-engine.add("A_throat", 0.01, "m^2", desc="Throat area")
-engine.add("A_exit",   0.15, "m^2", desc="Exit area")
-engine.add("P_amb",    0,    "Pa", desc="Vacuum")
+engine.add("OF",        5.0,          desc="Oxidizer/fuel ratio")
+engine.add("Pc",        20e6,  "Pa",  desc="Chamber pressure")
+engine.add("A_throat",  0.01,  "m^2", desc="Throat area")
+engine.add("A_exit",    0.15,  "m^2", desc="Exit area")
+engine.add("P_amb",     0,     "Pa",  desc="Vacuum")
 
 # Combustion -- fix propellant choice, vary OF and Pc
 def h2o2_combustion(OF, Pc):
@@ -1372,7 +1383,7 @@ print(f"  {'Propellant':20s} {'Tc(K)':>8s} {'gamma':>8s} {'Isp(s)':>8s} {'c*(m/s
 print(f"  {'-'*56}")
 
 for fuel_name, ox_name, of_ratio in [
-    ("H2", "O2", 5.0),
+    ("H2",  "O2", 5.0),
     ("CH4", "O2", 3.5),
 ]:
     # Rebuild engine with different propellant
@@ -1721,10 +1732,10 @@ print("  Part A: Satellite Reentry (RK45)")
 print("=" * 40)
 
 rho0    = 1.225       # kg/m^3, sea-level density
-H_scale = 8500.0      # m    , scale height
+H_scale = 8500.0      # m     , scale height
 Cd      = 1.2         # drag coefficient (blunt capsule)
-A       = 10.0        # m^2  , cross-section area
-m       = 1500.0      # kg   , capsule mass
+A       = 10.0        # m^2   , cross-section area
+m       = 1500.0      # kg    , capsule mass
 g       = 9.80665     # m/s^2
 gamma   = np.radians(3.0)  # flight-path angle (shallow entry)
 
@@ -1738,7 +1749,7 @@ def reentry(t, y):
     return [dvdt, dhdt]
 
 v0 = 7800.0   # m/s, orbital entry speed
-h0 = 120e3    # m , entry altitude 120 km
+h0 = 120e3    # m  , entry altitude 120 km
 
 t_eval = np.linspace(0, 500, 2000)
 sol_a = solvers.solve_ode(
@@ -1757,9 +1768,9 @@ h_final = sol_a["y"][1, -1]
 t_ground_idx = np.argmin(np.abs(sol_a["y"][1]))  # closest to h=0
 
 print(f"\n  Entry conditions:")
-print(f"    v0 = {v0:.0f} m/s, h0 = {h0/1e3:.0f} km")
+print(f"    v0 = {v0:.0f} m/s,  h0 = {h0/1e3:.0f} km")
 print(f"  After {sol_a['t'][-1]:.0f} s:")
-print(f"    v  = {v_final:.0f} m/s, h = {h_final/1e3:.1f} km")
+print(f"    v  = {v_final:.0f} m/s,  h = {h_final/1e3:.1f} km")
 print(f"  Peak deceleration at t ≈ {sol_a['t'][np.gradient(sol_a['y'][0]).argmin()]:.0f} s")
 print(f"  ODE solved in {sol_a['nfev']} function evaluations")
 
@@ -1774,7 +1785,7 @@ print(f"  ODE solved in {sol_a['nfev']} function evaluations")
 # d[B]/dt =  k1 * [A]  -  k2 * [B]
 # d[C]/dt =  k2 * [B]
 #
-# k1 = 1000 s^-1 (fast), k2 = 0.01 s^-1 (slow)
+# k1 = 1000 s^-1 (fast),  k2 = 0.01 s^-1 (slow)
 # =====================================================
 print("\n" + "=" * 40)
 print("  Part B: Chemical Kinetics A→B→C (BDF)")
@@ -1795,7 +1806,7 @@ t_end = 300.0   # s, watch the slow reaction complete
 sol_b = solvers.solve_ode_stiff(
     kinetics,
     t_span=(0, t_end),
-    y0=[1.0, 0.0, 0.0],   # all species A initially
+    y0=[1.0, 0.0, 0.0],    # all species A initially
     method="BDF",
     t_eval=np.linspace(0, t_end, 500),
     rtol=1e-6,
@@ -1804,7 +1815,7 @@ sol_b = solvers.solve_ode_stiff(
 )
 
 A_f, B_f, C_f = sol_b["y"][:, -1]
-print(f"\n  Rate constants: k1 = {k1} s⁻¹ (fast), k2 = {k2} s⁻¹ (slow)")
+print(f"\n  Rate constants: k1 = {k1} s⁻¹ (fast),  k2 = {k2} s⁻¹ (slow)")
 print(f"  At t = {t_end:.0f} s:")
 print(f"    [A] = {A_f:.6f}   (consumed by fast reaction)")
 print(f"    [B] = {B_f:.6f}   (intermediate)")
@@ -1843,11 +1854,11 @@ P_perim = 2 * (t_fin + 0.05)   # m, perimeter (assume 5 cm width)
 A_cs    = t_fin * 0.05          # m^2, cross section
 m_fin   = np.sqrt(h_conv * P_perim / (k_fin * A_cs))
 
-print(f"\n  Fin: L={L_fin*100:.0f} cm, t={t_fin*1000:.0f} mm, k={k_fin} W/m/K")
-print(f"  h_conv = {h_conv} W/m²/K, m = {m_fin:.2f} m⁻¹")
+print(f"\n  Fin: L={L_fin*100:.0f} cm,  t={t_fin*1000:.0f} mm,  k={k_fin} W/m/K")
+print(f"  h_conv = {h_conv} W/m²/K,  m = {m_fin:.2f} m⁻¹")
 
 def fin_ode(x, y):
-    # y[0] = T - T_inf, y[1] = dT/dx
+    # y[0] = T - T_inf,  y[1] = dT/dx
     return np.vstack([y[1], m_fin**2 * y[0]])
 
 def fin_bc(ya, yb):
@@ -1912,7 +1923,7 @@ L_wall  = 0.025     # m, 25 mm steel wall
 alpha   = 1.2e-5    # m^2/s, thermal diffusivity of steel
 rho_cp  = 3.9e6     # J/m^3/K, volumetric heat capacity (for Q calc)
 
-print(f"\n  Wall: L={L_wall*1000:.0f} mm, α={alpha:.2e} m²/s")
+print(f"\n  Wall: L={L_wall*1000:.0f} mm,  α={alpha:.2e} m²/s")
 print(f"  Step from T_amb={T_amb} K to T_gas={T_gas} K on hot face")
 print(f"  Fourier number at t=60s: Fo = α·t/L² = {alpha*60/L_wall**2:.2f}")
 
@@ -2005,9 +2016,9 @@ print("=" * 60)
   ODE converged: 446 function evaluations, t_final = 5.0000e+02
 
   Entry conditions:
-    v0 = 7800 m/s, h0 = 120 km
+    v0 = 7800 m/s,  h0 = 120 km
   After 500 s:
-    v  = 128 m/s, h = 45.9 km
+    v  = 128 m/s,  h = 45.9 km
   Peak deceleration at t ≈ 153 s
   ODE solved in 446 function evaluations
 
@@ -2097,9 +2108,9 @@ def log_mean_temp(T_hot_in, T_hot_out, T_cold_in, T_cold_out):
         LMTD = (dT1 - dT2) / np.log(dT1 / max(dT2, 1e-6))
     return {"LMTD": Q(LMTD, "K")}
 
-proj.push(ntu_crossflow,  domain="heat_transfer", description="Cross-flow NTU (Kays & London)")
-proj.push(shell_tube_ntu, domain="heat_transfer", description="1-2 shell-and-tube NTU (Shah & Sekulic)")
-proj.push(log_mean_temp,  domain="heat_transfer", description="Log Mean Temperature Difference")
+proj.push(ntu_crossflow,   domain="heat_transfer", description="Cross-flow NTU (Kays & London)")
+proj.push(shell_tube_ntu,  domain="heat_transfer", description="1-2 shell-and-tube NTU (Shah & Sekulic)")
+proj.push(log_mean_temp,   domain="heat_transfer", description="Log Mean Temperature Difference")
 
 proj.list()
 
@@ -2133,18 +2144,18 @@ def outlet_temps_from_eff(effectiveness_cf, C_min, C_hot_in, T_hot_in, T_cold_in
     T_cold_out = T_cold_in + Q_actual / C_cold
     return {
         "Q_actual": Q(Q_actual, "W"),
-        "T_hot_out":  Q(T_hot_out, "K"),
+        "T_hot_out":  Q(T_hot_out,  "K"),
         "T_cold_out": Q(T_cold_out, "K"),
     }
 
 hx = System("crossflow_hx")
-hx.add("T_hot_in",  450,  "K")
-hx.add("T_cold_in", 290,  "K")
-hx.add("mdot_hot",  1.2,  "kg/s")
-hx.add("mdot_cold", 2.0,  "kg/s")
-hx.add("Cp_hot",   1050,  "J/kg/K")
-hx.add("Cp_cold",  4186,  "J/kg/K")
-hx.add("UA",       3500,  "W/K")
+hx.add("T_hot_in",   450,   "K")
+hx.add("T_cold_in",  290,   "K")
+hx.add("mdot_hot",   1.2,   "kg/s")
+hx.add("mdot_cold",  2.0,   "kg/s")
+hx.add("Cp_hot",    1050,   "J/kg/K")
+hx.add("Cp_cold",   4186,   "J/kg/K")
+hx.add("UA",        3500,   "W/K")
 
 def compute_capacity_rates(mdot_hot, Cp_hot, mdot_cold, Cp_cold):
     C_hot  = mdot_hot  * Cp_hot
@@ -2285,15 +2296,15 @@ print("=" * 60)
 ============================================================
 
 [1] Opening project store for 'hx_correlations'...
-  Project 'hx_correlations' opened  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_6r1h9zwd\.anvil\project_hx_correlations.db)
-  Repr: <Project 'hx_correlations': 0 RSQs at C:\Users\rc\AppData\Local\Temp\anvil_ex12_6r1h9zwd>
+  Project 'hx_correlations' opened  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_1e2clxw2\.anvil\project_hx_correlations.db)
+  Repr: <Project 'hx_correlations': 0 RSQs at C:\Users\rc\AppData\Local\Temp\anvil_ex12_1e2clxw2>
 
 [2] Registering draft correlations...
   [hx_correlations] Registered 'ntu_crossflow' (R) in domain 'heat_transfer'.
   [hx_correlations] Registered 'shell_tube_ntu' (R) in domain 'heat_transfer'.
   [hx_correlations] Registered 'log_mean_temp' (R) in domain 'heat_transfer'.
 
-  Project: hx_correlations  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_6r1h9zwd)
+  Project: hx_correlations  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_1e2clxw2)
 
   Relations (3):
     log_mean_temp                   [heat_transfer]
@@ -2355,7 +2366,7 @@ omega_n_plant = 2.0    # rad/s, natural frequency
 zeta_plant    = 0.1    #, open-loop damping (lightly damped)
 K_plant       = 1.0    #, DC gain
 
-print(f"\n  ωn = {omega_n_plant} rad/s, ζ_ol = {zeta_plant}, K = {K_plant}")
+print(f"\n  ωn = {omega_n_plant} rad/s,  ζ_ol = {zeta_plant},  K = {K_plant}")
 print(f"  Open-loop step response characteristics:")
 
 r_ol = anvil.R.second_order_metrics(omega_n=omega_n_plant, zeta=zeta_plant)
@@ -2381,7 +2392,7 @@ print("\n[2] Ziegler-Nichols PID Tuning")
 Ku = 12.0    # ultimate gain (proportional only, at onset of oscillation)
 Tu = 2.2     # s, ultimate period
 
-print(f"\n  Ultimate gain Ku = {Ku}, Ultimate period Tu = {Tu} s")
+print(f"\n  Ultimate gain Ku = {Ku},  Ultimate period Tu = {Tu} s")
 print(f"\n  Ziegler-Nichols tuning methods:")
 
 for method in ["classic", "no_overshoot", "some_overshoot"]:
@@ -2462,18 +2473,18 @@ print(f"  {'Z-N PID':>16s}  {os_zn:>6.1f}  {ts_zn:>12.3f}  {tr_zn:>10.3f}")
 print("\n[4] PID output RSQ")
 
 pid_sys = System("pid_controller")
-pid_sys.add("error",           0.35,    desc="Tracking error (rad)")
-pid_sys.add("integral_error",  0.12,    desc="Integral of error (rad·s)")
-pid_sys.add("derivative_error", -0.08,   desc="Derivative of error (rad/s)")
-pid_sys.add("Kp",              Kp_zn,   desc="Proportional gain")
-pid_sys.add("Ki",              Ki_zn,   desc="Integral gain")
-pid_sys.add("Kd",              Kd_zn,   desc="Derivative gain")
+pid_sys.add("error",            0.35,     desc="Tracking error (rad)")
+pid_sys.add("integral_error",   0.12,     desc="Integral of error (rad·s)")
+pid_sys.add("derivative_error", -0.08,    desc="Derivative of error (rad/s)")
+pid_sys.add("Kp",               Kp_zn,    desc="Proportional gain")
+pid_sys.add("Ki",               Ki_zn,    desc="Integral gain")
+pid_sys.add("Kd",               Kd_zn,    desc="Derivative gain")
 pid_sys.use("pid_output")
 
 r_pid = pid_sys.solve_forward()
 result_u = r_pid["u_pid"].si if hasattr(r_pid["u_pid"], "si") else r_pid["u_pid"]
-print(f"\n  Error = 0.35, Integral = 0.12, Derivative = -0.08")
-print(f"  Z-N PID: Kp={Kp_zn:.3f}, Ki={Ki_zn:.3f}, Kd={Kd_zn:.4f}")
+print(f"\n  Error = 0.35,  Integral = 0.12,  Derivative = -0.08")
+print(f"  Z-N PID: Kp={Kp_zn:.3f},  Ki={Ki_zn:.3f},  Kd={Kd_zn:.4f}")
 print(f"  Control action u = {result_u:.4f}")
 
 
@@ -2483,13 +2494,13 @@ print(f"  Control action u = {result_u:.4f}")
 print("\n[5] Routh-Hurwitz Stability Check")
 
 print(f"\n  Characteristic polynomial: τ²s² + 2ζτs + 1  (2nd order)")
-print(f"  Coefficients: a1 = 2ζ/ωn, a0 = 1/ωn²")
+print(f"  Coefficients: a1 = 2ζ/ωn,  a0 = 1/ωn²")
 
 test_cases = [
-    ("Open-loop (ζ=0.1)",  2*0.1/omega_n_plant, 1/omega_n_plant**2),
-    ("Negative damping",   -0.5,                 1.0),
-    ("Unstable (a0<0)",     1.0,                -1.0),
-    ("Critically damped",   2/omega_n_plant,      1/omega_n_plant**2),
+    ("Open-loop (ζ=0.1)",   2*0.1/omega_n_plant, 1/omega_n_plant**2),
+    ("Negative damping",    -0.5,                  1.0),
+    ("Unstable (a0<0)",      1.0,                 -1.0),
+    ("Critically damped",    2/omega_n_plant,       1/omega_n_plant**2),
 ]
 
 print(f"\n  {'Case':30s}  {'a1':>6s}  {'a0':>8s}  {'Stable?':>8s}")
@@ -2508,7 +2519,7 @@ print("\n[6] Second-order metrics sweep, ζ trade study")
 
 metrics_sys = System("step_response_design")
 metrics_sys.add("omega_n", 5.0)   # rad/s, closed-loop natural frequency
-metrics_sys.add("zeta",   0.7)   # damping ratio
+metrics_sys.add("zeta",    0.7)   # damping ratio
 metrics_sys.use("second_order_metrics")
 
 print(f"\n  Sweep ζ at ωn = 5 rad/s:")
@@ -2535,8 +2546,8 @@ print(f"\n  Design choice: ζ = 0.7 balances OS% and t_settle (classic choice)."
 print("\n[7] First-order step response metrics")
 
 fo_sys = System("first_order_control")
-fo_sys.add("K",       2.0,  desc="DC gain")
-fo_sys.add("tau",     0.5,  desc="Time constant (s)")
+fo_sys.add("K",        2.0,   desc="DC gain")
+fo_sys.add("tau",      0.5,   desc="Time constant (s)")
 fo_sys.use("first_order_step")
 
 r_fo = fo_sys.solve_forward()
@@ -2560,7 +2571,7 @@ print("=" * 60)
 
 [1] Plant: Second-order system
 
-  ωn = 2.0 rad/s, ζ_ol = 0.1, K = 1.0
+  ωn = 2.0 rad/s,  ζ_ol = 0.1,  K = 1.0
   Open-loop step response characteristics:
     Overshoot:  72.9247614287671%
     t_settle:   20.0  (2% criterion)
@@ -2570,7 +2581,7 @@ print("=" * 60)
 
 [2] Ziegler-Nichols PID Tuning
 
-  Ultimate gain Ku = 12.0, Ultimate period Tu = 2.2 s
+  Ultimate gain Ku = 12.0,  Ultimate period Tu = 2.2 s
 
   Ziegler-Nichols tuning methods:
   [        classic]  Kp=7.200  Ti=1.100s  Td=0.2750s
@@ -2586,8 +2597,8 @@ print("=" * 60)
 
 [4] PID output RSQ
 
-  Error = 0.35, Integral = 0.12, Derivative = -0.08
-  Z-N PID: Kp=7.200, Ki=6.545, Kd=1.9800
+  Error = 0.35,  Integral = 0.12,  Derivative = -0.08
+  Z-N PID: Kp=7.200,  Ki=6.545,  Kd=1.9800
 ... (54 more lines)
 ```
 
@@ -2620,7 +2631,7 @@ E_steel       = 207e9      # Pa, Young's modulus
 sigma_y       = 1700e6     # Pa, 0.2% yield strength
 sigma_uts     = 1950e6     # Pa, ultimate tensile strength
 sigma_f_prime = 2100e6     # Pa, fatigue strength coefficient (Basquin)
-b_exp         = -0.07      #,  Basquin exponent (typical for high-strength steel)
+b_exp         = -0.07      #,   Basquin exponent (typical for high-strength steel)
 KIc           = 70e6       # Pa√m, plane strain fracture toughness
 
 print(f"\n  Material: 300M Steel")
@@ -2645,14 +2656,14 @@ SF   = _v(r_sf["safety_factor"])
 MoS  = _v(r_sf["margin_of_safety"])
 pass_ = bool(r_sf["pass"])
 
-print(f"\n  σ_applied = {design_stress/1e6:.0f} MPa, σ_allowable = {sigma_y/1e6:.0f} MPa")
+print(f"\n  σ_applied = {design_stress/1e6:.0f} MPa,  σ_allowable = {sigma_y/1e6:.0f} MPa")
 print(f"  Safety factor:   SF = {SF:.3f}  ({'PASS' if pass_ else 'FAIL'})")
 print(f"  Margin of safety: MoS = {MoS:.3f}  ({MoS*100:.1f}%)")
 
 # Sweep over applied stress to find failure boundary
 sf_sys = System("safety_check")
 sf_sys.add("allowable_stress", sigma_y, "Pa")
-sf_sys.add("applied_stress",  design_stress, "Pa")
+sf_sys.add("applied_stress",   design_stress, "Pa")
 sf_sys.use("safety_factor")
 
 sweep_sf = sf_sys.sweep("applied_stress", np.linspace(500e6, 2000e6, 7))
@@ -2684,9 +2695,9 @@ for sigma_a in stress_amplitudes:
 
 # Build a fatigue system for sweep
 fatigue_sys = System("basquin_fatigue")
-fatigue_sys.add("sigma_a",      design_stress, "Pa", desc="Stress amplitude")
-fatigue_sys.add("sigma_f_prime", sigma_f_prime, "Pa", desc="Basquin coefficient")
-fatigue_sys.add("b_exponent",   b_exp,               desc="Basquin exponent")
+fatigue_sys.add("sigma_a",       design_stress, "Pa",  desc="Stress amplitude")
+fatigue_sys.add("sigma_f_prime", sigma_f_prime, "Pa",  desc="Basquin coefficient")
+fatigue_sys.add("b_exponent",    b_exp,                desc="Basquin exponent")
 fatigue_sys.use("fatigue_life_basquin")
 
 print(f"\n  Fatigue life sweep (stress amplitude vs N_cycles):")
@@ -2704,9 +2715,9 @@ print("\n[3] Miner's Rule, Cumulative Damage")
 
 # Flight spectrum: [stress level (Pa), cycles per flight]
 spectrum = [
-    ("Taxi/ground",    150e6, 500),  # low stress, many cycles
-    ("Cruise",         400e6,  80),  # moderate stress
-    ("Maneuver/launch", 750e6,  20),  # high stress, few cycles
+    ("Taxi/ground",     150e6,  500),   # low stress, many cycles
+    ("Cruise",          400e6,   80),   # moderate stress
+    ("Maneuver/launch", 750e6,   20),   # high stress, few cycles
 ]
 
 # Compute fatigue life for each level
@@ -2777,7 +2788,7 @@ for sigma in [300e6, 500e6, 750e6, 1000e6, 1400e6]:
         sigma=sigma,
         a_crack=a_crack_ndi,
         KIc=KIc,
-        F_geometry=1.12,  # free-surface correction for semi-circular crack
+        F_geometry=1.12,   # free-surface correction for semi-circular crack
     )
     KI    = _v(r_frac["KI"])
     sf_fr = _v(r_frac["safety_factor"])
@@ -2850,10 +2861,10 @@ print(f"    E1/E2 ratio = {E1/E2:.1f}  (strong anisotropy)")
 
 # Sweep Vf
 comp_sys = System("composite_design")
-comp_sys.add("Ef",  Ef);   comp_sys.add("Em",  Em)
-comp_sys.add("Gf",  Gf);   comp_sys.add("Gm",  Gm)
+comp_sys.add("Ef",   Ef);   comp_sys.add("Em",   Em)
+comp_sys.add("Gf",   Gf);   comp_sys.add("Gm",   Gm)
 comp_sys.add("nu_f", nu_f); comp_sys.add("nu_m", nu_m)
-comp_sys.add("Vf",  Vf)
+comp_sys.add("Vf",   Vf)
 comp_sys.use("composite_laminate_stiffness")
 
 print(f"\n  Stiffness vs fiber volume fraction:")
@@ -2867,15 +2878,15 @@ sweep_comp.summary(outputs=["E1", "E2", "G12", "nu12"])
 print("\n[7] Integrated structural life system")
 
 struct_sys = System("shaft_life_assessment")
-struct_sys.add("sigma_a",      design_stress, "Pa")
-struct_sys.add("sigma_f_prime", sigma_f_prime, "Pa")
-struct_sys.add("b_exponent",   b_exp)
-struct_sys.add("allowable_stress", sigma_y,    "Pa")
-struct_sys.add("applied_stress",  design_stress, "Pa")
-struct_sys.add("sigma",           design_stress, "Pa")
-struct_sys.add("a_crack",         a_crack_ndi)
-struct_sys.add("KIc",             KIc)
-struct_sys.add("F_geometry",      1.12)
+struct_sys.add("sigma_a",       design_stress,  "Pa")
+struct_sys.add("sigma_f_prime", sigma_f_prime,  "Pa")
+struct_sys.add("b_exponent",    b_exp)
+struct_sys.add("allowable_stress", sigma_y,     "Pa")
+struct_sys.add("applied_stress",   design_stress, "Pa")
+struct_sys.add("sigma",            design_stress, "Pa")
+struct_sys.add("a_crack",          a_crack_ndi)
+struct_sys.add("KIc",              KIc)
+struct_sys.add("F_geometry",       1.12)
 struct_sys.use("fatigue_life_basquin")
 struct_sys.use("safety_factor")
 
@@ -2921,7 +2932,7 @@ print("=" * 60)
 
 [1] Safety Factor, Nominal Operating Stress
 
-  σ_applied = 750 MPa, σ_allowable = 1700 MPa
+  σ_applied = 750 MPa,  σ_allowable = 1700 MPa
   Safety factor:   SF = 2.267  (PASS)
   Margin of safety: MoS = 1.267  (126.7%)
 
@@ -2970,8 +2981,8 @@ print("=" * 60)
 # =====================================================
 # Aircraft parameters (narrow-body jet transport)
 # =====================================================
-W_MTOW     = 750e3    # N, max takeoff weight (≈76 t)
-W_OEW      = 420e3    # N, operating empty weight
+W_MTOW     = 750e3    # N , max takeoff weight (≈76 t)
+W_OEW      = 420e3    # N , operating empty weight
 S_ref      = 122.4    # m^2, wing reference area
 AR         = 9.5      #, aspect ratio
 sweep_deg  = 25.0     # deg, quarter-chord sweep
@@ -2982,8 +2993,8 @@ TSFC       = 1.8e-5   # kg/N/s, thrust specific fuel consumption (SI)
 
 print(f"\n  Aircraft parameters:")
 print(f"    MTOW   = {W_MTOW/1e3:.0f} kN ({W_MTOW/9.80665/1000:.0f} t)")
-print(f"    S_ref  = {S_ref} m², AR = {AR}, Sweep = {sweep_deg}°")
-print(f"    CD0    = {CD0}, CLmax = {CLmax}")
+print(f"    S_ref  = {S_ref} m²,  AR = {AR},  Sweep = {sweep_deg}°")
+print(f"    CD0    = {CD0},  CLmax = {CLmax}")
 print(f"    TSFC   = {TSFC:.2e} kg/N/s")
 
 # Demonstrate in_ alias (inches as a unit)
@@ -3064,10 +3075,10 @@ print(f"    L/D  = {LoD_cr:.2f}  (lift-to-drag)")
 
 # Sweep CL to find L/D max
 polar_sys = System("wing_polar")
-polar_sys.add("CL", 0.5)
+polar_sys.add("CL",  0.5)
 polar_sys.add("CD0", CD0)
-polar_sys.add("AR", AR)
-polar_sys.add("e",  e_oswald)
+polar_sys.add("AR",  AR)
+polar_sys.add("e",   e_oswald)
 polar_sys.use("drag_polar")
 
 print(f"\n  L/D vs CL (drag polar sweep):")
@@ -3109,7 +3120,7 @@ print("\n[5] Induced Drag RSQ")
 CDi_sys = System("induced_drag")
 CDi_sys.add("CL", 0.52)
 CDi_sys.add("AR", AR)
-CDi_sys.add("e", e_oswald)
+CDi_sys.add("e",  e_oswald)
 CDi_sys.use("induced_drag")
 
 r_cdi = CDi_sys.solve_forward()
@@ -3167,26 +3178,26 @@ for h_cruise in [7000, 9000, 10668, 12000]:    # FL230, FL295, FL350 (36kft), FL
 print("\n[7] Integrated aircraft performance System")
 
 acft = System("aircraft_performance")
-acft.add("h_cruise",  10668,  "m",     desc="Cruise altitude (FL350)")
-acft.add("W_initial", W_MTOW, "N",     desc="Initial weight (MTOW)")
-acft.add("W_final",   W_OEW,  "N",     desc="Final weight (OEW)")
-acft.add("S_ref",     S_ref,  "m^2",   desc="Wing reference area")
-acft.add("AR",        AR,               desc="Aspect ratio")
-acft.add("CD0",       CD0,              desc="Zero-lift drag coefficient")
-acft.add("CLmax",     CLmax,            desc="Max lift coefficient (flaps)")
-acft.add("TSFC",      TSFC,            desc="Thrust specific fuel consumption")
-acft.add("sweep_deg", sweep_deg,        desc="Wing quarter-chord sweep")
-acft.add("taper",     taper,            desc="Wing taper ratio")
-acft.add("CL_cruise", CL_cruise,        desc="Cruise lift coefficient")
-acft.add("e_base",    0.85,             desc="Base Oswald efficiency (fallback)")
+acft.add("h_cruise",   10668,   "m",      desc="Cruise altitude (FL350)")
+acft.add("W_initial",  W_MTOW,  "N",      desc="Initial weight (MTOW)")
+acft.add("W_final",    W_OEW,   "N",      desc="Final weight (OEW)")
+acft.add("S_ref",      S_ref,   "m^2",    desc="Wing reference area")
+acft.add("AR",         AR,                desc="Aspect ratio")
+acft.add("CD0",        CD0,               desc="Zero-lift drag coefficient")
+acft.add("CLmax",      CLmax,             desc="Max lift coefficient (flaps)")
+acft.add("TSFC",       TSFC,             desc="Thrust specific fuel consumption")
+acft.add("sweep_deg",  sweep_deg,         desc="Wing quarter-chord sweep")
+acft.add("taper",      taper,             desc="Wing taper ratio")
+acft.add("CL_cruise",  CL_cruise,         desc="Cruise lift coefficient")
+acft.add("e_base",     0.85,              desc="Base Oswald efficiency (fallback)")
 
 def isa_and_cruise(h_cruise):
     r = anvil.R.isa_atmosphere(h=h_cruise)
     def v(x): return float(x.si) if hasattr(x, "si") else float(x)
     return {"rho_cr": Q(v(r["rho_atm"]), "kg/m^3"),
-            "a_cr":   Q(v(r["a_atm"]),  "m/s"),
-            "T_cr":   Q(v(r["T_atm"]),  "K"),
-            "P_cr":   Q(v(r["P_atm"]),  "Pa")}
+            "a_cr":   Q(v(r["a_atm"]),   "m/s"),
+            "T_cr":   Q(v(r["T_atm"]),   "K"),
+            "P_cr":   Q(v(r["P_atm"]),   "Pa")}
 
 def cruise_speed_and_mach(W_initial, S_ref, CL_cruise, rho_cr, a_cr):
     V = float((W_initial / (0.5 * float(rho_cr.si if hasattr(rho_cr, 'si') else rho_cr)
@@ -3240,8 +3251,8 @@ print("=" * 60)
 
   Aircraft parameters:
     MTOW   = 750 kN (76 t)
-    S_ref  = 122.4 m², AR = 9.5, Sweep = 25.0°
-    CD0    = 0.025, CLmax = 2.8
+    S_ref  = 122.4 m²,  AR = 9.5,  Sweep = 25.0°
+    CD0    = 0.025,  CLmax = 2.8
     TSFC   = 1.80e-05 kg/N/s
 
   Model scale test chord: 5.5 in = 0.139700 m
@@ -3315,10 +3326,10 @@ nozzle = anvil.S.rocket_nozzle.copy()
 
 # Fix chamber conditions and ambient
 nozzle.set(
-    P0=8e6,      # 8 MPa
-    T0=3200,     # K
+    P0=8e6,       # 8 MPa
+    T0=3200,      # K
     gamma=1.25,
-    R_gas=400.0, # J/kg/K
+    R_gas=400.0,  # J/kg/K
     P_amb=101325,
 )
 
@@ -3326,8 +3337,8 @@ nozzle.set(
 opt = nozzle.optimize(
     objective="thrust",
     design_vars={
-        "A_throat": (0.002, 0.030),  # 20 to 300 cm²
-        "A_exit":   (0.010, 0.300),  # 100 to 3000 cm²
+        "A_throat": (0.002, 0.030),   # 20 to 300 cm²
+        "A_exit":   (0.010, 0.300),   # 100 to 3000 cm²
     },
     minimize=False,
     method="differential_evolution",
@@ -3380,14 +3391,14 @@ print("  (Higher Isp favours large expansion ratio; thrust trades off mdot vs Ve
 print("\n[4] Custom system: optimal NTU for heat exchanger effectiveness")
 
 hx = anvil.system("hx_opt")
-hx.add("NTU",   2.0)    # number of transfer units
-hx.add("Cr",    0.5)    # capacity rate ratio Cmin/Cmax
-hx.add("C_min", 500.0, "W/K")
-hx.add("T_h_in", 90.0, "K")   # hot inlet (relative, used for Q calc)
-hx.add("T_c_in", 20.0, "K")   # cold inlet
+hx.add("NTU",    2.0)    # number of transfer units
+hx.add("Cr",     0.5)    # capacity rate ratio Cmin/Cmax
+hx.add("C_min",  500.0, "W/K")
+hx.add("T_h_in", 90.0,  "K")   # hot inlet (relative, used for Q calc)
+hx.add("T_c_in", 20.0,  "K")   # cold inlet
 
 @anvil.relation
-def hx_effectiveness(NTU, Cr):
+def hx_eff_ntu(NTU, Cr):
     eps = (1 - np.exp(-NTU * (1 - Cr))) / (1 - Cr * np.exp(-NTU * (1 - Cr)))
     return {"effectiveness": eps}
 
@@ -3396,7 +3407,7 @@ def hx_duty(effectiveness, C_min, T_h_in, T_c_in):
     Q_max = C_min * (T_h_in - T_c_in)
     return {"Q_duty": effectiveness * Q_max}
 
-hx.use(hx_effectiveness)
+hx.use(hx_eff_ntu)
 hx.use(hx_duty)
 
 # Maximize effectiveness by tuning NTU (proxy for heat exchanger size/cost)
@@ -3404,7 +3415,7 @@ opt_hx = hx.optimize(
     objective="effectiveness",
     design_vars={"NTU": (0.1, 10.0), "Cr": (0.1, 1.0)},
     minimize=False,
-    method="L-BFGS-B",    # gradient-based: smooth landscape
+    method="L-BFGS-B",     # gradient-based: smooth landscape
     maxiter=200,
 )
 
@@ -3521,10 +3532,10 @@ def rayleigh_heat(M1, T01, P1, q_heat, cp, gamma=1.4):
     Raises ValueError if heat addition would choke the flow.
     """
     g      = float(gamma); M1 = float(M1)
-    T01    = float(getattr(T01,   "si", T01))
-    P1     = float(getattr(P1,    "si", P1))
+    T01    = float(getattr(T01,    "si", T01))
+    P1     = float(getattr(P1,     "si", P1))
     q_heat = float(getattr(q_heat, "si", q_heat))
-    cp     = float(getattr(cp,    "si", cp))
+    cp     = float(getattr(cp,     "si", cp))
     gp1 = g + 1
 
     def _T0r(M):
@@ -3555,8 +3566,8 @@ def rayleigh_heat(M1, T01, P1, q_heat, cp, gamma=1.4):
     return {
         "M2":        M2,
         "T02":       Q(T02, "K"),
-        "T2":        Q(T2, "K"),
-        "P2":        Q(P2, "Pa"),
+        "T2":        Q(T2,  "K"),
+        "P2":        Q(P2,  "Pa"),
         "P02":       Q(P02, "Pa"),
         "P01":       Q(P01, "Pa"),
         "P02_P01":   P02 / P01,
@@ -3602,12 +3613,12 @@ for k, v in r.items():
 print("\n--- System solve: single heat addition ---")
 
 duct = anvil.system("rayleigh_duct")
-duct.add("M1",    0.3)
-duct.add("T01",   400.0,  "K")
-duct.add("P1",    200e3,  "Pa")
-duct.add("q_heat", 300e3,  "J/kg")
-duct.add("cp",    1005.0, "J/kg/K")
-duct.add("gamma", 1.4)
+duct.add("M1",     0.3)
+duct.add("T01",    400.0,   "K")
+duct.add("P1",     200e3,   "Pa")
+duct.add("q_heat", 300e3,   "J/kg")
+duct.add("cp",     1005.0,  "J/kg/K")
+duct.add("gamma",  1.4)
 duct.use(proj.R.rayleigh_heat)
 
 result = duct.solve_forward()
@@ -3724,7 +3735,7 @@ print("\n[2] Hankel embedding")
 
 window = N // 4     # rule of thumb: N/4 to N/3
 H = decomp.hankel(x, window=window)
-print(f"  window = {window}, Hankel shape = {H.shape}  (rows x columns)")
+print(f"  window = {window},  Hankel shape = {H.shape}  (rows x columns)")
 print(f"  Each column: one {window}-sample snapshot")
 
 # --------------------------------------------------------------
@@ -3873,7 +3884,7 @@ print("=" * 60)
   Signal length: 1600 samples  (8.0 s at 200 Hz)
 
 [2] Hankel embedding
-  window = 400, Hankel shape = (400, 1201)  (rows x columns)
+  window = 400,  Hankel shape = (400, 1201)  (rows x columns)
   Each column: one 400-sample snapshot
 
 [3] POD, energy decomposition
@@ -3896,9 +3907,9 @@ print("=" * 60)
   DMD rank used : 12
   Mode    |eval|     Freq (Hz)   Growth rate   |Amplitude|
   -------------------------------------------------------
-     4   1.00001       -3.0003       +0.0013        9.9570
      3   1.00001       +3.0003       +0.0013        9.9570
-    10   1.00003      -10.9994       +0.0052        3.8833
+     4   1.00001       -3.0003       +0.0013        9.9570
+     9   1.00003      +10.9994       +0.0052        3.8833
 ... (41 more lines)
 ```
 
@@ -3923,7 +3934,7 @@ print("=" * 60)
 # Part 1: 1D validation -- Gaussian ring (analytic solution known)
 # ---------------------------------------------------------------
 print("\n[1] Forward Abel: Gaussian radial distribution -> projection")
-print("    f(r) = exp(-r^2/sigma^2), F(y) = sigma*sqrt(pi)*exp(-y^2/sigma^2)")
+print("    f(r) = exp(-r^2/sigma^2),  F(y) = sigma*sqrt(pi)*exp(-y^2/sigma^2)")
 
 N = 300
 dr = 0.05
@@ -4036,7 +4047,7 @@ print(f"  abel_center() found: col = {cc_found}  (true: {cx})")
 
 # Invert with both methods
 result_3pt   = decomp.abel_image(image, method="three_point", center=(cr_found, cc_found))
-result_onion = decomp.abel_image(image, method="onion",      center=(cr_found, cc_found))
+result_onion = decomp.abel_image(image, method="onion",       center=(cr_found, cc_found))
 
 print(f"  Radial image shape: {result_3pt['radial'].shape}")
 
@@ -4088,7 +4099,7 @@ print("=" * 60)
 ============================================================
 
 [1] Forward Abel: Gaussian radial distribution -> projection
-    f(r) = exp(-r^2/sigma^2), F(y) = sigma*sqrt(pi)*exp(-y^2/sigma^2)
+    f(r) = exp(-r^2/sigma^2),  F(y) = sigma*sqrt(pi)*exp(-y^2/sigma^2)
   Forward transform error vs analytic: 2.05e-04
 
 [2] Abel inversion: projection -> radial distribution
@@ -4123,7 +4134,7 @@ print("=" * 60)
 
 ## Example 20: Space Dynamics, Attitude, and Mission Budgets
 
-`examples/ex20_space_dynamics.py`, the space-focused RSQs added to the Anvil seed library.
+`examples/ex20_space_dynamics.py`: the space-focused RSQs added to the Anvil seed library.
 
 ```python
 import numpy as np
@@ -4533,7 +4544,7 @@ print("=" * W)
 
 ## Example 21: poliastro Adapter -- Orbit Design in Anvil
 
-`examples/ex21_poliastro_adapter.py`, the poliastro adapter for orbit state, Hohmann transfers,
+`examples/ex21_poliastro_adapter.py`: the poliastro adapter for orbit state, Hohmann transfers,
 
 ```python
 import os
@@ -4571,10 +4582,10 @@ print()
 print("[1] Orbit state -- direct adapter calls")
 
 orbits = [
-    ("ISS / LEO", R_E + 407e3, 0.0000, math.radians(51.6)),
-    ("GTO",       24396e3,     0.7311, math.radians(27.0)),
-    ("GEO",       42164e3,     0.0000, math.radians(0.0)),
-    ("Polar LEO", R_E + 500e3, 0.0000, math.radians(98.0)),
+    ("ISS / LEO",  R_E + 407e3,  0.0000, math.radians(51.6)),
+    ("GTO",        24396e3,      0.7311, math.radians(27.0)),
+    ("GEO",        42164e3,      0.0000, math.radians(0.0)),
+    ("Polar LEO",  R_E + 500e3,  0.0000, math.radians(98.0)),
 ]
 
 print(f"  {'Label':14s}  {'a (km)':>10s}  {'ecc':>6s}  {'T (min)':>8s}  {'v (m/s)':>9s}")
@@ -4589,9 +4600,9 @@ for label, a, ecc, inc in orbits:
 print(f"\n[2] Hohmann transfers")
 
 transfers = [
-    ("LEO 200km -> GEO",      R_E + 200e3, 42164e3),
-    ("LEO 200km -> Moon dist", R_E + 200e3, 384400e3),
-    ("LEO 400km -> LEO 600km", R_E + 400e3, R_E + 600e3),
+    ("LEO 200km -> GEO",       R_E + 200e3,  42164e3),
+    ("LEO 200km -> Moon dist", R_E + 200e3,  384400e3),
+    ("LEO 400km -> LEO 600km", R_E + 400e3,  R_E + 600e3),
 ]
 
 print(f"  {'Transfer':28s}  {'dv1 (m/s)':>10s}  {'dv2 (m/s)':>10s}  "
@@ -4609,11 +4620,11 @@ print(f"\n[3] LEO->GEO mission budget (orbit + propellant_mass in one System)")
 register()   # push adapters to global registry so sys.use() can find them
 
 mission = anvil.system("leo_geo_mission")
-mission.add("a_i",  R_E + 200e3, "m",  desc="Departure orbit radius")
-mission.add("a_f",  42164e3,    "m",  desc="Target orbit radius (GEO)")
-mission.add("Isp",  450.0,      "s",  desc="Engine specific impulse")
-mission.add("m_wet", 5000.0,     "kg", desc="Spacecraft wet mass")
-mission.add("g0",   9.80665,    "m/s^2")
+mission.add("a_i",   R_E + 200e3, "m",   desc="Departure orbit radius")
+mission.add("a_f",   42164e3,     "m",   desc="Target orbit radius (GEO)")
+mission.add("Isp",   450.0,       "s",   desc="Engine specific impulse")
+mission.add("m_wet", 5000.0,      "kg",  desc="Spacecraft wet mass")
+mission.add("g0",    9.80665,     "m/s^2")
 
 mission.use(poliastro_hohmann)          # Adapter object directly (not registry lookup)
 
@@ -4650,12 +4661,12 @@ for alt in altitudes_km:
 print(f"\n[5] Sensitivity: what drives orbital speed in LEO?")
 
 leo_sys = anvil.system("leo_orbit")
-leo_sys.add("a",   R_E + 400e3, "m")
-leo_sys.add("ecc", 0.0)
-leo_sys.add("inc", math.radians(51.6), "rad")
+leo_sys.add("a",    R_E + 400e3, "m")
+leo_sys.add("ecc",  0.0)
+leo_sys.add("inc",  math.radians(51.6), "rad")
 leo_sys.add("raan", 0.0, "rad")
 leo_sys.add("argp", 0.0, "rad")
-leo_sys.add("nu",  0.0, "rad")
+leo_sys.add("nu",   0.0, "rad")
 leo_sys.use(poliastro_orbit)            # Adapter object directly
 
 sens = leo_sys.sensitivity(outputs=["v_mag", "period"])
@@ -4694,7 +4705,7 @@ ecc_gto = (42164e3 - (R_E + 200e3)) / (42164e3 + R_E + 200e3)
 T_gto = poliastro_orbit(a=a_gto, ecc=ecc_gto, inc=0.0,
                          raan=0.0, argp=0.0, nu=0.0)["period"].si
 
-print(f"  a_gto   = {a_gto/1e6:.3f} Mm, ecc = {ecc_gto:.4f}")
+print(f"  a_gto   = {a_gto/1e6:.3f} Mm,  ecc = {ecc_gto:.4f}")
 print(f"  r_p     = {(R_E + 200e3)/1e6:.3f} Mm (perigee)")
 print(f"  r_a     = {42164e3/1e6:.3f} Mm (apogee)")
 print(f"  period  = {T_gto/3600:.2f} h")
@@ -4716,7 +4727,7 @@ print(f"{'='*W}")
 
 ## Example 22: pykep Adapter -- Trajectory Design in Anvil
 
-`examples/ex22_pykep_adapter.py`, the pykep adapter for Lambert arc solutions, Keplerian
+`examples/ex22_pykep_adapter.py`: the pykep adapter for Lambert arc solutions, Keplerian
 
 ```python
 import os
@@ -4789,11 +4800,11 @@ print(f"  Closure error : {dr/AU:.4f} AU  (two-body propagation vs JPL low-preci
 print(f"\n[3] Lambert arc Earth->Mars at J2000 positions, tof=200 days")
 
 r_earth = pykep_planet_state(planet="earth", epoch_mjd2000=0.0)
-r_mars  = pykep_planet_state(planet="mars", epoch_mjd2000=200.0)  # Mars 200 days later
+r_mars  = pykep_planet_state(planet="mars",  epoch_mjd2000=200.0)  # Mars 200 days later
 
 sol = pykep_lambert(
     r0_x=r_earth["r_x"].si, r0_y=r_earth["r_y"].si, r0_z=r_earth["r_z"].si,
-    r1_x=r_mars["r_x"].si, r1_y=r_mars["r_y"].si, r1_z=r_mars["r_z"].si,
+    r1_x=r_mars["r_x"].si,  r1_y=r_mars["r_y"].si,  r1_z=r_mars["r_z"].si,
     tof=200 * 86400,
 )
 print(f"  Departure v   : ({sol['v_dep_x'].value/1e3:.3f}, "
@@ -4823,8 +4834,8 @@ print(f"\n[4] Delta-v budget System (planet state + Lambert in one solve)")
 register()  # push pykep adapters to global registry
 
 traj = anvil.system("earth_mars_transfer")
-traj.add("epoch_dep", 0.0,       desc="Departure epoch (MJD2000 days)")
-traj.add("tof",      200.0 * 86400, "s", desc="Time of flight")
+traj.add("epoch_dep", 0.0,        desc="Departure epoch (MJD2000 days)")
+traj.add("tof",       200.0 * 86400, "s", desc="Time of flight")
 
 # Earth departure state
 def earth_state(epoch_dep):
@@ -4873,7 +4884,7 @@ for tof_d in tofs_days:
         s = pykep_lambert(
             r0_x=r_earth["r_x"].si, r0_y=r_earth["r_y"].si,
             r0_z=r_earth["r_z"].si,
-            r1_x=r_mars["r_x"].si, r1_y=r_mars["r_y"].si,
+            r1_x=r_mars["r_x"].si,  r1_y=r_mars["r_y"].si,
             r1_z=r_mars["r_z"].si,
             tof=tof_d * 86400,
         )
@@ -4930,7 +4941,7 @@ print(f"{'='*W}")
 
 ## Example: 2D Euler CFD, Subsonic flow over a Gaussian bump
 
-`examples/ex_cfd_subsonic_bump.py`, M = 0.5 air flow through a channel with a Gaussian bump on the lower wall.
+`examples/ex_cfd_subsonic_bump.py`: M = 0.5 air flow through a channel with a Gaussian bump on the lower wall.
 
 ```python
 import sys, os
@@ -4983,8 +4994,8 @@ mesh = Mesh.bump(
     bump_sigma  = 0.20,
     title       = "subsonic_bump",
     patches     = {
-        "inlet":   MeshPatch("left", 0, 30),
-        "outlet":  MeshPatch("right", 0, 30),
+        "inlet":   MeshPatch("left",  0, 30),
+        "outlet":  MeshPatch("right",  0, 30),
         "wall":    MeshPatch("bottom", 0, 80),
         "ceiling": MeshPatch("top", 0, 80),
     }
@@ -5036,14 +5047,14 @@ print(f"  Saving Mach contour snapshots to: {snap_dir}/")
 
 result = solver.run(
     max_iter    = 3000,
-    tol         = 1e-3,   # subsonic fixed-ghost inlet converges slowly
+    tol         = 1e-3,    # subsonic fixed-ghost inlet converges slowly
     monitor     = True,
     verbose     = True,
     print_every = 300,
-    save_every  = 600,     # save PNG every 600 iterations
+    save_every  = 600,      # save PNG every 600 iterations
     save_field  = "M",
     save_dir    = snap_dir,
-    save_vmin   = 0.3,     # fixed scale -- all frames comparable
+    save_vmin   = 0.3,      # fixed scale -- all frames comparable
     save_vmax   = 1.0,
 )
 
@@ -5096,8 +5107,8 @@ sweep_mesh = Mesh.bump(
     length=2.0, height=0.5, nx=40, ny=15,
     bump_height=0.10, bump_x0=1.0, bump_sigma=0.20,
     patches={
-        "inlet":   MeshPatch("left", 0, 15),
-        "outlet":  MeshPatch("right", 0, 15),
+        "inlet":   MeshPatch("left",  0, 15),
+        "outlet":  MeshPatch("right",  0, 15),
         "wall":    MeshPatch("bottom", 0, 40),
         "ceiling": MeshPatch("top", 0, 40),
     }
@@ -5109,7 +5120,7 @@ def bump_bcs(M, p0, T0, alpha=0.0):
     p_s = p0 / fac**(g/(g-1))   # isentropic static at inlet M
     return {
         "inlet":   SubsonicInlet(M=M, p0=p0, T0=T0, gamma=g, R_gas=R),
-        "outlet":  SubsonicOutlet(p_back=p_s, gamma=g), # matched back pressure
+        "outlet":  SubsonicOutlet(p_back=p_s, gamma=g),  # matched back pressure
         "wall":    SlipWall(),
         "ceiling": SlipWall(),
     }
@@ -5129,8 +5140,8 @@ cfd_rel = sweep_solver.as_relation(
 
 sweep_sys = anvil.system("bump_mach_sweep")
 sweep_sys.add("M_inf", 0.5)
-sweep_sys.add("p_inf", p0_inlet)
-sweep_sys.add("T_inf", T0_inlet)
+sweep_sys.add("p_inf",  p0_inlet)
+sweep_sys.add("T_inf",  T0_inlet)
 sweep_sys.use(cfd_rel)
 
 mach_vals = np.array([0.3, 0.4, 0.5, 0.6])
@@ -5148,10 +5159,10 @@ for f in ["bump.amesh", "bump_flow.vtk"]:
 
 print("\n" + "=" * 60)
 print("  Done. Output files:")
-print(f"    {mesh_png}     , mesh + patch labels")
-print(f"    {panel_png}    , M/p/T/rho contours")
-print(f"    {conv_png}     , residual convergence")
-print(f"    {snap_dir}/    , Mach snapshots every 500 iters")
+print(f"    {mesh_png}      , mesh + patch labels")
+print(f"    {panel_png}     , M/p/T/rho contours")
+print(f"    {conv_png}      , residual convergence")
+print(f"    {snap_dir}/     , Mach snapshots every 500 iters")
 print("=" * 60)
 ```
 
@@ -5160,7 +5171,7 @@ print("=" * 60)
 
 ## Example: 2D Euler CFD, Supersonic flow over a compression ramp
 
-`examples/ex_cfd_supersonic_ramp.py`, M = 2.5 flow over a compression ramp (lower wall turns up 12deg).
+`examples/ex_cfd_supersonic_ramp.py`: M = 2.5 flow over a compression ramp (lower wall turns up 12deg).
 
 ```python
 import sys, os
@@ -5217,8 +5228,8 @@ nx, ny = 80, 30
 i_ramp = int(nx * ramp_x0 / length)   # first ramp cell
 
 patches = {
-    "inlet":     MeshPatch("left", 0, ny),
-    "outlet":    MeshPatch("right", 0, ny),
+    "inlet":     MeshPatch("left",  0, ny),
+    "outlet":    MeshPatch("right",  0, ny),
     "flat_wall": MeshPatch("bottom", 0, i_ramp),
     "ramp":      MeshPatch("bottom", i_ramp, nx),
     "ceiling":   MeshPatch("top", 0, nx),
@@ -5284,7 +5295,7 @@ result = solver.run(
     save_every  = 500,
     save_field  = "p",
     save_dir    = snap_dir,
-    save_vmin   = 100_000,  # fixed scale for all frames
+    save_vmin   = 100_000,   # fixed scale for all frames
     save_vmax   = 430_000,
 )
 
@@ -5346,8 +5357,8 @@ def make_ramp_mesh(theta):
         length=length, height=height, ramp_x0=ramp_x0,
         ramp_angle_deg=theta, nx=40, ny=15,
         patches={
-            "inlet":     MeshPatch("left", 0, 15),
-            "outlet":    MeshPatch("right", 0, 15),
+            "inlet":     MeshPatch("left",  0, 15),
+            "outlet":    MeshPatch("right",  0, 15),
             "flat_wall": MeshPatch("bottom", 0, i_r),
             "ramp":      MeshPatch("bottom", i_r, 40),
             "ceiling":   MeshPatch("top", 0, 40),
@@ -5416,7 +5427,7 @@ print("=" * 60)
 
 ## Example: 2D Euler CFD -- Supersonic flow over a wedge
 
-`examples/ex_cfd_wedge.py`, Inviscid supersonic flow (M=2) over a 10-degree wedge.
+`examples/ex_cfd_wedge.py`: Inviscid supersonic flow (M=2) over a 10-degree wedge.
 
 ```python
 import os
@@ -5453,7 +5464,7 @@ T_inf = 300.0  # K
 R_gas = 287.058  # J/kg/K
 
 r = anvil.R.oblique_shock(M1=M_inf, theta_deg=theta_deg, gamma=gamma)
-print(f"\n  Freestream M = {M_inf}, wedge half-angle = {theta_deg} deg")
+print(f"\n  Freestream M = {M_inf},  wedge half-angle = {theta_deg} deg")
 print(f"  Shock attached: {r['attached']}")
 print(
     f"  Shock angle beta = {r['beta_deg']:.3f} deg  (Mach angle = {np.degrees(np.arcsin(1 / M_inf)):.3f} deg)"
@@ -5467,7 +5478,7 @@ print(f"  rho2/rho1       = {r['rho2_rho1']:.4f}")
 p2 = p_inf * r["p2_p1"]
 T2 = T_inf * r["T2_T1"]
 rho2 = (p_inf / (R_gas * T_inf)) * r["rho2_rho1"]
-print(f"\n  Downstream: p = {p2:.1f} Pa, T = {T2:.1f} K, M = {r['M2']:.4f}")
+print(f"\n  Downstream: p = {p2:.1f} Pa,  T = {T2:.1f} K,  M = {r['M2']:.4f}")
 
 # ─────────────────────────────────────────────────────────────────
 # PART 2, Numerical solution: anvil.cfd 2D Euler solver
@@ -5477,20 +5488,20 @@ print("  PART 2: Numerical 2D Euler solution")
 print("=" * 60)
 
 # Build body-fitted wedge mesh
-# Domain: x in [0, 1] m, y from wedge surface up to 0.6 m above
+# Domain: x in [0, 1] m,  y from wedge surface up to 0.6 m above
 nx_main, ny_main = 80, 40
 mesh = Mesh.wedge(
     half_angle_deg=theta_deg,
-    chord=1.0, # m
-    height=0.6, # m above wedge surface
+    chord=1.0,  # m
+    height=0.6,  # m above wedge surface
     nx=nx_main,
     ny=ny_main,
     title="wedge_10deg",
     patches={
-        "inlet":    MeshPatch("left",  0, ny_main),
-        "outlet":   MeshPatch("right", 0, ny_main),
+        "inlet":    MeshPatch("left",   0, ny_main),
+        "outlet":   MeshPatch("right",  0, ny_main),
         "wall":     MeshPatch("bottom", 0, nx_main),
-        "farfield": MeshPatch("top",   0, nx_main),
+        "farfield": MeshPatch("top",    0, nx_main),
     },
 )
 mesh.info()
@@ -5509,11 +5520,11 @@ solver = CFDSolver(
     bcs=bcs,
     gamma=gamma,
     R_gas=R_gas,
-    flux_scheme="roe", # Roe approximate Riemann solver
-    order=2, # MUSCL + van Leer limiter
-    time_scheme="rk4", # 4-stage Runge-Kutta
-    cfl=0.3, # CFL number (0.3 recommended for 2nd order)
-    transient=False, # local time stepping for steady-state
+    flux_scheme="roe",  # Roe approximate Riemann solver
+    order=2,  # MUSCL + van Leer limiter
+    time_scheme="rk4",  # 4-stage Runge-Kutta
+    cfl=0.3,  # CFL number (0.3 recommended for 2nd order)
+    transient=False,  # local time stepping for steady-state
 )
 solver.initialize(M=M_inf, p=p_inf, T=T_inf, alpha_deg=0.0)
 
@@ -5522,14 +5533,14 @@ print(f"\n  Running Euler solver ({mesh.nx}x{mesh.ny} cells, Roe flux, 2nd order
 out_dir = os.path.dirname(os.path.abspath(__file__))
 result = solver.run(
     max_iter=3000,
-    tol=1e-4,      # shock residual stagnates at ~1e-4 (truncation error)
+    tol=1e-4,       # shock residual stagnates at ~1e-4 (truncation error)
     monitor=True,
     verbose=True,
     print_every=200,
-    save_every=500,             # save PNG every 500 iters
+    save_every=500,              # save PNG every 500 iters
     save_field="M",
     save_dir=os.path.join(out_dir, "wedge_snapshots"),
-    save_vmin=1.4,              # fixed scale, all frames comparable
+    save_vmin=1.4,               # fixed scale, all frames comparable
     save_vmax=2.1,
 )
 
@@ -5596,10 +5607,10 @@ sweep_mesh = Mesh.wedge(
     ny=ny_sw,
     title="wedge_sweep",
     patches={
-        "inlet":    MeshPatch("left",  0, ny_sw),
-        "outlet":   MeshPatch("right", 0, ny_sw),
+        "inlet":    MeshPatch("left",   0, ny_sw),
+        "outlet":   MeshPatch("right",  0, ny_sw),
         "wall":     MeshPatch("bottom", 0, nx_sw),
-        "farfield": MeshPatch("top",   0, nx_sw),
+        "farfield": MeshPatch("top",    0, nx_sw),
     },
 )
 
@@ -5615,7 +5626,7 @@ def wedge_bcs(M, p, T, alpha=0.0):
 
 sweep_solver = CFDSolver(
     mesh=sweep_mesh,
-    bcs=wedge_bcs(M_inf, p_inf, T_inf), # placeholder; factory overrides
+    bcs=wedge_bcs(M_inf, p_inf, T_inf),  # placeholder; factory overrides
     gamma=gamma,
     R_gas=R_gas,
     flux_scheme="roe",
@@ -5685,7 +5696,7 @@ print("""
 
 ## Example: CoolProp Adapter -- Real-Fluid Properties in Anvil (real-only)
 
-`examples/ex_coolprop_adapter.py`, the CoolProp adapter (rho, h, cp, mu, a) for several fluids and
+`examples/ex_coolprop_adapter.py`: the CoolProp adapter (rho, h, cp, mu, a) for several fluids and
 
 ```python
 import anvil
@@ -5743,6 +5754,101 @@ print("=" * W)
 > Requires an external tool that is not installed here. Run `anvil doctor` for the exact install command, then run the script to see its output.
 
 
+## Curve Fitting and Data Tables
+
+`examples/ex_curve_fitting.py`: the data-fitting RSQs that take ``x_data`` / ``y_data`` arrays and
+
+```python
+import numpy as np
+
+import anvil
+
+rng = np.random.default_rng(0)
+
+print("=" * 60)
+print("  Linear regression: y = 2 x + 1 (+ noise)")
+print("=" * 60)
+
+x = np.linspace(0, 10, 25)
+y = 2.0 * x + 1.0 + rng.normal(0, 0.15, x.size)
+lin = anvil.R.linear_regression(x_data=x, y_data=y)
+print(f"  slope     = {lin['slope']:.4f}  (true 2.0)")
+print(f"  intercept = {lin['intercept']:.4f}  (true 1.0)")
+print(f"  R-squared = {lin['r_squared']:.5f},  RMSE = {lin['rmse']:.4f}")
+
+print("\n" + "=" * 60)
+print("  Polynomial fit: y = x^2 + 1 (exact)")
+print("=" * 60)
+
+xp = np.linspace(-3, 3, 21)
+yp = xp**2 + 1.0
+poly = anvil.R.poly_fit(x_data=xp, y_data=yp, degree=2)
+coeffs = poly["coeffs"]
+print(f"  coeffs (high->low) = "
+      f"[{coeffs[0]:.4f}, {coeffs[1]:.4f}, {coeffs[2]:.4f}]  (true [1, 0, 1])")
+print(f"  R-squared = {poly['r_squared']:.5f}")
+
+print("\n" + "=" * 60)
+print("  Power fit: y = 2 x^1.5")
+print("=" * 60)
+
+xw = np.linspace(1, 20, 20)
+yw = 2.0 * xw**1.5
+powr = anvil.R.power_fit(x_data=xw, y_data=yw)
+print(f"  a = {powr['a']:.4f}  (true 2.0)")
+print(f"  b = {powr['b']:.4f}  (true 1.5)")
+print(f"  R-squared = {powr['r_squared']:.5f}")
+
+print("\n" + "=" * 60)
+print("  Exponential fit: y = 5 e^(0.3 x)")
+print("=" * 60)
+
+xe = np.linspace(0, 8, 20)
+ye = 5.0 * np.exp(0.3 * xe)
+expf = anvil.R.exp_fit(x_data=xe, y_data=ye)
+print(f"  a = {expf['a']:.4f}  (true 5.0)")
+print(f"  b = {expf['b']:.4f}  (true 0.3)")
+print(f"  R-squared = {expf['r_squared']:.5f}")
+
+print("\n  Each fit recovers the generating coefficients, confirming the")
+print("  data-fitting RSQs are ready to drop into the workbench data tables.")
+```
+
+**Output:**
+
+```
+============================================================
+  Linear regression: y = 2 x + 1 (+ noise)
+============================================================
+  slope     = 2.0028  (true 2.0)
+  intercept = 0.9751  (true 1.0)
+  R-squared = 0.99955,  RMSE = 0.1280
+
+============================================================
+  Polynomial fit: y = x^2 + 1 (exact)
+============================================================
+  coeffs (high->low) = [1.0000, 0.0000, 1.0000]  (true [1, 0, 1])
+  R-squared = 1.00000
+
+============================================================
+  Power fit: y = 2 x^1.5
+============================================================
+  a = 2.0000  (true 2.0)
+  b = 1.5000  (true 1.5)
+  R-squared = 1.00000
+
+============================================================
+  Exponential fit: y = 5 e^(0.3 x)
+============================================================
+  a = 5.0000  (true 5.0)
+  b = 0.3000  (true 0.3)
+  R-squared = 1.00000
+
+  Each fit recovers the generating coefficients, confirming the
+  data-fitting RSQs are ready to drop into the workbench data tables.
+```
+
+
 ## Example: Design of Experiments (DOE) + parallel sweeps on a built-in System.
 
 `examples/ex_doe.py`
@@ -5764,8 +5870,8 @@ def main():
 
     # --- 1. Latin Hypercube DOE over two inputs -------------------------------
     bounds = {
-        "P0": (3.0e6, 10.0e6),   # chamber pressure [Pa]
-        "A_exit": (0.05, 0.30),  # exit area [m^2]
+        "P0": (3.0e6, 10.0e6),    # chamber pressure [Pa]
+        "A_exit": (0.05, 0.30),   # exit area [m^2]
     }
     samples = doe.latin_hypercube(bounds, n=20, seed=7)
     print(f"\nGenerated {len(samples)} Latin Hypercube samples.")
@@ -5847,9 +5953,143 @@ Parallel sweep of chamber pressure P0:
 ```
 
 
+## Extended Engineering RSQs
+
+`examples/ex_extended_rsqs.py`: the extended relation pack that fills common gaps across
+
+```python
+import anvil
+
+print("=" * 60)
+print("  Compressible duct flow")
+print("=" * 60)
+
+fanno = anvil.R.fanno_flow(M=2.0, gamma=1.4)
+print(f"  Fanno   M=2.0 : fL*/D_max = {fanno['fLD_max']:.4f}, "
+      f"T/T* = {fanno['T_Tstar']:.4f}")
+
+rayleigh = anvil.R.rayleigh_flow(M=0.5, gamma=1.4)
+print(f"  Rayleigh M=0.5: T0/T0* = {rayleigh['T0_T0star']:.4f}, "
+      f"P/P* = {rayleigh['P_Pstar']:.4f}")
+
+mu = anvil.R.mach_angle(M=2.0)
+print(f"  Mach angle M=2.0 : mu = {mu['mu_deg']:.3f} deg")
+
+print("\n" + "=" * 60)
+print("  Internal and external flow")
+print("=" * 60)
+
+cole = anvil.R.colebrook_friction(Re=1e5, rel_roughness=0.001)
+haal = anvil.R.haaland_friction(Re=1e5, rel_roughness=0.001)
+print(f"  Darcy friction (Re=1e5, e/D=0.001):")
+print(f"    Colebrook (implicit) = {cole['f_darcy']:.5f}  [{cole['regime']}]")
+print(f"    Haaland   (explicit) = {haal['f_darcy']:.5f}")
+
+dp = anvil.R.pipe_pressure_drop(f_darcy=cole["f_darcy"], L=50, D=0.1,
+                                rho=998, V=2.0)
+print(f"  Pipe drop (50 m, D=0.1 m, water @ 2 m/s): "
+      f"dP = {dp['dP']}, head = {dp['head_loss']}")
+
+cf = anvil.R.skin_friction_flat_plate(Re_L=1e6, regime="auto")
+print(f"  Flat-plate skin friction (Re_L=1e6): Cf = {cf['Cf']:.5f} "
+      f"[{cf['regime']}]")
+
+print("\n" + "=" * 60)
+print("  Heat transfer")
+print("=" * 60)
+
+db = anvil.R.dittus_boelter(Re=1e5, Pr=0.7, k_fluid=0.026, D=0.05,
+                            heating=True)
+print(f"  Dittus-Boelter (air in tube): Nu = {db['Nu']:.1f}, "
+      f"h = {db['h_conv']}")
+
+hx = anvil.R.lmtd(T_hot_in=150, T_hot_out=90, T_cold_in=30, T_cold_out=70,
+                  flow="counter")
+print(f"  LMTD (counterflow): {hx['LMTD']}")
+
+bi = anvil.R.biot_number(h_conv=50, L_char=0.01, k_solid=200)
+print(f"  Biot number: Bi = {bi['Bi']:.4f} "
+      f"(lumped valid = {bi['lumped_valid']})")
+
+lc = anvil.R.lumped_capacitance(T0=200, T_inf=25, t=60, h_conv=50,
+                                A_surf=0.02, rho=2700, V_vol=1e-4, cp=900)
+print(f"  Lumped cooling after 60 s: T = {lc['T_t']} (tau = {lc['tau']})")
+
+print("\n" + "=" * 60)
+print("  Structures")
+print("=" * 60)
+
+tor = anvil.R.torsion_circular_shaft(torque=500, d_outer=0.04, L=1.0,
+                                     G=79e9, d_inner=0.0)
+print(f"  Solid shaft torsion (T=500 N.m, d=40 mm): "
+      f"tau_max = {tor['tau_max']}, twist = {tor['twist_deg']:.3f} deg")
+
+ps = anvil.R.principal_stresses_2d(sigma_x=80e6, sigma_y=20e6, tau_xy=30e6)
+print(f"  Principal stresses: s1 = {ps['sigma_1']}, s2 = {ps['sigma_2']}, "
+      f"tau_max = {ps['tau_max']}")
+
+vm = anvil.R.von_mises_stress(sigma_x=80e6, sigma_y=20e6, sigma_z=0,
+                              tau_xy=30e6, tau_yz=0, tau_zx=0)
+print(f"  Von Mises equivalent stress: {vm['sigma_vm']}")
+
+print("\n" + "=" * 60)
+print("  Ideal cycles")
+print("=" * 60)
+
+carnot = anvil.R.carnot_efficiency(T_hot=800, T_cold=300)
+print(f"  Carnot (800 K / 300 K): eta = {carnot['eta_carnot']:.4f}, "
+      f"COP_hp = {carnot['COP_heat_pump']:.3f}")
+
+brayton = anvil.R.brayton_ideal(pressure_ratio=15, gamma=1.4,
+                                T_min=300, T_max=1600)
+print(f"  Ideal Brayton (rp=15): eta = {brayton['eta_thermal']:.4f}, "
+      f"back-work ratio = {brayton['back_work_ratio']:.4f}")
+```
+
+**Output:**
+
+```
+============================================================
+  Compressible duct flow
+============================================================
+  Fanno   M=2.0 : fL*/D_max = 0.3050, T/T* = 0.6667
+  Rayleigh M=0.5: T0/T0* = 0.6914, P/P* = 1.7778
+  Mach angle M=2.0 : mu = 30.000 deg
+
+============================================================
+  Internal and external flow
+============================================================
+  Darcy friction (Re=1e5, e/D=0.001):
+    Colebrook (implicit) = 0.02217  [turbulent]
+    Haaland   (explicit) = 0.02197
+  Pipe drop (50 m, D=0.1 m, water @ 2 m/s): dP = 22130.19 Pa, head = 2.2612 m
+  Flat-plate skin friction (Re_L=1e6): Cf = 0.00467 [turbulent]
+
+============================================================
+  Heat transfer
+============================================================
+  Dittus-Boelter (air in tube): Nu = 199.4, h = 103.70 W/m^2/K
+  LMTD (counterflow): 69.5212 K
+  Biot number: Bi = 0.0025 (lumped valid = True)
+  Lumped cooling after 60 s: T = 161.71 K (tau = 243.00 s)
+
+============================================================
+  Structures
+============================================================
+  Solid shaft torsion (T=500 N.m, d=40 mm): tau_max = 3.9789e+07 Pa, twist = 1.443 deg
+  Principal stresses: s1 = 9.2426e+07 Pa, s2 = 7.5736e+06 Pa, tau_max = 4.2426e+07 Pa
+  Von Mises equivalent stress: 8.8882e+07 Pa
+
+============================================================
+  Ideal cycles
+============================================================
+... (2 more lines)
+```
+
+
 ## Example: FEniCSx FEM Adapter (real only -- requires dolfinx)
 
-`examples/ex_fenics_adapter.py`, fenics_linear_elasticity and fenics_heat_conduction.
+`examples/ex_fenics_adapter.py`: fenics_linear_elasticity and fenics_heat_conduction.
 
 ```python
 import sys, os
@@ -5871,7 +6111,7 @@ print("=== FEniCSx linear elasticity: cantilever box ===")
 r = fenics_linear_elasticity(
     E=200e9, nu=0.3,
     Lx=1.0, Ly=0.05, Lz=0.05,
-    F_distributed=1e4,   # N/m^2 on top face
+    F_distributed=1e4,    # N/m^2 on top face
     nx=20, ny=4, nz=4,
 )
 print(f"  Max displacement = {r['max_displacement']}")
@@ -5887,15 +6127,15 @@ print(f"  Analytical δ     = {delta_analytical*1000:.4f} mm  (Euler-Bernoulli c
 # ── Geometry sensitivity: deflection vs length ───────────────────────────────
 print("\n=== Deflection vs beam length (E=200GPa, Ly=Lz=5cm, F=10kPa) ===")
 sys_ = anvil.system("fenics_length_sweep")
-sys_.add("E",           200e9)
-sys_.add("nu",          0.3)
-sys_.add("Lx",          1.0)
-sys_.add("Ly",          0.05)
-sys_.add("Lz",          0.05)
+sys_.add("E",            200e9)
+sys_.add("nu",           0.3)
+sys_.add("Lx",           1.0)
+sys_.add("Ly",           0.05)
+sys_.add("Lz",           0.05)
 sys_.add("F_distributed", 1e4)
-sys_.add("nx",          20)
-sys_.add("ny",          4)
-sys_.add("nz",          4)
+sys_.add("nx",           20)
+sys_.add("ny",           4)
+sys_.add("nz",           4)
 sys_.use(fenics_linear_elasticity)
 
 Lx_vals = np.linspace(0.5, 2.0, 6)
@@ -5913,10 +6153,10 @@ print("  (δ ∝ L⁴, σ ∝ L²: doubling length → 16× more deflection, 4×
 # ── Heat conduction ────────────────────────────────────────────────────────────
 print("\n=== FEniCSx heat conduction: aluminium rod ===")
 r2 = fenics_heat_conduction(
-    k=205.0,      # W/m/K  (aluminium)
-    Lx=0.5,       # m
+    k=205.0,       # W/m/K  (aluminium)
+    Lx=0.5,        # m
     Ly=0.02, Lz=0.02,
-    T_left=600.0, # K
+    T_left=600.0,  # K
     T_right=300.0, # K
     Q_vol=0.0,
     nx=20, ny=5, nz=5,
@@ -5932,16 +6172,16 @@ print(f"  Analytical Q = {Q_analytical:.2f} W")
 # ── Thermal sensitivity: conductivity sweep ────────────────────────────────────
 print("\n=== Heat flux vs thermal conductivity (ΔT=300K, L=0.5m) ===")
 sys2 = anvil.system("fenics_k_sweep")
-sys2.add("k",      205.0)
-sys2.add("Lx",     0.5)
-sys2.add("Ly",     0.02)
-sys2.add("Lz",     0.02)
-sys2.add("T_left", 600.0)
+sys2.add("k",       205.0)
+sys2.add("Lx",      0.5)
+sys2.add("Ly",      0.02)
+sys2.add("Lz",      0.02)
+sys2.add("T_left",  600.0)
 sys2.add("T_right", 300.0)
-sys2.add("Q_vol",  0.0)
-sys2.add("nx",     20)
-sys2.add("ny",     5)
-sys2.add("nz",     5)
+sys2.add("Q_vol",   0.0)
+sys2.add("nx",      20)
+sys2.add("ny",      5)
+sys2.add("nz",      5)
 sys2.use(fenics_heat_conduction)
 
 k_vals = [15.0, 45.0, 100.0, 205.0, 385.0]   # steel, Ti, Al alloy, Al, Cu
@@ -5964,9 +6204,143 @@ print("  Global: fenics_linear_elasticity, fenics_heat_conduction → domain fem
 > Requires an external tool that is not installed here. Run `anvil doctor` for the exact install command, then run the script to see its output.
 
 
+## Jet Engine Cycle Analysis (GasTurb style)
+
+`examples/ex_jet_engine_cycle.py`
+
+```python
+from anvil import propulsion as jet
+
+print("=" * 60)
+print("  Turbojet -- cruise design point")
+print("=" * 60)
+
+tj = jet.build_turbojet()
+tj.set(M0=0.85, pi_c=12, T04=1500, mdot=25)
+res = tj.solve()
+res.summary(keys=["specific_thrust", "thrust", "TSFC", "far",
+                  "thermal_eff", "propulsive_eff", "overall_eff", "M9"])
+
+print("\n  Station stagnation conditions:")
+print(jet.station_table(res))
+
+print("\n" + "=" * 60)
+print("  Two-spool turbofan (bypass ratio 5)")
+print("=" * 60)
+
+tf = jet.build_turbofan()
+tf.set(M0=0.80, pi_f=1.6, pi_c=22, bypass=5, T04=1550, mdot=30)
+rtf = tf.solve()
+rtf.summary(keys=["specific_thrust", "thrust", "TSFC",
+                  "thermal_eff", "propulsive_eff", "overall_eff"])
+print("\n  The high-bypass fan trades specific thrust for a much lower TSFC")
+print("  and higher propulsive efficiency than the bare turbojet above.")
+
+print("\n" + "=" * 60)
+print("  Sweep: compressor pressure ratio (turbojet)")
+print("=" * 60)
+
+tj2 = jet.build_turbojet()
+tj2.set(M0=0.80, T04=1500)
+sweep = tj2.sweep("pi_c", [6, 10, 15, 20, 25, 30, 40])
+sweep.summary(outputs=["specific_thrust", "TSFC", "thermal_eff"])
+print("\n  Higher pressure ratio lowers TSFC (better fuel economy), while")
+print("  specific thrust peaks at a moderate pressure ratio.")
+
+print("\n" + "=" * 60)
+print("  Optimize: pressure ratio for maximum specific thrust")
+print("=" * 60)
+
+opt = jet.build_turbojet()
+opt.set(M0=0.80, T04=1500)
+best = opt.optimize("specific_thrust", {"pi_c": (4, 45)},
+                    minimize=False, seed=1)
+print(f"  Best compressor pressure ratio : {best.x['pi_c']:.2f}")
+print(f"  Maximum specific thrust        : {best.fun:.1f} N per kg/s")
+
+print("\n" + "=" * 60)
+print("  Afterburning turbojet (reheat to 2000 K)")
+print("=" * 60)
+
+ab = jet.build_turbojet_ab()
+ab.set(M0=0.90, pi_c=10, T04=1500, T07=2000, mdot=25)
+rab = ab.solve()
+rab.summary(keys=["specific_thrust", "thrust", "TSFC", "far_total",
+                 "thermal_eff", "M9"])
+print("\n  The afterburner adds fuel downstream of the turbine, raising")
+print("  specific thrust sharply at the cost of a much higher TSFC.")
+
+print("\n" + "=" * 60)
+print("  Turboprop / turboshaft (shaft-power output)")
+print("=" * 60)
+
+tp = jet.build_turboprop()
+tp.set(M0=0.50, pi_c=10, T04=1400, mdot=15)
+rtp = tp.solve()
+rtp.summary(keys=["shaft_power", "specific_power", "PSFC", "thermal_eff"])
+print("\n  A turboprop extracts nearly all the exhaust energy as shaft power")
+print("  instead of jet thrust, reported here as power-specific fuel burn.")
+
+print("\n" + "=" * 60)
+print("  Cycle diagrams (T-s and h-s / Mollier)")
+print("=" * 60)
+
+diag = jet.build_turbojet()
+diag.set(M0=0.85, pi_c=12, T04=1500, mdot=25)
+rdiag = diag.solve()
+for kind, fname in [("Ts", "jet_cycle_Ts.png"), ("hs", "jet_cycle_hs.png")]:
+    try:
+        fig = jet.cycle_diagram(rdiag, kind=kind)
+        fig.savefig(f"examples/{fname}", dpi=90, bbox_inches="tight")
+        print(f"  Saved {kind} diagram to examples/{fname}")
+    except Exception as exc:  # headless / no display: skip gracefully
+        print(f"  Skipped {kind} diagram ({exc})")
+```
+
+**Output:**
+
+```
+============================================================
+  Turbojet -- cruise design point
+============================================================
+
+--------------------------------------------------------
+  turbojet -- results
+--------------------------------------------------------
+  specific_thrust           663.09 N
+  thrust                    16577.23 N
+  TSFC                      3.6810e-05
+  far                       0.024408
+  thermal_eff               0.235274
+  propulsive_eff            0.776715
+  overall_eff               0.182741
+  M9                        1.0000
+--------------------------------------------------------
+
+  Station stagnation conditions:
+   st  location              T0 [K]    P0 [kPa]
+  ---------------------------------------------
+    0  ambient                288.1       101.3
+    2  comp face              329.8       161.1
+    3  comp exit              721.7      1932.9
+    4  turbine inlet         1500.0      1855.6
+    5  turbine exit          1161.9       576.4
+    9  core nozzle            996.0       311.1
+
+============================================================
+  Two-spool turbofan (bypass ratio 5)
+============================================================
+
+--------------------------------------------------------
+  turbofan -- results
+--------------------------------------------------------
+... (78 more lines)
+```
+
+
 ## Example: Meshing Adapter -- Parametric Geometry in Anvil (real-only)
 
-`examples/ex_meshing_adapter.py`, the mesh_box and mesh_cylinder adapters: node/element counts
+`examples/ex_meshing_adapter.py`: the mesh_box and mesh_cylinder adapters: node/element counts
 
 ```python
 import anvil
@@ -6027,7 +6401,7 @@ print("=" * W)
 
 ## Example: Differential Equations in Anvil
 
-`examples/ex_ode_patterns.py`, Shows three patterns for using differential equations within the framework:
+`examples/ex_ode_patterns.py`: Shows three patterns for using differential equations within the framework
 
 ```python
 import sys, os
@@ -6066,7 +6440,7 @@ result = solvers.solve_ode(
     decay_rhs,
     t_span=(0, 60),
     y0=N0,
-    method="RK45",        # explicit -- good for non-stiff problems
+    method="RK45",         # explicit -- good for non-stiff problems
     t_eval=np.linspace(0, 60, 300),
     rtol=1e-8,
     atol=1e-10,
@@ -6135,7 +6509,7 @@ def rocket_burn(F_thrust, mdot, Cd, A_ref, m_dry, m_prop, rho_air=1.225, g=9.81)
 
     sol = solvers.solve_ode(
         rhs,
-        t_span=(0, t_burn * 1.5),   # generous span; event stops it
+        t_span=(0, t_burn * 1.5),    # generous span; event stops it
         y0=[0.0, 0.0, m0],
         method="RK45",
         events=burnout,
@@ -6151,7 +6525,7 @@ def rocket_burn(F_thrust, mdot, Cd, A_ref, m_dry, m_prop, rho_air=1.225, g=9.81)
         "v_burnout":  Q(v_burnout, "m/s"),
         "h_burnout":  Q(h_burnout, "m"),
         "t_burnout":  Q(t_burnout, "s"),
-        "delta_v":    Q(v_burnout, "m/s"),  # no gravity / drag: Tsiolkovsky would give more
+        "delta_v":    Q(v_burnout, "m/s"),   # no gravity / drag: Tsiolkovsky would give more
     }
 
 
@@ -6167,12 +6541,12 @@ def coast_to_apogee(v_burnout, h_burnout, g=9.81):
 
 # Build the System -- ODE Relation sits alongside algebraic Relation
 rocket = anvil.system("sounding_rocket")
-rocket.add("F_thrust", 10000, "N",   desc="Thrust")
-rocket.add("mdot",       5.0, "kg/s", desc="Mass flow rate")
-rocket.add("Cd",         0.3,        desc="Drag coefficient")
-rocket.add("A_ref",     0.02, "m^2", desc="Reference area")
-rocket.add("m_dry",     20.0, "kg",  desc="Dry mass")
-rocket.add("m_prop",    30.0, "kg",  desc="Propellant mass")
+rocket.add("F_thrust",  10000, "N",    desc="Thrust")
+rocket.add("mdot",        5.0, "kg/s", desc="Mass flow rate")
+rocket.add("Cd",          0.3,         desc="Drag coefficient")
+rocket.add("A_ref",      0.02, "m^2",  desc="Reference area")
+rocket.add("m_dry",      20.0, "kg",   desc="Dry mass")
+rocket.add("m_prop",     30.0, "kg",   desc="Propellant mass")
 
 rocket.use(rocket_burn)       # ODE inside -- solves internally, returns scalars
 rocket.use(coast_to_apogee)   # algebraic -- uses burnout scalars from ODE above
@@ -6221,7 +6595,7 @@ sol_stiff = solvers.solve_ode_stiff(
     kinetics_rhs,
     t_span=(0, 5),
     y0=[1.0, 0.0, 0.0],
-    method="BDF",         # implicit -- handles stiff systems efficiently
+    method="BDF",          # implicit -- handles stiff systems efficiently
     t_eval=np.linspace(0, 5, 200),
     rtol=1e-6,
     atol=1e-10,
@@ -6309,7 +6683,7 @@ print("""
 
 ## Example: OpenFOAM CFD Adapter (real only -- requires OpenFOAM on PATH)
 
-`examples/ex_openfoam_adapter.py`, openfoam_incompressible on a real, prepared OpenFOAM case.
+`examples/ex_openfoam_adapter.py`: openfoam_incompressible on a real, prepared OpenFOAM case.
 
 ```python
 import sys, os
@@ -6356,7 +6730,7 @@ print(f"  Re     = {float(r['Re']):.2e}")
 print("\n=== Polar: CL/CD vs AoA (U=30 m/s) ===")
 sys_ = anvil.system("foam_polar")
 sys_.add("case_path", case_dir)
-sys_.add("U_inf",    30.0)
+sys_.add("U_inf",     30.0)
 sys_.add("alpha_deg", 0.0)   # placeholder; swept below
 sys_.use(openfoam_incompressible)
 
@@ -6382,7 +6756,7 @@ register()
 
 ## Example: OpenMDAO MDO Adapter (real only -- requires openmdao)
 
-`examples/ex_openmdo_adapter.py`, openmdo_sellar, openmdo_beam, and the make_openmdo_adapter
+`examples/ex_openmdo_adapter.py`: openmdo_sellar, openmdo_beam, and the make_openmdo_adapter
 
 ```python
 import sys, os
@@ -6429,11 +6803,11 @@ print("  (g2 = y2 - 24; tends infeasible at high z1 due to y2 growth)")
 # ── Cantilever beam ───────────────────────────────────────────────────────────
 print("\n=== OpenMDAO cantilever beam ===")
 r2 = openmdo_beam(
-    F_tip=5000.0,   # N
-    L_beam=2.0,     # m
-    E=70e9,         # Pa (aluminium)
-    b=0.05,         # m
-    h=0.10,         # m
+    F_tip=5000.0,    # N
+    L_beam=2.0,      # m
+    E=70e9,          # Pa (aluminium)
+    b=0.05,          # m
+    h=0.10,          # m
 )
 print(f"  Deflection = {r2['deflection']}")
 print(f"  Max stress = {r2['max_stress']}")
@@ -6442,11 +6816,11 @@ print(f"  I_moment   = {r2['I_moment']}")
 # ── Beam sensitivity: deflection vs cross-section height ─────────────────────
 print("\n=== Beam deflection vs height h (F=5kN, L=2m, E=70GPa, b=0.05) ===")
 sys2 = anvil.system("beam_height_sweep")
-sys2.add("F_tip", 5000.0)
+sys2.add("F_tip",  5000.0)
 sys2.add("L_beam", 2.0)
-sys2.add("E",     70e9)
-sys2.add("b",     0.05)
-sys2.add("h",     0.1)
+sys2.add("E",      70e9)
+sys2.add("b",      0.05)
+sys2.add("h",      0.1)
 sys2.use(openmdo_beam)
 
 h_vals = np.linspace(0.04, 0.20, 8)
@@ -6457,7 +6831,7 @@ for i in range(len(h_vals)):
     defl = row["deflection"]
     sig  = row["max_stress"]
     defl_mm    = (float(defl.si) if hasattr(defl, "si") else float(defl)) * 1000
-    stress_mpa = (float(sig.si)  if hasattr(sig, "si") else float(sig))  / 1e6
+    stress_mpa = (float(sig.si)  if hasattr(sig,  "si") else float(sig))  / 1e6
     print(f"  {h_vals[i]:7.3f}  {defl_mm:8.2f}  {stress_mpa:12.1f}")
 print("  (deflection ~ 1/h^3: doubling height cuts deflection 8x)")
 
@@ -6502,7 +6876,7 @@ print("  Global: openmdo_sellar, openmdo_beam -> domain mdo.openmdao")
 
 ## Example: Orifice Pressure Solver
 
-`examples/ex_orifice_pressure_solver.py`, Given phi, gas names, orifice size range, and per-line P0 bounds,
+`examples/ex_orifice_pressure_solver.py`: Given phi, gas names, orifice size range, and per-line P0 bounds,
 
 ```python
 import os
@@ -6574,7 +6948,7 @@ def pressure_margin(P0_O2, P0_fuel, P0_O2_min, P0_O2_max, P0_fuel_min, P0_fuel_m
     from anvil import Q
     si = lambda v: float(getattr(v, "si", v))
     return {"min_slack": Q(min(
-        si(P0_O2)   - si(P0_O2_min), si(P0_O2_max)   - si(P0_O2),
+        si(P0_O2)   - si(P0_O2_min),  si(P0_O2_max)   - si(P0_O2),
         si(P0_fuel) - si(P0_fuel_min), si(P0_fuel_max) - si(P0_fuel),
     ), "Pa")}
 
@@ -6586,10 +6960,10 @@ def pressure_margin(P0_O2, P0_fuel, P0_O2_min, P0_O2_max, P0_fuel_min, P0_fuel_m
 proj = anvil.project("orifice_phi_study", path="./orifice_phi_work")
 
 for fn, desc in [
-    (ox_choked_flow,  "Choked flow through the oxidizer orifice"),
+    (ox_choked_flow,   "Choked flow through the oxidizer orifice"),
     (phi_to_fuel_mdot, "Required fuel mdot for target equivalence ratio"),
     (fuel_P0_required, "Required P0 for fuel line at target mass flow"),
-    (pressure_margin, "Min pressure margin across both lines (optimizer objective)"),
+    (pressure_margin,  "Min pressure margin across both lines (optimizer objective)"),
 ]:
     proj.push(fn, domain="flow.orifice.phi", description=desc,
               tags=["orifice", "choked", "phi"])
@@ -6601,25 +6975,25 @@ for fn, desc in [
 
 def _build_system(fuel_gas, ox_gas, T0=300.0, Cd=0.61):
     gf = fluids.get(fuel_gas, T=T0)
-    go = fluids.get(ox_gas,  T=T0)
+    go = fluids.get(ox_gas,   T=T0)
     s  = anvil.system("phi_solver")
-    s.add("P0_O2",      1e6,                   "Pa")
-    s.add("T0_O2",      T0,                    "K")
-    s.add("d_O2",       1.0)
-    s.add("gamma_O2",   float(go["gamma"]))
-    s.add("R_O2",       float(go["R_gas"].si), "J/kg/K")
-    s.add("Cd_O2",      Cd)
-    s.add("phi",        1.0)
+    s.add("P0_O2",       1e6,                    "Pa")
+    s.add("T0_O2",       T0,                     "K")
+    s.add("d_O2",        1.0)
+    s.add("gamma_O2",    float(go["gamma"]))
+    s.add("R_O2",        float(go["R_gas"].si),  "J/kg/K")
+    s.add("Cd_O2",       Cd)
+    s.add("phi",         1.0)
     s.add("stoich_FO_val", 0.1)
-    s.add("T0_fuel",    T0,                    "K")
-    s.add("d_fuel",     1.0)
-    s.add("gamma_fuel", float(gf["gamma"]))
-    s.add("R_fuel",     float(gf["R_gas"].si), "J/kg/K")
-    s.add("Cd_fuel",    Cd)
-    s.add("P0_O2_min",  3e5,  "Pa")
-    s.add("P0_O2_max",  20e5, "Pa")
-    s.add("P0_fuel_min", 3e5,  "Pa")
-    s.add("P0_fuel_max", 20e5, "Pa")
+    s.add("T0_fuel",     T0,                     "K")
+    s.add("d_fuel",      1.0)
+    s.add("gamma_fuel",  float(gf["gamma"]))
+    s.add("R_fuel",      float(gf["R_gas"].si),  "J/kg/K")
+    s.add("Cd_fuel",     Cd)
+    s.add("P0_O2_min",   3e5,   "Pa")
+    s.add("P0_O2_max",   20e5,  "Pa")
+    s.add("P0_fuel_min", 3e5,   "Pa")
+    s.add("P0_fuel_max", 20e5,  "Pa")
     s.use(proj.R.ox_choked_flow)
     s.use(proj.R.phi_to_fuel_mdot)
     s.use(proj.R.fuel_P0_required)
@@ -6662,7 +7036,7 @@ def find_pressure_settings(phi, fuel_gas, ox_gas, fuel_formula,
     s.set(
         phi=phi,
         stoich_FO_val=_stoich_FO(fuel_formula, oxidizer_formula),
-        P0_O2_min=P0_bounds["ox"][0],   P0_O2_max=P0_bounds["ox"][1],
+        P0_O2_min=P0_bounds["ox"][0],    P0_O2_max=P0_bounds["ox"][1],
         P0_fuel_min=P0_bounds["fuel"][0], P0_fuel_max=P0_bounds["fuel"][1],
     )
 
@@ -6688,10 +7062,10 @@ def find_pressure_settings(phi, fuel_gas, ox_gas, fuel_formula,
         "d_fuel":    Q(opt.x["d_fuel"] * 1e-3, "m"),
         "d_ox":      Q(opt.x["d_O2"]   * 1e-3, "m"),
         "P0_fuel":   opt["P0_fuel"],
-        "P0_ox":     Q(opt.x["P0_O2"],         "Pa"),
+        "P0_ox":     Q(opt.x["P0_O2"],          "Pa"),
         "mdot_fuel": opt["mdot_fuel"],
         "mdot_ox":   opt["mdot_O2"],
-        "margin":    Q(opt.fun,                 "Pa"),
+        "margin":    Q(opt.fun,                  "Pa"),
     }
 
 
@@ -6735,7 +7109,7 @@ for phi_val in np.linspace(0.5, 2.5, 9):
         print(f"  {phi_val:>6.2f}  -- no feasible solution --")
 
 # ── asymmetric bounds ─────────────────────────────────────────────────────────
-print(f"\n[3] Asymmetric bounds: H2 3-10 bar, O2 3-20 bar")
+print(f"\n[3] Asymmetric bounds: H2 3-10 bar,  O2 3-20 bar")
 _show(find_pressure_settings(
     phi=1.0, fuel_gas="hydrogen", ox_gas="oxygen", fuel_formula="H2",
     orifice_range=(0.5, 2.0), P0_bounds={"fuel": (3e5, 10e5), "ox": (3e5, 20e5)},
@@ -6784,7 +7158,7 @@ print(f"{'='*W}")
     2.25   0.880314 mm   0.829315 mm  11.5000 bar (P0_fuel)       11.4999 bar
     2.50     1.7051 mm     1.5239 mm  11.5000 bar (P0_fuel)       11.5000 bar
 
-[3] Asymmetric bounds: H2 3-10 bar, O2 3-20 bar
+[3] Asymmetric bounds: H2 3-10 bar,  O2 3-20 bar
   d_fuel  = 1.9495 mm   d_ox    = 1.8361 mm
   P0_fuel = 6.5000 bar (P0_fuel)   P0_ox   = 14.6333 bar
   mdot_fuel = 7.3041e-04 kg/s (mdot_fuel)   mdot_ox = 5.7967e-03 kg/s (mdot_O2)
@@ -6796,7 +7170,7 @@ print(f"{'='*W}")
 
 ## Example: Custom Relations + Project Registry
 
-`examples/ex_project_workflow.py`, Scenario: pipe flow design, friction factor, pressure drop, pump power.
+`examples/ex_project_workflow.py`: Scenario: pipe flow design, friction factor, pressure drop, pump power.
 
 ```python
 import sys, os
@@ -6849,9 +7223,9 @@ def pump_power(dP, V, D_pipe, eta_pump=0.75):
     W_hyd = Q_vol * dP          # watts if dP in Pa, Q_vol in m^3/s
     W_shaft = W_hyd / eta_pump
     return {
-        "W_hydraulic": Q(W_hyd,  "W"),
+        "W_hydraulic": Q(W_hyd,   "W"),
         "W_shaft":     Q(W_shaft, "W"),
-        "Q_vol":       Q(Q_vol,  "m^3/s"),
+        "Q_vol":       Q(Q_vol,   "m^3/s"),
     }
 
 
@@ -6931,15 +7305,15 @@ print("=" * 60)
 # --- Define inputs with units ---
 pipe_sys = system("water_pipe")
 
-pipe_sys.add("rho",           998.2, "kg/m^3", desc="Water density")
-pipe_sys.add("V",               2.0, "m/s",    desc="Mean flow velocity")
-pipe_sys.add("D_pipe",         0.05, "m",      desc="Pipe inner diameter")
-pipe_sys.add("L_pipe",         10.0, "m",      desc="Pipe length")
-pipe_sys.add("roughness_ratio", 1e-4,            desc="Relative roughness eps/D")
-pipe_sys.add("eta_pump",       0.75,            desc="Pump efficiency")
+pipe_sys.add("rho",            998.2,  "kg/m^3",  desc="Water density")
+pipe_sys.add("V",                2.0,  "m/s",     desc="Mean flow velocity")
+pipe_sys.add("D_pipe",          0.05,  "m",       desc="Pipe inner diameter")
+pipe_sys.add("L_pipe",          10.0,  "m",       desc="Pipe length")
+pipe_sys.add("roughness_ratio", 1e-4,             desc="Relative roughness eps/D")
+pipe_sys.add("eta_pump",        0.75,             desc="Pump efficiency")
 
 # Add Reynolds number from the built-in registry RSQ
-pipe_sys.add("mu",           1.002e-3, "Pa*s",  desc="Dynamic viscosity (water)")
+pipe_sys.add("mu",            1.002e-3, "Pa*s",   desc="Dynamic viscosity (water)")
 pipe_sys.use("reynolds_number",
     map={"L_char": "D_pipe"})    # map the 'L_char' input to our 'D_pipe'
 
@@ -6992,8 +7366,8 @@ print("  PART 6: Promote to global registry")
 print("=" * 60)
 
 proj.promote("friction_factor", overwrite=True)
-proj.promote("pressure_drop",  overwrite=True)
-proj.promote("pump_power",     overwrite=True)
+proj.promote("pressure_drop",   overwrite=True)
+proj.promote("pump_power",      overwrite=True)
 
 # Verify they're now in global registry
 print("\n  Searching global registry for 'pipe'...")
@@ -7056,13 +7430,13 @@ print("=" * 60)
 
 --------------------------------------------------------
   water_pipe -- results
-... (71 more lines)
+... (77 more lines)
 ```
 
 
 ## Example: pyNastran / NASTRAN FEM Adapter (real only)
 
-`examples/ex_pynastran_adapter.py`, nastran_linear_static and nastran_normal_modes against a real
+`examples/ex_pynastran_adapter.py`: nastran_linear_static and nastran_normal_modes against a real
 
 ```python
 import sys, os
@@ -7129,7 +7503,7 @@ register()
 
 ## Example: RocketCEA + RocketPy Adapter -- Engine & Flight (real-only)
 
-`examples/ex_rocketcea_adapter.py`, the rocket_cea combustion adapter (Tc, c*, Isp, gamma) and the
+`examples/ex_rocketcea_adapter.py`: the rocket_cea combustion adapter (Tc, c*, Isp, gamma) and the
 
 ```python
 import anvil
@@ -7196,7 +7570,7 @@ print("=" * W)
 
 ## Anvil Framework -- Complete Showcase
 
-`examples/ex_showcase_v2.py`, every major feature in one runnable file.
+`examples/ex_showcase_v2.py`: every major feature in one runnable file.
 
 ```python
 #!/usr/bin/env python3
@@ -7328,7 +7702,7 @@ section("2. DEFINING RELATIONS")
 
 # --- 2a. Decorator syntax -- auto-registers in the registry ---
 @anvil.relation(domain="thermo", tags=["ideal_gas"])
-def ideal_gas_density(P, R_gas, T):
+def ideal_gas_rho(P, R_gas, T):
     """Ideal gas: rho = P / (R * T)"""
     return {"rho": Q(P / (R_gas * T), "kg/m^3")}
 
@@ -7345,9 +7719,9 @@ def reynolds_num(rho, V, L_char, mu):
     return {"Re": rho * V * L_char / mu}
 
 
-print(f"\n@relation auto-registered: {ideal_gas_density}")
-print(f"  inputs:  {ideal_gas_density.inputs}")
-print(f"  outputs: {ideal_gas_density.outputs}")
+print(f"\n@relation auto-registered: {ideal_gas_rho}")
+print(f"  inputs:  {ideal_gas_rho.inputs}")
+print(f"  outputs: {ideal_gas_rho.outputs}")
 
 
 # --- 2b. Relation() explicit wrap ---
@@ -7389,7 +7763,7 @@ print(f"  outputs: {air_props.outputs}")
 section("3. ONE-SHOT SOLVE -- anvil.solve()")
 
 # No System object needed; inputs passed as keyword arguments
-r = anvil.solve(ideal_gas_density, P=101325.0, R_gas=287.0, T=298.15)
+r = anvil.solve(ideal_gas_rho, P=101325.0, R_gas=287.0, T=298.15)
 print(f"\nOne-shot solve -- ideal gas density:")
 r.summary()
 
@@ -7411,9 +7785,9 @@ nozzle = anvil.system("de_laval_nozzle")
 
 # New kwargs-style add -- name inferred from keyword
 nozzle.add(
-    P0=8.0e6 * Pa, # chamber total pressure
-    T0=3300.0 * K, # chamber total temperature
-    gamma=Q(1.22), # ratio of specific heats (dimensionless)
+    P0=8.0e6 * Pa,  # chamber total pressure
+    T0=3300.0 * K,  # chamber total temperature
+    gamma=Q(1.22),  # ratio of specific heats (dimensionless)
     R_gas=380.0 * J / kg / K,
     A_throat=0.001 * m**2,
     A_exit=Q(0.07, "m^2"),
@@ -7807,13 +8181,13 @@ print(f"\n  Aluminium alpha = {alpha:.4e} m2/s")
 
 pde_result = solvers.solve_pde_heat_1d(
     alpha=alpha,
-    x_span=(0.0, 0.1), # 10 cm slab
-    t_span=(0.0, 60.0), # 60 second transient
+    x_span=(0.0, 0.1),  # 10 cm slab
+    t_span=(0.0, 60.0),  # 60 second transient
     u_init=lambda x: 300.0 + 200.0 * np.exp(-500 * (x - 0.05) ** 2),
-    bc_left=300.0, # constant 300 K wall
-    bc_right=300.0, # constant 300 K wall
+    bc_left=300.0,  # constant 300 K wall
+    bc_right=300.0,  # constant 300 K wall
     nx=60,
-    nt=600, # 600 steps (Crank-Nicolson is unconditionally stable)
+    nt=600,  # 600 steps (Crank-Nicolson is unconditionally stable)
     verbose=True,
 )
 
@@ -8078,8 +8452,8 @@ anvil.update(
 )
 
 # --- 14f. Export source ---
-print("\nExport source of 'ideal_gas_density':")
-anvil.registry.export("ideal_gas_density")
+print("\nExport source of 'ideal_gas_rho':")
+anvil.registry.export("ideal_gas_rho")
 
 
 # =========================================================================
@@ -8113,7 +8487,7 @@ print(f"{'=' * 65}\n")
 
 ## Example: Signal Processing RSQs
 
-`examples/ex_signal_processing.py`, all 7 signal processing RSQs in the misc domain:
+`examples/ex_signal_processing.py`: all 7 signal processing RSQs in the misc domain
 
 ```python
 import sys, os
@@ -8350,10 +8724,10 @@ print("7. signal_statistics, descriptive statistics")
 print("=" * 60)
 
 signals = {
-    "sine 50 Hz":      (sig_clean, dt),
-    "sine + noise":    (sig_noisy, dt),
+    "sine 50 Hz":      (sig_clean,  dt),
+    "sine + noise":    (sig_noisy,  dt),
     "Gaussian noise":  (rng.standard_normal(n), dt),
-    "bearing fault":   (fault[:n], dt_fault),  # use same-length slice
+    "bearing fault":   (fault[:n],  dt_fault),   # use same-length slice
     "impulse train":   (np.where((np.arange(n) % 256) == 0, 5.0, 0.0) + 0.1*rng.standard_normal(n), dt),
 }
 
@@ -8460,7 +8834,7 @@ print("  (fault_level 1.0 -> elevated kurtosis, fault frequency at 120 Hz clearl
 
 ## Example: SU2 CFD Adapter (real only -- requires SU2_CFD on PATH)
 
-`examples/ex_su2_adapter.py`, su2_euler and su2_rans against a real SU2 install.
+`examples/ex_su2_adapter.py`: su2_euler and su2_rans against a real SU2 install.
 
 ```python
 import sys, os
@@ -8494,9 +8868,9 @@ print(f"  CL = {r['CL']:.4f}   CD = {r['CD']:.5f}   CM = {r['CM']:.4f}")
 print("\n=== Wave drag onset: CD vs Mach (AoA=2 deg, inviscid) ===")
 sys_ = anvil.system("su2_mach_sweep")
 sys_.add("cfg_template", cfg_path)
-sys_.add("mesh",        mesh_path)
-sys_.add("AoA_deg",     2.0)
-sys_.add("Mach",        0.5)   # placeholder; swept below
+sys_.add("mesh",         mesh_path)
+sys_.add("AoA_deg",      2.0)
+sys_.add("Mach",         0.5)   # placeholder; swept below
 sys_.use(su2_euler)
 
 sweep = sys_.sweep("Mach", [0.5, 0.7, 0.8, 0.85, 0.9])
@@ -8522,7 +8896,7 @@ register()
 
 ## Example: Surrogate Model Adapters
 
-`examples/ex_surrogate_adapter.py`, make_poly_adapter, make_rbf_adapter (real methods on Anvil's
+`examples/ex_surrogate_adapter.py`: make_poly_adapter, make_rbf_adapter (real methods on Anvil's
 
 ```python
 import sys, os
@@ -8661,7 +9035,7 @@ if HAS_SKLEARN:
 
 ## Example: UQ Adapter -- Monte Carlo Uncertainty Propagation in Anvil
 
-`examples/ex_uq_adapter.py`, the uq_montecarlo adapter: propagate input uncertainty through
+`examples/ex_uq_adapter.py`: the uq_montecarlo adapter: propagate input uncertainty through
 
 ```python
 import anvil
@@ -8737,7 +9111,7 @@ print("=" * W)
 
 ## Example: XFOIL 2D Airfoil Adapter (real only -- requires XFOIL on PATH)
 
-`examples/ex_xfoil_adapter.py`, xfoil_polar and xfoil_alpha_sweep against a real XFOIL binary.
+`examples/ex_xfoil_adapter.py`: xfoil_polar and xfoil_alpha_sweep against a real XFOIL binary.
 
 ```python
 import sys, os
@@ -8775,10 +9149,10 @@ print(f"  CL_max   = {r['CL_max']:.3f}")
 # ── Reynolds sweep with an Anvil System ──────────────────────────────────────
 print("\n=== Reynolds effect on drag (alpha = 4 deg) ===")
 sys_ = anvil.system("xfoil_re_study")
-sys_.add("airfoil",  "NACA2412")
+sys_.add("airfoil",   "NACA2412")
 sys_.add("alpha_deg", 4.0)
-sys_.add("Mach",     0.1)
-sys_.add("Re",       1e6)   # placeholder; swept below
+sys_.add("Mach",      0.1)
+sys_.add("Re",        1e6)   # placeholder; swept below
 sys_.use(xfoil_polar)
 
 sweep = sys_.sweep("Re", [2e5, 5e5, 1e6, 2e6, 5e6])
@@ -8799,7 +9173,7 @@ print("  xfoil_polar, xfoil_alpha_sweep -> domain aero.xfoil")
 
 ## Anvil v0.3 Showcase
 
-`examples/showcase.py`, the full RSQ workflow:
+`examples/showcase.py`: the full RSQ workflow
 
 ```python
 import os
@@ -8992,9 +9366,9 @@ print("=" * 60)
 
 --- What's in the registry? ---
 
-  Relations (102):
+  Relations (137):
     hx_duty                       
-    hx_effectiveness              
+    hx_eff_ntu                    
     drag_force                      [aero]  (builtin)
       Drag force: D = 0.5 * rho * V^2 * S * CD
     drag_polar                      [aero]  (builtin)
@@ -9009,6 +9383,8 @@ print("=" * 60)
       Oswald span efficiency estimate from aspect ratio (empirical)
     reynolds_num                    [aero]
       Reynolds number: Re = rho V L / mu
+    skin_friction_flat_plate        [aero]  (builtin)
+      Average skin-friction coefficient on a flat plate (laminar or turbulen
     stall_speed                     [aero]  (builtin)
       Aircraft stall speed: Vs = sqrt(2*W/(rho*S*CLmax))
     thin_airfoil_cl                 [aero]  (builtin)
@@ -9018,15 +9394,13 @@ print("=" * 60)
     area_mach_subsonic              [aero.compressible]  (builtin)
       Subsonic Mach from area ratio (A/A*)
     area_mach_supersonic            [aero.compressible]  (builtin)
-      Supersonic Mach from area ratio (A/A*)
-    isentropic_ratios               [aero.compressible]  (builtin)
-... (391 more lines)
+... (473 more lines)
 ```
 
 
 ## Pressure-tank blowdown through a hole -- "half-life" drain time for a gas.
 
-`examples/tank_blowdown.py`, Problem
+`examples/tank_blowdown.py`: Problem
 
 ```python
 from __future__ import annotations
@@ -9210,7 +9584,7 @@ def solve_blowdown(V, d, N, P0, T, species="air", Cd=0.62, P_amb=101325.0,
         return [-Cd * A_eff * flux]
 
     # ---- analytic choked time scale / half-life ----------------------------
-    #   Choked mdot = k*P, k = Cd*A*sqrt(gamma/(R*T))*(2/(g+1))**((g+1)/(2(g-1)))
+    #   Choked mdot = k*P,  k = Cd*A*sqrt(gamma/(R*T))*(2/(g+1))**((g+1)/(2(g-1)))
     #   The characteristic time  tau = V/(k*R*T)  governs BOTH closures:
     #     isothermal:  P/P0 = exp(-t/tau)                         (const half-life)
     #     adiabatic :  P/P0 = [1 + ((g-1)/2)(t/tau)]**(-2g/(g-1)) (power-law decay)

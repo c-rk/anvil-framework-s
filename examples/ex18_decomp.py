@@ -33,7 +33,7 @@ rng = np.random.default_rng(42)
 
 
 # --------------------------------------------------------------
-# Part 1: Synthetic 1D signal — known frequencies
+# Part 1: Synthetic 1D signal, known frequencies
 # --------------------------------------------------------------
 print("\n[1] Synthetic signal: 3 Hz + 11 Hz + noise")
 
@@ -61,7 +61,7 @@ print(f"  Each column: one {window}-sample snapshot")
 # --------------------------------------------------------------
 # Part 3: POD
 # --------------------------------------------------------------
-print("\n[3] POD — energy decomposition")
+print("\n[3] POD, energy decomposition")
 
 pod_r = decomp.pod(H)   # all modes first
 
@@ -89,9 +89,9 @@ for r in [2, 4, 6, 10, 20]:
           f"  cumE = {pod_r['cumulative_energy'][r-1]*100:.2f}%")
 
 # --------------------------------------------------------------
-# Part 5: DMD — frequency identification
+# Part 5: DMD, frequency identification
 # --------------------------------------------------------------
-print("\n[5] DMD — frequency and growth rate identification")
+print("\n[5] DMD, frequency and growth rate identification")
 
 dmd_r = decomp.dmd(H, dt=dt, r=12)
 
@@ -122,7 +122,7 @@ print(f"  Reconstruction error (r=12): {dmd_err:.4f}")
 n_future = H.shape[1] + int(0.2 * H.shape[1])
 X_future = decomp.dmd_reconstruct(dmd_r, n_steps=n_future)
 print(f"  Extended to {n_future} steps ({n_future*dt:.2f} s) for future prediction")
-print(f"  (DMD extrapolates via eigenvalue powers — valid for stable modes)")
+print(f"  (DMD extrapolates via eigenvalue powers, valid for stable modes)")
 
 # --------------------------------------------------------------
 # Part 7: Multi-dim snapshot matrix (simulated sensor array)
@@ -174,7 +174,7 @@ coeff = decomp.pod_project(pod_vib, X_vib[:, -50:])
 print(f"\n  pod_project(): projected last 50 snapshots -> coefficients shape {coeff.shape}")
 
 # --------------------------------------------------------------
-# Part 8: Viz (optional — skipped if no matplotlib)
+# Part 8: Viz (optional, skipped if no matplotlib)
 # --------------------------------------------------------------
 print("\n[8] Visualization (requires matplotlib)")
 try:
@@ -182,9 +182,9 @@ try:
     viz.pod_energy(pod_r, show=False)
     viz.dmd_spectrum(dmd_r, show=False)
     print("  Figures created. Call plt.show() or save with fig.savefig().")
-    print("  (Running headless — no display. Remove show=False for interactive use.)")
+    print("  (Running headless, no display. Remove show=False for interactive use.)")
 except ImportError:
-    print("  matplotlib not installed — skipping plots.")
+    print("  matplotlib not installed, skipping plots.")
 except Exception as e:
     print(f"  Viz skipped: {e}")
 

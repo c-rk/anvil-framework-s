@@ -54,6 +54,7 @@ PAGES = [
     ("20",       "Web Workbench",          "wiki/20_workbench.md"),
     ("21",       "Contributing",           "wiki/21_contributing.md"),
     ("22",       "Examples",               "wiki/22_examples.md"),
+    ("23",       "Propulsion Cycles",      "wiki/23_propulsion.md"),
 ]
 
 # ── Markdown → HTML conversion ────────────────────────────────────────────────
@@ -92,6 +93,7 @@ SECTION_GROUPS = [
     ("RSQs & Adapters",  ["09", "10"]),
     ("Analysis",         ["11", "12"]),
     ("Reference",        ["13", "14", "15", "16", "17", "18", "19"]),
+    ("Propulsion",       ["23"]),
     ("Workbench & Dev",  ["20", "21"]),
 ]
 

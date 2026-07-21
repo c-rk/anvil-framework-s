@@ -855,6 +855,12 @@ class System:
         original_func = rel.func
         reverse_map = {v: k for k, v in name_map.items()}
 
+        # Discover the original relation's outputs before wrapping. The wrapper
+        # below is a closure whose source has no return-dict literal, so output
+        # discovery would fail on it; do it now against the real function.
+        if not rel._outputs:
+            _discover_outputs(rel, self._quantities, self._relations)
+
         new_inputs = []
         for inp in rel._inputs:
             new_inputs.append(name_map.get(inp, inp))
@@ -924,7 +930,7 @@ class System:
             overwritten = [k for k in self._quantities if k in all_rel_outputs]
             if overwritten:
                 msg = (f"  WARNING: variable(s) declared via .add() are also produced by a "
-                       f"relation — declared value will be overwritten after solve: {overwritten}\n"
+                       f"relation, so the declared value will be overwritten after solve: {overwritten}\n"
                        f"    (This is intentional for iterative initial guesses; for forward "
                        f"systems it may indicate a naming mismatch.)")
                 print(msg)

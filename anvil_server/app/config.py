@@ -58,6 +58,8 @@ ARRAY_INPUT_RSQS = {
     "fft_spectrum", "welch_psd", "stft_spectrogram", "bandpass_filter",
     "envelope_detection", "cross_correlation", "signal_statistics",
     "pod_modes", "dmd_modes", "pca_reduce", "svd_decompose",
+    # Curve fitting / regression: take (x_data, y_data) arrays.
+    "linear_regression", "poly_fit", "power_fit", "exp_fit",
 }
 
 # Input names that, if present on an RSQ, indicate an array / time-series input.

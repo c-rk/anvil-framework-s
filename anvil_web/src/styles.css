@@ -2219,3 +2219,147 @@ textarea:focus-visible,
   gap: 0.3rem;
   flex-shrink: 0;
 }
+
+/* ============================================================
+   Relation packs (catalog filter chips)
+   ============================================================ */
+.catalog-packs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.7rem 0.8rem 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.pack-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast),
+    color var(--t-fast);
+}
+.pack-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.pack-chip.active {
+  background: var(--accent-tint);
+  border-color: var(--accent-soft);
+  color: var(--text);
+}
+.pack-chip-count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+/* ============================================================
+   Result comparison tray
+   ============================================================ */
+.export-row {
+  flex-wrap: wrap;
+}
+.compare-add {
+  border-color: var(--accent-soft) !important;
+  color: var(--accent) !important;
+}
+.compare-panel {
+  margin-top: 1.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md, 10px);
+  background: var(--surface-1);
+  padding: 0.9rem 1rem 1.1rem;
+}
+.compare-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+}
+.compare-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.compare-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.compare-actions button {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.3rem 0.7rem;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.compare-actions button:hover {
+  border-color: var(--border-strong);
+}
+.compare-clear {
+  color: var(--muted);
+}
+.compare-scroll {
+  overflow-x: auto;
+}
+.compare-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.85rem;
+}
+.compare-table th,
+.compare-table td {
+  padding: 0.35rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+.compare-varcol {
+  color: var(--muted);
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+}
+.compare-col {
+  position: relative;
+}
+.compare-col-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text);
+}
+.compare-col-x {
+  margin-left: 0.4rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.compare-col-x:hover {
+  color: var(--text);
+}
+.compare-var {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+.compare-unit {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.compare-num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}

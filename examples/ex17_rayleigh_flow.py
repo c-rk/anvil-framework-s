@@ -11,7 +11,7 @@ Demonstrates:
     - proj.promote() to push a finished RSQ to the global registry
 
 Engineering context:
-    Constant-area duct with heat addition (Rayleigh flow) — models a
+    Constant-area duct with heat addition (Rayleigh flow), models a
     combustion chamber, afterburner, or any duct where heat is added
     without friction. Given inlet Mach, stagnation temperature, and
     static pressure, find exit conditions for a range of heat loads.

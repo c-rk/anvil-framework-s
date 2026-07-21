@@ -2,7 +2,7 @@
 Example: Custom Relations + Project Registry
 =============================================
 
-Scenario: pipe flow design — friction factor, pressure drop, pump power.
+Scenario: pipe flow design, friction factor, pressure drop, pump power.
 All three relations are written from scratch and managed in a project registry.
 
 Shows:
@@ -21,7 +21,7 @@ import anvil
 from anvil import Q, system
 
 # ─────────────────────────────────────────────────────────────────
-# PART 1 — Define your own Relations (plain Python functions)
+# PART 1, Define your own Relations (plain Python functions)
 #
 # Rules:
 #   - Accept inputs as keyword arguments
@@ -71,7 +71,7 @@ def pump_power(dP, V, D_pipe, eta_pump=0.75):
 
 
 # ─────────────────────────────────────────────────────────────────
-# PART 2 — Open a project registry
+# PART 2, Open a project registry
 #
 # Creates (or opens) a local .db file in the given directory.
 # Nothing goes to the global registry until you explicitly promote it.
@@ -108,7 +108,7 @@ proj.list()
 
 
 # ─────────────────────────────────────────────────────────────────
-# PART 3 — Use project RSQs directly (no System needed)
+# PART 3, Use project RSQs directly (no System needed)
 #
 # Quick sanity check on each relation before wiring them together.
 # ─────────────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ print(f"  Pressure drop: {r_dp['dP']}")
 
 
 # ─────────────────────────────────────────────────────────────────
-# PART 4 — Build a System using project RSQs
+# PART 4, Build a System using project RSQs
 #
 # Use proj.R.<name> to pull a relation from the project into a System.
 # Alternatively use the string name: sys.use("friction_factor")
@@ -166,7 +166,7 @@ pipe_sys.use(proj.R.friction_factor)
 pipe_sys.use(proj.R.pressure_drop)
 pipe_sys.use(proj.R.pump_power)
 
-# Solve — acyclic (feed-forward), so forward pass
+# Solve, acyclic (feed-forward), so forward pass
 result = pipe_sys.solve_forward()
 result.summary()
 
@@ -181,7 +181,7 @@ print(f"    Q_vol      = {result['Q_vol']}"
 
 
 # ─────────────────────────────────────────────────────────────────
-# PART 5 — Parametric sweep using the system
+# PART 5, Parametric sweep using the system
 #
 # Vary flow velocity; observe friction factor, pressure drop, pump power.
 # ─────────────────────────────────────────────────────────────────
@@ -195,7 +195,7 @@ sweep.summary(outputs=["Re", "f_darcy", "dP", "W_shaft"])
 
 
 # ─────────────────────────────────────────────────────────────────
-# PART 6 — Promote to global registry
+# PART 6, Promote to global registry
 #
 # Once your relations are validated and producing correct results,
 # promote them from the project store to the global registry.
@@ -214,13 +214,13 @@ proj.promote("pump_power",      overwrite=True)
 print("\n  Searching global registry for 'pipe'...")
 anvil.registry.search("pipe")
 
-# Access via global namespace — exactly like any built-in RSQ
+# Access via global namespace, exactly like any built-in RSQ
 r_check = anvil.R.friction_factor(Re=1000)
 print(f"\n  anvil.R.friction_factor(Re=1000) -> f = {r_check['f_darcy']:.4f}")
 
 
 # ─────────────────────────────────────────────────────────────────
-# CLEANUP (optional — remove promoted RSQs from global for clean demo)
+# CLEANUP (optional, remove promoted RSQs from global for clean demo)
 # ─────────────────────────────────────────────────────────────────
 
 for name in ("friction_factor", "pressure_drop", "pump_power"):

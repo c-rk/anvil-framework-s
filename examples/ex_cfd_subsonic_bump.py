@@ -1,5 +1,5 @@
 """
-Example: 2D Euler CFD — Subsonic flow over a Gaussian bump
+Example: 2D Euler CFD, Subsonic flow over a Gaussian bump
 ===========================================================
 
 M = 0.5 air flow through a channel with a Gaussian bump on the lower wall.
@@ -51,7 +51,7 @@ print(f"\n  Inlet:  p0={p0_inlet:.0f} Pa  T0={T0_inlet:.1f} K  M={M_inlet}")
 print(f"  Static: p={p_inlet:.1f} Pa  T={T_inlet:.2f} K  rho={rho_inlet:.4f} kg/m³")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 1 — Build mesh and write .amesh file
+# PART 1, Build mesh and write .amesh file
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 1: Mesh generation and .amesh file I/O")
@@ -90,7 +90,7 @@ mesh.plot(show=False, save_path=mesh_png, show_patches=True, show_mesh=True)
 print(f"  Mesh plot saved: {mesh_png}")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 2 — Solver setup
+# PART 2, Solver setup
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 2: Solver setup and run")
@@ -136,7 +136,7 @@ result = solver.run(
 result.summary()
 
 # ─────────────────────────────────────────────────────────────────
-# PART 3 — Post-processing
+# PART 3, Post-processing
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 3: Post-processing and comparison")
@@ -172,7 +172,7 @@ result.to_vtk(vtk_path)
 print(f"  VTK output saved: {vtk_path}")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 4 — Mach sweep via as_relation() + parallel
+# PART 4, Mach sweep via as_relation() + parallel
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 4: Mach sweep (parallel=2) using solver as Anvil Relation")
@@ -234,8 +234,8 @@ for f in ["bump.amesh", "bump_flow.vtk"]:
 
 print("\n" + "=" * 60)
 print("  Done. Output files:")
-print(f"    {mesh_png}       — mesh + patch labels")
-print(f"    {panel_png}      — M/p/T/rho contours")
-print(f"    {conv_png}       — residual convergence")
-print(f"    {snap_dir}/      — Mach snapshots every 500 iters")
+print(f"    {mesh_png}      , mesh + patch labels")
+print(f"    {panel_png}     , M/p/T/rho contours")
+print(f"    {conv_png}      , residual convergence")
+print(f"    {snap_dir}/     , Mach snapshots every 500 iters")
 print("=" * 60)

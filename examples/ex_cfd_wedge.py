@@ -36,7 +36,7 @@ _rebuild_namespaces()
 # anvil.lookup("mesh")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 1 — Analytical oblique shock (exact solution)
+# PART 1, Analytical oblique shock (exact solution)
 # ─────────────────────────────────────────────────────────────────
 print("=" * 60)
 print("  PART 1: Analytical oblique shock solution")
@@ -67,7 +67,7 @@ rho2 = (p_inf / (R_gas * T_inf)) * r["rho2_rho1"]
 print(f"\n  Downstream: p = {p2:.1f} Pa,  T = {T2:.1f} K,  M = {r['M2']:.4f}")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 2 — Numerical solution: anvil.cfd 2D Euler solver
+# PART 2, Numerical solution: anvil.cfd 2D Euler solver
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 2: Numerical 2D Euler solution")
@@ -92,7 +92,7 @@ mesh = Mesh.wedge(
 )
 mesh.info()
 
-# Boundary conditions — use descriptive edge names (left/right/top/bottom)
+# Boundary conditions, use descriptive edge names (left/right/top/bottom)
 bcs = {
     "inlet":   SupersonicInlet(M=M_inf, p=p_inf, T=T_inf, gamma=gamma, R_gas=R_gas),
     "outlet":  SupersonicOutlet(),
@@ -114,7 +114,7 @@ solver = CFDSolver(
 )
 solver.initialize(M=M_inf, p=p_inf, T=T_inf, alpha_deg=0.0)
 
-# Run solver — watch residuals converge
+# Run solver, watch residuals converge
 print(f"\n  Running Euler solver ({mesh.nx}x{mesh.ny} cells, Roe flux, 2nd order)...")
 out_dir = os.path.dirname(os.path.abspath(__file__))
 result = solver.run(
@@ -126,14 +126,14 @@ result = solver.run(
     save_every=500,              # save PNG every 500 iters
     save_field="M",
     save_dir=os.path.join(out_dir, "wedge_snapshots"),
-    save_vmin=1.4,               # fixed scale — all frames comparable
+    save_vmin=1.4,               # fixed scale, all frames comparable
     save_vmax=2.1,
 )
 
 result.summary()
 
 # ─────────────────────────────────────────────────────────────────
-# PART 3 — Comparison: analytical vs numerical
+# PART 3, Comparison: analytical vs numerical
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 3: Analytical vs Numerical comparison")
@@ -162,7 +162,7 @@ print(
 print(f"\n  (numerical error expected ~1-5% at this resolution)")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 4 — Write output files for ParaView and Tecplot
+# PART 4, Write output files for ParaView and Tecplot
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 4: Writing output files")
@@ -176,14 +176,14 @@ print("  -> Open wedge_flow.vtk in ParaView (File -> Open, then Apply)")
 print("  -> Open wedge_flow.dat in Tecplot (Data -> Load Data File)")
 
 # ─────────────────────────────────────────────────────────────────
-# PART 5 — Mach sweep using solver as Anvil Relation
+# PART 5, Mach sweep using solver as Anvil Relation
 #           Runs each Mach number in parallel threads
 # ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("  PART 5: Mach number sweep (solver as Anvil Relation)")
 print("=" * 60)
 
-# BC factory — rebuilds BCs for each M_inf so sweep is physically correct
+# BC factory, rebuilds BCs for each M_inf so sweep is physically correct
 nx_sw, ny_sw = 40, 20
 sweep_mesh = Mesh.wedge(
     half_angle_deg=theta_deg,

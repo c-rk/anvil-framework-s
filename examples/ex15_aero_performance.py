@@ -3,16 +3,16 @@ Example 15: Aerodynamic Performance Analysis
 =============================================
 
 Demonstrates:
-    - isa_atmosphere RSQ      — ISA standard atmosphere at any altitude
-    - thin_airfoil_cl RSQ     — thin airfoil lift slope + Prandtl-Glauert
-    - induced_drag RSQ        — induced drag from lift coefficient
-    - drag_polar RSQ          — full drag polar (CDi + CD0)
-    - oswald_efficiency RSQ   — Oswald efficiency for swept wings
-    - stall_speed RSQ         — minimum speed (stall)
-    - range_breguet RSQ       — Breguet range equation (jet aircraft)
-    - solve_forward()         — DAG system for aircraft sizing
-    - sweep()                 — performance vs altitude trade study
-    - in_ alias               — `in` as unit (inches)
+    - isa_atmosphere RSQ     , ISA standard atmosphere at any altitude
+    - thin_airfoil_cl RSQ    , thin airfoil lift slope + Prandtl-Glauert
+    - induced_drag RSQ       , induced drag from lift coefficient
+    - drag_polar RSQ         , full drag polar (CDi + CD0)
+    - oswald_efficiency RSQ  , Oswald efficiency for swept wings
+    - stall_speed RSQ        , minimum speed (stall)
+    - range_breguet RSQ      , Breguet range equation (jet aircraft)
+    - solve_forward()        , DAG system for aircraft sizing
+    - sweep()                , performance vs altitude trade study
+    - in_ alias              , `in` as unit (inches)
 
 Engineering context:
     Conceptual design of a subsonic jet transport. Compute lift,
@@ -40,15 +40,15 @@ print("=" * 60)
 # =====================================================
 # Aircraft parameters (narrow-body jet transport)
 # =====================================================
-W_MTOW     = 750e3    # N  — max takeoff weight (≈76 t)
-W_OEW      = 420e3    # N  — operating empty weight
-S_ref      = 122.4    # m^2 — wing reference area
-AR         = 9.5      # — aspect ratio
-sweep_deg  = 25.0     # deg — quarter-chord sweep
-taper      = 0.25     # — taper ratio
-CD0        = 0.025    # — zero-lift drag coefficient
-CLmax      = 2.8      # — max lift coefficient (flaps extended)
-TSFC       = 1.8e-5   # kg/N/s — thrust specific fuel consumption (SI)
+W_MTOW     = 750e3    # N , max takeoff weight (≈76 t)
+W_OEW      = 420e3    # N , operating empty weight
+S_ref      = 122.4    # m^2, wing reference area
+AR         = 9.5      #, aspect ratio
+sweep_deg  = 25.0     # deg, quarter-chord sweep
+taper      = 0.25     #, taper ratio
+CD0        = 0.025    #, zero-lift drag coefficient
+CLmax      = 2.8      #, max lift coefficient (flaps extended)
+TSFC       = 1.8e-5   # kg/N/s, thrust specific fuel consumption (SI)
 
 print(f"\n  Aircraft parameters:")
 print(f"    MTOW   = {W_MTOW/1e3:.0f} kN ({W_MTOW/9.80665/1000:.0f} t)")
@@ -191,7 +191,7 @@ sweep_cdi.summary(outputs=["CDi"])
 
 
 # =====================================================
-# 6. Breguet Range — cruise altitude trade study
+# 6. Breguet Range, cruise altitude trade study
 # =====================================================
 print("\n[6] Breguet Range vs Cruise Altitude")
 

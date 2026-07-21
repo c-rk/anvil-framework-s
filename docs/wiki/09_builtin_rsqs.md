@@ -1,6 +1,6 @@
 # Built-in RSQs
 
-101 RSQs (96 relations, 4 quantity sets, 1 system) across 20 domains, auto-seeded into `~/.anvil/registry.db` on first import. Access via `anvil.R.*`, `anvil.S.*`, `anvil.QDB.*`, or `sys.use("name")`.
+132 RSQs (123 relations, 4 quantity sets, 5 systems) across 18 domains, auto-seeded into `~/.anvil/registry.db` on first import. Access via `anvil.R.*`, `anvil.S.*`, `anvil.QDB.*`, or `sys.use("name")`.
 
 All inputs are dimensionless scalars or SI floats unless noted. All outputs are SI units unless returned as `Q(value, "unit")`.
 
@@ -776,7 +776,7 @@ anvil.R.orbital_period(mu=3.986e14, a=6.571e6)
 
 ---
 
-## Quick Reference, All 57 RSQs
+## Quick Reference
 
 | Name | Domain | Type | Key inputs | Key outputs |
 |------|--------|------|-----------|------------|
@@ -1267,3 +1267,56 @@ r = anvil.R.gain_phase_margin(num_coeffs=[8], den_coeffs=[1, 3, 2, 0])
 ```
 
 **Convention:** GM = ∞ when no phase crossover exists. Stable requires GM > 0 dB **and** PM > 0 deg.
+
+---
+
+## Fluids, Heat, Stress & Cycles (extended), Type: R
+
+Compressible duct flow, pipe friction, convection and transient conduction,
+stress analysis, and thermodynamic cycles.
+
+| Name | Domain | Description |
+|------|--------|-------------|
+| `fanno_flow` | aero.compressible | Adiabatic constant-area friction flow: sonic-reference ratios and 4fL*/D |
+| `rayleigh_flow` | aero.compressible | Frictionless constant-area heat addition: sonic-reference ratios |
+| `mach_angle` | aero.compressible | Mach wave angle, mu = arcsin(1/M) |
+| `colebrook_friction` | fluids | Darcy friction factor from the implicit Colebrook equation |
+| `haaland_friction` | fluids | Darcy friction factor from the explicit Haaland approximation |
+| `pipe_pressure_drop` | fluids | Darcy-Weisbach pressure drop and head loss |
+| `dittus_boelter` | heat_transfer | Turbulent internal convection Nusselt number and h |
+| `lmtd` | heat_transfer | Log-mean temperature difference (counter/parallel flow) |
+| `biot_number` | heat_transfer | Biot number and lumped-capacitance validity |
+| `lumped_capacitance` | heat_transfer | Transient lumped cooling/heating temperature and time constant |
+| `torsion_circular_shaft` | structures | Solid/hollow shaft shear stress, polar moment, angle of twist |
+| `principal_stresses_2d` | structures | Plane-stress principal stresses and max shear (Mohr's circle) |
+| `von_mises_stress` | structures | Von Mises equivalent stress from a 3D stress state |
+| `carnot_efficiency` | thermo | Carnot efficiency and heat-pump/refrigerator COPs |
+| `brayton_ideal` | thermo | Ideal Brayton cycle efficiency, stage temperatures, back-work ratio |
+| `skin_friction_flat_plate` | aero | Flat-plate skin-friction coefficient (laminar or turbulent) |
+| `linear_regression` | data.fitting | Least-squares line y = m x + b with R-squared |
+| `poly_fit` | data.fitting | Polynomial least-squares fit of chosen degree with coefficients |
+| `power_fit` | data.fitting | Power-law fit y = a x^b via log-log regression |
+| `exp_fit` | data.fitting | Exponential fit y = a e^(b x) via semi-log regression |
+
+---
+
+## Propulsion: Gas-Turbine Cycle, Type: R and S
+
+Station-by-station engine components and full engine cycles. See the
+[Propulsion Cycles](23_propulsion.md) page for the complete walkthrough.
+
+**Components (R):** `ram_intake`, `compressor`, `combustor`, `turbine`,
+`nozzle`, `thrust_performance` (turbojet); `fan`, `hp_compressor`,
+`hp_turbine`, `lp_turbine`, `bypass_nozzle`, `turbofan_thrust` (turbofan);
+`afterburner`; `power_turbine`, `turboshaft_performance` (turboprop).
+
+**Engines (S):** `turbojet_cycle`, `turbofan_cycle`, `turbojet_ab_cycle`,
+`turboprop_cycle`.
+
+```python
+from anvil import propulsion as jet
+tj = jet.build_turbojet()
+tj.set(M0=0.85, pi_c=12, T04=1500, mdot=25)
+res = tj.solve()
+print(jet.station_table(res))
+```

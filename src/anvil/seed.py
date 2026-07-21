@@ -1373,4 +1373,390 @@ _SEED_ENTRIES = [
          '    }\n'
          'export = envelope_detection'
      )},
+
+    # ==================== COMPRESSIBLE DUCT FLOW ====================
+    {"name": "fanno_flow", "type": "R", "domain": "aero.compressible",
+     "desc": "Fanno flow (adiabatic, constant-area, with friction): sonic-reference ratios and 4fL*/D",
+     "tags": ["compressible", "fanno", "friction", "duct"],
+     "latex": r"\frac{4 f L^*}{D}=\frac{1-M^2}{\gamma M^2}+\frac{\gamma+1}{2\gamma}\ln\frac{(\gamma+1)M^2}{2+(\gamma-1)M^2}",
+     "source":
+'''import numpy as np
+def fanno_flow(M, gamma=1.4):
+    g = gamma; M2 = M * M
+    T_Tstar = (g + 1) / (2 + (g - 1) * M2)
+    P_Pstar = (1.0 / M) * T_Tstar ** 0.5
+    rho_rhostar = (1.0 / M) * ((2 + (g - 1) * M2) / (g + 1)) ** 0.5
+    P0_P0star = (1.0 / M) * ((2 + (g - 1) * M2) / (g + 1)) ** ((g + 1) / (2 * (g - 1)))
+    fLD = (1 - M2) / (g * M2) + (g + 1) / (2 * g) * np.log((g + 1) * M2 / (2 + (g - 1) * M2))
+    return {"T_Tstar": T_Tstar, "P_Pstar": P_Pstar, "rho_rhostar": rho_rhostar,
+            "P0_P0star": P0_P0star, "fLD_max": fLD}
+export = fanno_flow'''},
+    {"name": "rayleigh_flow", "type": "R", "domain": "aero.compressible",
+     "desc": "Rayleigh flow (frictionless, constant-area, with heat addition): sonic-reference ratios",
+     "tags": ["compressible", "rayleigh", "heat_addition", "duct"],
+     "latex": r"\frac{T_0}{T_0^*}=\frac{(\gamma+1)M^2\,[2+(\gamma-1)M^2]}{(1+\gamma M^2)^2},\quad \frac{P}{P^*}=\frac{1+\gamma}{1+\gamma M^2}",
+     "source":
+'''def rayleigh_flow(M, gamma=1.4):
+    g = gamma; M2 = M * M; d = 1 + g * M2
+    T0_T0star = ((g + 1) * M2 * (2 + (g - 1) * M2)) / d ** 2
+    P_Pstar = (1 + g) / d
+    T_Tstar = M2 * (1 + g) ** 2 / d ** 2
+    P0_P0star = ((1 + g) / d) * ((2 + (g - 1) * M2) / (g + 1)) ** (g / (g - 1))
+    V_Vstar = M2 * (1 + g) / d
+    return {"T0_T0star": T0_T0star, "P_Pstar": P_Pstar, "T_Tstar": T_Tstar,
+            "P0_P0star": P0_P0star, "V_Vstar": V_Vstar}
+export = rayleigh_flow'''},
+    {"name": "mach_angle", "type": "R", "domain": "aero.compressible",
+     "desc": "Mach angle of a supersonic flow: mu = arcsin(1/M)",
+     "tags": ["compressible", "mach", "wave_angle"],
+     "latex": r"\mu = \arcsin\!\left(\frac{1}{M}\right)",
+     "source":
+'''import numpy as np
+def mach_angle(M):
+    mu = np.arcsin(1.0 / M) if M >= 1 else float("nan")
+    return {"mu_rad": mu, "mu_deg": np.degrees(mu)}
+export = mach_angle'''},
+
+    # ==================== INTERNAL / PIPE FLOW ====================
+    {"name": "colebrook_friction", "type": "R", "domain": "fluids",
+     "desc": "Darcy friction factor from the implicit Colebrook equation (laminar branch below Re=2300)",
+     "tags": ["fluids", "pipe", "friction", "colebrook", "moody"],
+     "latex": r"\frac{1}{\sqrt{f}}=-2\log_{10}\!\left(\frac{\epsilon/D}{3.7}+\frac{2.51}{Re\sqrt{f}}\right)",
+     "source":
+'''import numpy as np
+from anvil import solvers
+def colebrook_friction(Re, rel_roughness=0.0):
+    if Re < 2300:
+        return {"f_darcy": 64.0 / Re, "regime": "laminar"}
+    def resid(f):
+        return 1.0 / f ** 0.5 + 2.0 * np.log10(rel_roughness / 3.7 + 2.51 / (Re * f ** 0.5))
+    f = solvers.find_root(resid, bracket=(0.005, 0.15), method="brent")
+    return {"f_darcy": f, "regime": "turbulent"}
+export = colebrook_friction'''},
+    {"name": "haaland_friction", "type": "R", "domain": "fluids",
+     "desc": "Darcy friction factor from the explicit Haaland approximation to Colebrook",
+     "tags": ["fluids", "pipe", "friction", "haaland"],
+     "latex": r"\frac{1}{\sqrt{f}}=-1.8\log_{10}\!\left[\left(\frac{\epsilon/D}{3.7}\right)^{1.11}+\frac{6.9}{Re}\right]",
+     "source":
+'''import numpy as np
+def haaland_friction(Re, rel_roughness=0.0):
+    if Re < 2300:
+        return {"f_darcy": 64.0 / Re}
+    inv = -1.8 * np.log10((rel_roughness / 3.7) ** 1.11 + 6.9 / Re)
+    return {"f_darcy": 1.0 / inv ** 2}
+export = haaland_friction'''},
+    {"name": "pipe_pressure_drop", "type": "R", "domain": "fluids",
+     "desc": "Darcy-Weisbach pressure drop and head loss in a pipe",
+     "tags": ["fluids", "pipe", "darcy_weisbach", "head_loss"],
+     "latex": r"\Delta P=f\frac{L}{D}\frac{\rho V^2}{2},\quad h_L=\frac{\Delta P}{\rho g}",
+     "source":
+'''from anvil import Q
+def pipe_pressure_drop(f_darcy, L, D, rho, V):
+    dP = f_darcy * (L / D) * 0.5 * rho * V ** 2
+    hL = dP / (rho * 9.80665)
+    return {"dP": Q(dP, "Pa"), "head_loss": Q(hL, "m")}
+export = pipe_pressure_drop'''},
+
+    # ==================== HEAT TRANSFER (EXTENDED) ====================
+    {"name": "dittus_boelter", "type": "R", "domain": "heat_transfer",
+     "desc": "Dittus-Boelter correlation for turbulent internal convection Nusselt number and h",
+     "tags": ["heat_transfer", "convection", "nusselt", "dittus_boelter"],
+     "latex": r"Nu = 0.023\,Re^{0.8}Pr^{n},\quad n=0.4\ (\text{heating}),\ 0.3\ (\text{cooling})",
+     "source":
+'''from anvil import Q
+def dittus_boelter(Re, Pr, k_fluid, D, heating=True):
+    n = 0.4 if heating else 0.3
+    Nu = 0.023 * Re ** 0.8 * Pr ** n
+    h = Nu * k_fluid / D
+    return {"Nu": Nu, "h_conv": Q(h, "W/m^2/K")}
+export = dittus_boelter'''},
+    {"name": "lmtd", "type": "R", "domain": "heat_transfer",
+     "desc": "Log-mean temperature difference for counter- or parallel-flow heat exchangers",
+     "tags": ["heat_transfer", "heat_exchanger", "lmtd"],
+     "latex": r"\Delta T_{lm}=\frac{\Delta T_1-\Delta T_2}{\ln(\Delta T_1/\Delta T_2)}",
+     "source":
+'''import numpy as np
+from anvil import Q
+def lmtd(T_hot_in, T_hot_out, T_cold_in, T_cold_out, flow="counter"):
+    if flow == "counter":
+        dT1 = T_hot_in - T_cold_out; dT2 = T_hot_out - T_cold_in
+    else:
+        dT1 = T_hot_in - T_cold_in; dT2 = T_hot_out - T_cold_out
+    lm = dT1 if abs(dT1 - dT2) < 1e-9 else (dT1 - dT2) / np.log(dT1 / dT2)
+    return {"LMTD": Q(lm, "K"), "dT1": Q(dT1, "K"), "dT2": Q(dT2, "K")}
+export = lmtd'''},
+    {"name": "biot_number", "type": "R", "domain": "heat_transfer",
+     "desc": "Biot number and whether the lumped-capacitance assumption is valid (Bi < 0.1)",
+     "tags": ["heat_transfer", "biot", "lumped", "transient"],
+     "latex": r"Bi=\frac{h L_c}{k}",
+     "source":
+'''def biot_number(h_conv, L_char, k_solid):
+    Bi = h_conv * L_char / k_solid
+    return {"Bi": Bi, "lumped_valid": Bi < 0.1}
+export = biot_number'''},
+    {"name": "lumped_capacitance", "type": "R", "domain": "heat_transfer",
+     "desc": "Transient lumped-capacitance cooling/heating: temperature at time t and time constant",
+     "tags": ["heat_transfer", "transient", "lumped", "cooling"],
+     "latex": r"T(t)=T_\infty+(T_0-T_\infty)e^{-t/\tau},\quad \tau=\frac{\rho V c_p}{h A_s}",
+     "source":
+'''import numpy as np
+from anvil import Q
+def lumped_capacitance(T0, T_inf, t, h_conv, A_surf, rho, V_vol, cp):
+    tau = rho * V_vol * cp / (h_conv * A_surf)
+    theta = np.exp(-t / tau)
+    T = T_inf + (T0 - T_inf) * theta
+    return {"T_t": Q(T, "K"), "tau": Q(tau, "s"), "theta": theta}
+export = lumped_capacitance'''},
+
+    # ==================== STRUCTURES (EXTENDED) ====================
+    {"name": "torsion_circular_shaft", "type": "R", "domain": "structures",
+     "desc": "Torsion of a solid/hollow circular shaft: max shear stress, polar moment, angle of twist",
+     "tags": ["structures", "torsion", "shaft", "shear"],
+     "latex": r"\tau_{max}=\frac{T r}{J},\quad J=\frac{\pi(d_o^4-d_i^4)}{32},\quad \phi=\frac{T L}{G J}",
+     "source":
+'''import numpy as np
+from anvil import Q
+def torsion_circular_shaft(torque, d_outer, L, G, d_inner=0.0):
+    J = np.pi * (d_outer ** 4 - d_inner ** 4) / 32.0
+    tau_max = torque * (d_outer / 2.0) / J
+    phi = torque * L / (G * J)
+    return {"tau_max": Q(tau_max, "Pa"), "J": J, "twist_rad": phi,
+            "twist_deg": np.degrees(phi)}
+export = torsion_circular_shaft'''},
+    {"name": "principal_stresses_2d", "type": "R", "domain": "structures",
+     "desc": "Plane-stress principal stresses, maximum shear and orientation (Mohr's circle)",
+     "tags": ["structures", "stress", "principal", "mohr"],
+     "latex": r"\sigma_{1,2}=\frac{\sigma_x+\sigma_y}{2}\pm\sqrt{\left(\frac{\sigma_x-\sigma_y}{2}\right)^2+\tau_{xy}^2}",
+     "source":
+'''import numpy as np
+from anvil import Q
+def principal_stresses_2d(sigma_x, sigma_y, tau_xy):
+    avg = (sigma_x + sigma_y) / 2.0
+    R = (((sigma_x - sigma_y) / 2.0) ** 2 + tau_xy ** 2) ** 0.5
+    theta_p = 0.5 * np.degrees(np.arctan2(2 * tau_xy, sigma_x - sigma_y))
+    return {"sigma_1": Q(avg + R, "Pa"), "sigma_2": Q(avg - R, "Pa"),
+            "tau_max": Q(R, "Pa"), "theta_p_deg": theta_p}
+export = principal_stresses_2d'''},
+    {"name": "von_mises_stress", "type": "R", "domain": "structures",
+     "desc": "Von Mises equivalent stress from a general 3D stress state",
+     "tags": ["structures", "stress", "von_mises", "yield"],
+     "latex": r"\sigma_{vm}=\sqrt{\tfrac{1}{2}\left[(\sigma_x-\sigma_y)^2+(\sigma_y-\sigma_z)^2+(\sigma_z-\sigma_x)^2+6(\tau_{xy}^2+\tau_{yz}^2+\tau_{zx}^2)\right]}",
+     "source":
+'''from anvil import Q
+def von_mises_stress(sigma_x=0.0, sigma_y=0.0, sigma_z=0.0,
+                     tau_xy=0.0, tau_yz=0.0, tau_zx=0.0):
+    vm = (0.5 * ((sigma_x - sigma_y) ** 2 + (sigma_y - sigma_z) ** 2
+                 + (sigma_z - sigma_x) ** 2
+                 + 6 * (tau_xy ** 2 + tau_yz ** 2 + tau_zx ** 2))) ** 0.5
+    return {"sigma_vm": Q(vm, "Pa")}
+export = von_mises_stress'''},
+
+    # ==================== THERMODYNAMIC CYCLES ====================
+    {"name": "carnot_efficiency", "type": "R", "domain": "thermo",
+     "desc": "Carnot efficiency and heat-pump/refrigerator coefficients of performance",
+     "tags": ["thermo", "carnot", "efficiency", "cop"],
+     "latex": r"\eta_{Carnot}=1-\frac{T_c}{T_h}",
+     "source":
+'''def carnot_efficiency(T_hot, T_cold):
+    eta = 1.0 - T_cold / T_hot
+    return {"eta_carnot": eta,
+            "COP_heat_pump": T_hot / (T_hot - T_cold),
+            "COP_refrigerator": T_cold / (T_hot - T_cold)}
+export = carnot_efficiency'''},
+    {"name": "brayton_ideal", "type": "R", "domain": "thermo",
+     "desc": "Ideal (air-standard) Brayton cycle thermal efficiency, stage temperatures and back-work ratio",
+     "tags": ["thermo", "brayton", "cycle", "gas_turbine"],
+     "latex": r"\eta_{th}=1-\frac{1}{r_p^{(\gamma-1)/\gamma}}",
+     "source":
+'''from anvil import Q
+def brayton_ideal(pressure_ratio, gamma=1.4, T_min=288.0, T_max=1600.0):
+    x = pressure_ratio ** ((gamma - 1) / gamma)
+    eta = 1.0 - 1.0 / x
+    T2 = T_min * x; T4 = T_max / x
+    return {"eta_thermal": eta, "T_compressor_out": Q(T2, "K"),
+            "T_turbine_out": Q(T4, "K"),
+            "back_work_ratio": (T2 - T_min) / (T_max - T4)}
+export = brayton_ideal'''},
+    {"name": "skin_friction_flat_plate", "type": "R", "domain": "aero",
+     "desc": "Average skin-friction coefficient on a flat plate (laminar or turbulent, auto by Re)",
+     "tags": ["aero", "skin_friction", "boundary_layer", "drag"],
+     "latex": r"C_f=\frac{1.328}{\sqrt{Re_L}}\ (\text{laminar}),\quad C_f=\frac{0.074}{Re_L^{1/5}}\ (\text{turbulent})",
+     "source":
+'''def skin_friction_flat_plate(Re_L, regime="auto"):
+    if regime == "auto":
+        regime = "laminar" if Re_L < 5e5 else "turbulent"
+    Cf = 1.328 / Re_L ** 0.5 if regime == "laminar" else 0.074 / Re_L ** 0.2
+    return {"Cf": Cf, "regime": regime}
+export = skin_friction_flat_plate'''},
+
+    # ==================== DATA FITTING / REGRESSION ====================
+    # Fit a model to (x, y) data. Inputs are named *_data so the web calculator
+    # renders array widgets (and its CSV-column picker) for them.
+    {"name": "linear_regression", "type": "R", "domain": "data.fitting",
+     "desc": "Ordinary least-squares straight-line fit: slope, intercept, R-squared, residuals",
+     "tags": ["data", "regression", "curve_fit", "least_squares"],
+     "latex": r"y = m x + b,\quad R^2 = 1-\frac{\sum(y-\hat y)^2}{\sum(y-\bar y)^2}",
+     "source":
+'''import numpy as np
+def linear_regression(x_data, y_data):
+    x = np.asarray(x_data, float); y = np.asarray(y_data, float)
+    A = np.vstack([x, np.ones(len(x))]).T
+    (m, b), *_ = np.linalg.lstsq(A, y, rcond=None)
+    yhat = m * x + b
+    ss_res = float(np.sum((y - yhat) ** 2))
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 1.0
+    return {"slope": float(m), "intercept": float(b), "r_squared": r2,
+            "rmse": float((ss_res / len(x)) ** 0.5),
+            "y_fit": yhat.tolist(), "residuals": (y - yhat).tolist()}
+export = linear_regression'''},
+    {"name": "poly_fit", "type": "R", "domain": "data.fitting",
+     "desc": "Least-squares polynomial fit of a given degree: coefficients, R-squared, RMSE",
+     "tags": ["data", "regression", "curve_fit", "polynomial"],
+     "latex": r"y=\sum_{k=0}^{n} c_k x^{n-k}",
+     "source":
+'''import numpy as np
+def poly_fit(x_data, y_data, degree=2):
+    x = np.asarray(x_data, float); y = np.asarray(y_data, float)
+    coeffs = np.polyfit(x, y, int(degree))
+    yhat = np.polyval(coeffs, x)
+    ss_res = float(np.sum((y - yhat) ** 2))
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 1.0
+    return {"coeffs": coeffs.tolist(), "r_squared": r2,
+            "rmse": float((ss_res / len(x)) ** 0.5), "y_fit": yhat.tolist()}
+export = poly_fit'''},
+    {"name": "power_fit", "type": "R", "domain": "data.fitting",
+     "desc": "Power-law fit y = a x^b via log-log least squares (x, y > 0)",
+     "tags": ["data", "regression", "curve_fit", "power_law"],
+     "latex": r"y = a\,x^{b}",
+     "source":
+'''import numpy as np
+def power_fit(x_data, y_data):
+    x = np.asarray(x_data, float); y = np.asarray(y_data, float)
+    mask = (x > 0) & (y > 0)
+    b, lna = np.polyfit(np.log(x[mask]), np.log(y[mask]), 1)
+    a = float(np.exp(lna))
+    yhat = a * x ** b
+    ss_res = float(np.sum((y - yhat) ** 2))
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 1.0
+    return {"a": a, "b": float(b), "r_squared": r2, "y_fit": yhat.tolist()}
+export = power_fit'''},
+    {"name": "exp_fit", "type": "R", "domain": "data.fitting",
+     "desc": "Exponential fit y = a exp(b x) via semi-log least squares (y > 0)",
+     "tags": ["data", "regression", "curve_fit", "exponential"],
+     "latex": r"y = a\,e^{b x}",
+     "source":
+'''import numpy as np
+def exp_fit(x_data, y_data):
+    x = np.asarray(x_data, float); y = np.asarray(y_data, float)
+    mask = y > 0
+    b, lna = np.polyfit(x[mask], np.log(y[mask]), 1)
+    a = float(np.exp(lna))
+    yhat = a * np.exp(b * x)
+    ss_res = float(np.sum((y - yhat) ** 2))
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 1.0
+    return {"a": a, "b": float(b), "r_squared": r2, "y_fit": yhat.tolist()}
+export = exp_fit'''},
+
+    # ==================== PROPULSION: GAS-TURBINE CYCLE ====================
+    # Station-by-station engine components (GasTurb style). Each maps an inlet
+    # stagnation state to an exit stagnation state; the real, documented
+    # implementations live in anvil/propulsion.py so they stay easy to read
+    # and test. Wired into full engines by the *_cycle systems below.
+    {"name": "ram_intake", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Intake ram compression, freestream to compressor face (station 0 to 2)",
+     "tags": ["propulsion", "cycle", "intake", "ram", "gas_turbine"],
+     "latex": r"T_{02}=T_a\left(1+\tfrac{\gamma-1}{2}M_0^2\right),\quad P_{02}=P_a\left(1+\eta_d\tfrac{\gamma-1}{2}M_0^2\right)^{\frac{\gamma}{\gamma-1}}",
+     "source": "from anvil.propulsion import ram_intake\nexport = ram_intake"},
+    {"name": "compressor", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Compressor with isentropic efficiency, station 2 to 3; returns exit state and specific work",
+     "tags": ["propulsion", "cycle", "compressor", "gas_turbine"],
+     "latex": r"T_{03}=T_{02}\left(1+\frac{\pi_c^{(\gamma-1)/\gamma}-1}{\eta_c}\right),\quad w_c=c_p(T_{03}-T_{02})",
+     "source": "from anvil.propulsion import compressor\nexport = compressor"},
+    {"name": "combustor", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Combustor at prescribed turbine inlet temperature; energy balance gives fuel-air ratio (station 3 to 4)",
+     "tags": ["propulsion", "cycle", "combustor", "gas_turbine"],
+     "latex": r"f=\frac{c_{p,h}T_{04}-c_{p,c}T_{03}}{\eta_b\,\mathrm{LHV}-c_{p,h}T_{04}}",
+     "source": "from anvil.propulsion import combustor\nexport = combustor"},
+    {"name": "turbine", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Turbine sized by work balance to drive the compressor (station 4 to 5)",
+     "tags": ["propulsion", "cycle", "turbine", "gas_turbine"],
+     "latex": r"w_t=\frac{w_c+w_{ext}}{\eta_m(1+f)},\quad T_{05}=T_{04}-\frac{w_t}{c_{p,h}}",
+     "source": "from anvil.propulsion import turbine\nexport = turbine"},
+    {"name": "nozzle", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Convergent nozzle with automatic choking detection (station 5 to 9)",
+     "tags": ["propulsion", "cycle", "nozzle", "gas_turbine"],
+     "latex": r"\mathrm{NPR}_{crit}=\left(\tfrac{\gamma+1}{2}\right)^{\frac{\gamma}{\gamma-1}};\ \text{choked if } P_{05}/P_a>\mathrm{NPR}_{crit}",
+     "source": "from anvil.propulsion import nozzle\nexport = nozzle"},
+    {"name": "thrust_performance", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Specific thrust, TSFC and thermal/propulsive/overall efficiencies for a core stream",
+     "tags": ["propulsion", "cycle", "thrust", "tsfc", "efficiency"],
+     "latex": r"F_s=(1+f)V_9-V_0+(1+f)\frac{R T_9}{V_9}\!\left(1-\frac{P_a}{P_9}\right),\quad \mathrm{TSFC}=\frac{f}{F_s}",
+     "source": "from anvil.propulsion import thrust_performance\nexport = thrust_performance"},
+    {"name": "fan", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Turbofan fan pressuring the full core+bypass flow (station 2 to 13)",
+     "tags": ["propulsion", "cycle", "fan", "turbofan"],
+     "source": "from anvil.propulsion import fan\nexport = fan"},
+    {"name": "hp_compressor", "type": "R", "domain": "propulsion.cycle",
+     "desc": "HP compressor, core flow only, station 13 to 3 (two-spool turbofan)",
+     "tags": ["propulsion", "cycle", "compressor", "turbofan", "spool"],
+     "source": "from anvil.propulsion import hp_compressor\nexport = hp_compressor"},
+    {"name": "hp_turbine", "type": "R", "domain": "propulsion.cycle",
+     "desc": "HP turbine driving the HP compressor / gas generator (station 4 to 45)",
+     "tags": ["propulsion", "cycle", "turbine", "turbofan", "spool"],
+     "source": "from anvil.propulsion import hp_turbine\nexport = hp_turbine"},
+    {"name": "lp_turbine", "type": "R", "domain": "propulsion.cycle",
+     "desc": "LP turbine driving the fan, accounts for bypass mass flow (station 45 to 5)",
+     "tags": ["propulsion", "cycle", "turbine", "turbofan", "spool"],
+     "source": "from anvil.propulsion import lp_turbine\nexport = lp_turbine"},
+    {"name": "bypass_nozzle", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Cold bypass-duct nozzle for a turbofan (station 13 to 19)",
+     "tags": ["propulsion", "cycle", "nozzle", "turbofan", "bypass"],
+     "source": "from anvil.propulsion import bypass_nozzle\nexport = bypass_nozzle"},
+    {"name": "turbofan_thrust", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Combined core+bypass specific thrust, TSFC and efficiencies for a turbofan",
+     "tags": ["propulsion", "cycle", "thrust", "turbofan", "efficiency"],
+     "source": "from anvil.propulsion import turbofan_thrust\nexport = turbofan_thrust"},
+    {"name": "afterburner", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Afterburner / reheat to a target temperature; adds fuel (station 5 to 7)",
+     "tags": ["propulsion", "cycle", "afterburner", "reheat"],
+     "latex": r"f_{ab}=(1+f)\frac{c_{p,h}(T_{07}-T_{05})}{\eta_{ab}\,\mathrm{LHV}-c_{p,h}T_{07}}",
+     "source": "from anvil.propulsion import afterburner\nexport = afterburner"},
+    {"name": "power_turbine", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Free power turbine extracting shaft work for a turboprop/turboshaft (station 45 to 5)",
+     "tags": ["propulsion", "cycle", "turbine", "turboprop", "turboshaft"],
+     "source": "from anvil.propulsion import power_turbine\nexport = power_turbine"},
+    {"name": "turboshaft_performance", "type": "R", "domain": "propulsion.cycle",
+     "desc": "Shaft power, specific power and power-specific fuel consumption for a turboprop/turboshaft",
+     "tags": ["propulsion", "cycle", "shaft_power", "turboprop", "psfc"],
+     "source": "from anvil.propulsion import turboshaft_performance\nexport = turboshaft_performance"},
+
+    # --- Full engine cycles (solvable Systems) ---
+    {"name": "turbojet_cycle", "type": "S", "domain": "propulsion.cycle",
+     "desc": "Single-spool turbojet: intake, compressor, combustor, turbine, nozzle, performance",
+     "tags": ["propulsion", "cycle", "turbojet", "system", "gas_turbine"],
+     "depends": ["ram_intake", "compressor", "combustor", "turbine", "nozzle",
+                 "thrust_performance"],
+     "source": "from anvil.propulsion import build_turbojet as build\nexport = build"},
+    {"name": "turbojet_ab_cycle", "type": "S", "domain": "propulsion.cycle",
+     "desc": "Turbojet with afterburner (reheat) between turbine and nozzle",
+     "tags": ["propulsion", "cycle", "turbojet", "afterburner", "system"],
+     "depends": ["ram_intake", "compressor", "combustor", "turbine",
+                 "afterburner", "nozzle", "thrust_performance"],
+     "source": "from anvil.propulsion import build_turbojet_ab as build\nexport = build"},
+    {"name": "turbofan_cycle", "type": "S", "domain": "propulsion.cycle",
+     "desc": "Two-spool separate-flow turbofan with fan, bypass duct and LP/HP spools",
+     "tags": ["propulsion", "cycle", "turbofan", "bypass", "system"],
+     "depends": ["ram_intake", "fan", "hp_compressor", "combustor", "hp_turbine",
+                 "lp_turbine", "nozzle", "bypass_nozzle", "turbofan_thrust"],
+     "source": "from anvil.propulsion import build_turbofan as build\nexport = build"},
+    {"name": "turboprop_cycle", "type": "S", "domain": "propulsion.cycle",
+     "desc": "Turboprop / turboshaft with a free power turbine driving a propeller or shaft",
+     "tags": ["propulsion", "cycle", "turboprop", "turboshaft", "system"],
+     "depends": ["ram_intake", "compressor", "combustor", "hp_turbine",
+                 "power_turbine", "turboshaft_performance"],
+     "source": "from anvil.propulsion import build_turboprop as build\nexport = build"},
 ]

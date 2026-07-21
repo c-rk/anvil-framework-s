@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
 import { exportResultCSV, exportResultJSON } from "../lib/export";
+import { exportReportHTML, exportReportMarkdown } from "../lib/report";
+import { addCompare } from "../lib/compare";
 import type { RsqDetail, SolveInputValue, SolveResponse } from "../lib/types";
 import { MathView } from "./MathView";
 import { ResidualChart } from "./ResidualChart";
@@ -493,8 +495,21 @@ export function Calculator({ name }: Props) {
                 </tbody>
               </table>
               <div className="export-row">
+                <button
+                  className="compare-add"
+                  onClick={() => addCompare(result)}
+                  title="Add this result to the comparison tray below"
+                >
+                  + Compare
+                </button>
                 <button onClick={() => exportResultCSV(result)}>Export CSV</button>
                 <button onClick={() => exportResultJSON(result)}>Export JSON</button>
+                <button onClick={() => exportReportHTML(detail, result)} title="Download a self-contained HTML report">
+                  Report HTML
+                </button>
+                <button onClick={() => exportReportMarkdown(detail, result)} title="Download a Markdown report">
+                  Report MD
+                </button>
               </div>
             </>
           )}

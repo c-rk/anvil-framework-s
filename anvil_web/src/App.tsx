@@ -6,6 +6,7 @@ import { useConnection } from "./hooks/useConnection";
 import { Catalog } from "./components/Catalog";
 import { Calculator } from "./components/Calculator";
 import { CalcPad } from "./components/CalcPad";
+import { ComparePanel } from "./components/ComparePanel";
 import { Builder } from "./components/Builder";
 import { Spotlight } from "./components/Spotlight";
 import { ShortcutsHelp } from "./components/ShortcutsHelp";
@@ -290,6 +291,7 @@ export default function App() {
                 {loading ? "Loading…" : "Select an RSQ from the catalog."}
               </div>
             )}
+            <ComparePanel />
           </div>
           <CalcPad />
         </main>

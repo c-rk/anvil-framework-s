@@ -3,13 +3,13 @@ Example 13: Control Systems Analysis
 ======================================
 
 Demonstrates:
-    - pid_output RSQ          — PID controller output from error signals
-    - ziegler_nichols_pid RSQ — auto-tune PID gains from ultimate gain/period
-    - second_order_metrics RSQ — step response characteristics (OS%, t_settle)
-    - routh_hurwitz_2nd RSQ   — closed-loop stability check
-    - solve_ode()             — simulate the closed-loop step response
-    - solve_forward()         — DAG system for design calculations
-    - sweep()                 — bandwidth vs damping ratio trade study
+    - pid_output RSQ         , PID controller output from error signals
+    - ziegler_nichols_pid RSQ, auto-tune PID gains from ultimate gain/period
+    - second_order_metrics RSQ, step response characteristics (OS%, t_settle)
+    - routh_hurwitz_2nd RSQ  , closed-loop stability check
+    - solve_ode()            , simulate the closed-loop step response
+    - solve_forward()        , DAG system for design calculations
+    - sweep()                , bandwidth vs damping ratio trade study
 
 Engineering context:
     Design a flight control law for an attitude hold loop. The plant is
@@ -46,9 +46,9 @@ print("=" * 60)
 # =====================================================
 print("\n[1] Plant: Second-order system")
 
-omega_n_plant = 2.0    # rad/s — natural frequency
-zeta_plant    = 0.1    # — open-loop damping (lightly damped)
-K_plant       = 1.0    # — DC gain
+omega_n_plant = 2.0    # rad/s, natural frequency
+zeta_plant    = 0.1    #, open-loop damping (lightly damped)
+K_plant       = 1.0    #, DC gain
 
 print(f"\n  ωn = {omega_n_plant} rad/s,  ζ_ol = {zeta_plant},  K = {K_plant}")
 print(f"  Open-loop step response characteristics:")
@@ -74,7 +74,7 @@ print("\n[2] Ziegler-Nichols PID Tuning")
 # Ku = (2*zeta*omega_n)^2 / (omega_n^2 * K_plant) * ... (simplified here)
 # Using rule-of-thumb values for demonstration:
 Ku = 12.0    # ultimate gain (proportional only, at onset of oscillation)
-Tu = 2.2     # s — ultimate period
+Tu = 2.2     # s, ultimate period
 
 print(f"\n  Ultimate gain Ku = {Ku},  Ultimate period Tu = {Tu} s")
 print(f"\n  Ziegler-Nichols tuning methods:")
@@ -152,7 +152,7 @@ print(f"  {'Z-N PID':>16s}  {os_zn:>6.1f}  {ts_zn:>12.3f}  {tr_zn:>10.3f}")
 
 
 # =====================================================
-# 4. PID output RSQ — compute instantaneous control action
+# 4. PID output RSQ, compute instantaneous control action
 # =====================================================
 print("\n[4] PID output RSQ")
 
@@ -173,7 +173,7 @@ print(f"  Control action u = {result_u:.4f}")
 
 
 # =====================================================
-# 5. Stability check — Routh-Hurwitz (2nd order)
+# 5. Stability check, Routh-Hurwitz (2nd order)
 # =====================================================
 print("\n[5] Routh-Hurwitz Stability Check")
 
@@ -197,12 +197,12 @@ for name, a1, a0 in test_cases:
 
 
 # =====================================================
-# 6. Second-order metrics sweep — ωn and ζ trade study
+# 6. Second-order metrics sweep, ωn and ζ trade study
 # =====================================================
-print("\n[6] Second-order metrics sweep — ζ trade study")
+print("\n[6] Second-order metrics sweep, ζ trade study")
 
 metrics_sys = System("step_response_design")
-metrics_sys.add("omega_n", 5.0)   # rad/s — closed-loop natural frequency
+metrics_sys.add("omega_n", 5.0)   # rad/s, closed-loop natural frequency
 metrics_sys.add("zeta",    0.7)   # damping ratio
 metrics_sys.use("second_order_metrics")
 
