@@ -39,6 +39,14 @@ inside a controlled namespace. Output ONLY a Python list of dicts, each matching
    slips through. If a needed unit is not clearly base or standard-derived, express the output in a
    unit you are sure of (for capacitance return energy in `J`; for charge keep it a plain-float
    input) or verify with `Q(1.0, "<unit>").dim` before trusting it.
+   - RECIPROCALS: spell the reciprocal of a base unit with `^-1`, not `1/`. `Q(1,"s^-1").dim` is a
+     real `[T-1]`, but `Q(1,"1/s").dim` is the OPAQUE `[1/s]`; likewise `K^-1` resolves, `1/K` does
+     not. Use `s^-1`, `K^-1`, `mol^-1` for rate constants, expansion coefficients, and the like.
+   - SCALED UNITS silently rescale to SI: `Q(0.25,"mol/L").si == 250.0` (mol/m^3), because `mol/L`
+     carries a 1000x factor. So a textbook molarity wrapped as `Q(x,"mol/L")` becomes `1000 x` in SI,
+     and any `float(result)` test must expect the mol/m^3 number. Prefer the true SI unit `mol/m^3`
+     for dimensioned concentration outputs, or keep concentration a plain-float input when it only
+     enters a ratio or a logarithm (pH, Henderson-Hasselbalch, dilution) and state the unit in `desc`.
 3a. Physical constants are NOT injected. If you need `c`, `h`, `hbar`, `G`, `e` (elementary charge),
     `epsilon_0`, `k_B`, `N_A`, etc., define them as SI numeric literals inside the function body.
     Do not import `scipy.constants` (blocked in the sandbox) and do not assume any constant is in

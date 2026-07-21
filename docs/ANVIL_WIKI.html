@@ -297,6 +297,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <a href="#23" onclick="showPage('23')">Propulsion Cycles</a>
 <div class="sb-section">Physics</div>
 <a href="#24" onclick="showPage('24')">Physics</a>
+<div class="sb-section">Chemistry</div>
+<a href="#25" onclick="showPage('25')">Chemistry</a>
 <div class="sb-section">Workbench & Dev</div>
 <a href="#20" onclick="showPage('20')">Web Workbench</a>
 <a href="#21" onclick="showPage('21')">Contributing</a>
@@ -4642,7 +4644,7 @@ Calls the function with <code>1.0</code> for every unknown input. Reads the retu
 </tbody>
 </table></section>
 <section id="page-09" class="wiki-page" style="display:none"><h1 id="built-in-rsqs">Built-in RSQs<a class="headerlink" href="#built-in-rsqs" title="Permanent link">&para;</a></h1>
-<p>148 RSQs (139 relations, 4 quantity sets, 5 systems) across 24 domains, auto-seeded into <code>~/.anvil/registry.db</code> on first import. Access via <code>anvil.R.*</code>, <code>anvil.S.*</code>, <code>anvil.QDB.*</code>, or <code>sys.use("name")</code>. Fundamental-physics relations have their own page: <a href="#24" onclick="showPage('24'); return false;">Physics</a>.</p>
+<p>166 RSQs (157 relations, 4 quantity sets, 5 systems) across 33 domains, auto-seeded into <code>~/.anvil/registry.db</code> on first import. Access via <code>anvil.R.*</code>, <code>anvil.S.*</code>, <code>anvil.QDB.*</code>, or <code>sys.use("name")</code>. Domain-specific packs have their own pages: <a href="#24" onclick="showPage('24'); return false;">Physics</a> and <a href="#25" onclick="showPage('25'); return false;">Chemistry</a>.</p>
 <p>All inputs are dimensionless scalars or SI floats unless noted. All outputs are SI units unless returned as <code>Q(value, "unit")</code>.</p>
 <hr />
 <h2 id="constants-const-type-q">Constants (<code>const</code>), Type: Q<a class="headerlink" href="#constants-const-type-q" title="Permanent link">&para;</a></h2>
@@ -6277,6 +6279,96 @@ stress analysis, and thermodynamic cycles.</p>
 <td><code>wien_peak_wavelength</code></td>
 <td>physics.quantum</td>
 <td>Blackbody peak wavelength (Wien displacement)</td>
+</tr>
+<tr>
+<td><code>moles_from_mass</code></td>
+<td>chemistry.stoichiometry</td>
+<td>Moles from mass and molar mass n = m/M</td>
+</tr>
+<tr>
+<td><code>percent_yield</code></td>
+<td>chemistry.stoichiometry</td>
+<td>Percent yield from actual and theoretical amount</td>
+</tr>
+<tr>
+<td><code>molarity</code></td>
+<td>chemistry.stoichiometry</td>
+<td>Molar concentration c = n/V (mol/m^3)</td>
+</tr>
+<tr>
+<td><code>moles_ideal_gas</code></td>
+<td>chemistry.gas</td>
+<td>Moles of ideal gas n = PV/RT</td>
+</tr>
+<tr>
+<td><code>combined_gas_law</code></td>
+<td>chemistry.gas</td>
+<td>Final volume from combined gas law</td>
+</tr>
+<tr>
+<td><code>dilution</code></td>
+<td>chemistry.solution</td>
+<td>Dilution M1 V1 = M2 V2</td>
+</tr>
+<tr>
+<td><code>beer_lambert_absorbance</code></td>
+<td>chemistry.solution</td>
+<td>Beer-Lambert absorbance A = eps l c</td>
+</tr>
+<tr>
+<td><code>freezing_point_depression</code></td>
+<td>chemistry.solution.colligative</td>
+<td>Freezing point depression i Kf m</td>
+</tr>
+<tr>
+<td><code>osmotic_pressure</code></td>
+<td>chemistry.solution.colligative</td>
+<td>Osmotic pressure Pi = i M R T</td>
+</tr>
+<tr>
+<td><code>raoult_vapor_pressure</code></td>
+<td>chemistry.solution.colligative</td>
+<td>Raoult law solution vapor pressure</td>
+</tr>
+<tr>
+<td><code>gibbs_free_energy</code></td>
+<td>chemistry.thermo</td>
+<td>Gibbs free energy dG = dH - T dS</td>
+</tr>
+<tr>
+<td><code>gibbs_from_equilibrium_constant</code></td>
+<td>chemistry.thermo</td>
+<td>Gibbs energy from K, dG = -RT ln K</td>
+</tr>
+<tr>
+<td><code>arrhenius_rate_constant</code></td>
+<td>chemistry.kinetics</td>
+<td>Arrhenius rate constant k = A exp(-Ea/RT)</td>
+</tr>
+<tr>
+<td><code>first_order_half_life</code></td>
+<td>chemistry.kinetics</td>
+<td>First-order half-life ln2/k</td>
+</tr>
+<tr>
+<td><code>equilibrium_constant_from_gibbs</code></td>
+<td>chemistry.equilibrium</td>
+<td>Equilibrium constant K = exp(-dG/RT)</td>
+</tr>
+<tr>
+<td><code>nernst_cell_potential</code></td>
+<td>chemistry.electro</td>
+<td>Nernst cell potential</td>
+</tr>
+<tr>
+<td><code>ph_from_concentration</code></td>
+<td>chemistry.acidbase</td>
+<td>pH from hydronium concentration</td>
+</tr>
+<tr>
+<td><code>henderson_hasselbalch</code></td>
+<td>chemistry.acidbase</td>
+<td>Buffer pH from Henderson-Hasselbalch</td>
 </tr>
 </tbody>
 </table>
@@ -13337,15 +13429,15 @@ python<span class="w"> </span>tests/test_v03.py<span class="w">          </span>
 <span class="o">============================================================</span>
 
 <span class="o">[</span><span class="n">1</span><span class="o">]</span><span class="w"> </span><span class="n">Opening</span><span class="w"> </span><span class="n">project</span><span class="w"> </span><span class="n">store</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="p">...</span>
-<span class="w">  </span><span class="n">Project</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="w"> </span><span class="n">opened</span><span class="w">  </span><span class="p">(</span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_u782vmjv</span><span class="err">\</span><span class="p">.</span><span class="n">anvil</span><span class="err">\</span><span class="n">project_hx_correlations</span><span class="p">.</span><span class="n">db</span><span class="p">)</span>
-<span class="w">  </span><span class="nl">Repr</span><span class="p">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">Project</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="err">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="n">RSQs</span><span class="w"> </span><span class="k">at</span><span class="w"> </span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_u782vmjv</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">Project</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="w"> </span><span class="n">opened</span><span class="w">  </span><span class="p">(</span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_ft5adu2u</span><span class="err">\</span><span class="p">.</span><span class="n">anvil</span><span class="err">\</span><span class="n">project_hx_correlations</span><span class="p">.</span><span class="n">db</span><span class="p">)</span>
+<span class="w">  </span><span class="nl">Repr</span><span class="p">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">Project</span><span class="w"> </span><span class="s1">&#39;hx_correlations&#39;</span><span class="err">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="n">RSQs</span><span class="w"> </span><span class="k">at</span><span class="w"> </span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_ft5adu2u</span><span class="o">&gt;</span>
 
 <span class="o">[</span><span class="n">2</span><span class="o">]</span><span class="w"> </span><span class="n">Registering</span><span class="w"> </span><span class="n">draft</span><span class="w"> </span><span class="n">correlations</span><span class="p">...</span>
 <span class="w">  </span><span class="o">[</span><span class="n">hx_correlations</span><span class="o">]</span><span class="w"> </span><span class="n">Registered</span><span class="w"> </span><span class="s1">&#39;ntu_crossflow&#39;</span><span class="w"> </span><span class="p">(</span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="k">domain</span><span class="w"> </span><span class="s1">&#39;heat_transfer&#39;</span><span class="p">.</span>
 <span class="w">  </span><span class="o">[</span><span class="n">hx_correlations</span><span class="o">]</span><span class="w"> </span><span class="n">Registered</span><span class="w"> </span><span class="s1">&#39;shell_tube_ntu&#39;</span><span class="w"> </span><span class="p">(</span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="k">domain</span><span class="w"> </span><span class="s1">&#39;heat_transfer&#39;</span><span class="p">.</span>
 <span class="w">  </span><span class="o">[</span><span class="n">hx_correlations</span><span class="o">]</span><span class="w"> </span><span class="n">Registered</span><span class="w"> </span><span class="s1">&#39;log_mean_temp&#39;</span><span class="w"> </span><span class="p">(</span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="k">domain</span><span class="w"> </span><span class="s1">&#39;heat_transfer&#39;</span><span class="p">.</span>
 
-<span class="w">  </span><span class="nl">Project</span><span class="p">:</span><span class="w"> </span><span class="n">hx_correlations</span><span class="w">  </span><span class="p">(</span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_u782vmjv</span><span class="p">)</span>
+<span class="w">  </span><span class="nl">Project</span><span class="p">:</span><span class="w"> </span><span class="n">hx_correlations</span><span class="w">  </span><span class="p">(</span><span class="nl">C</span><span class="p">:</span><span class="err">\</span><span class="n">Users</span><span class="err">\</span><span class="n">rc</span><span class="err">\</span><span class="n">AppData</span><span class="err">\</span><span class="k">Local</span><span class="err">\</span><span class="n">Temp</span><span class="err">\</span><span class="n">anvil_ex12_ft5adu2u</span><span class="p">)</span>
 
 <span class="w">  </span><span class="n">Relations</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="err">:</span>
 <span class="w">    </span><span class="n">log_mean_temp</span><span class="w">                   </span><span class="o">[</span><span class="n">heat_transfer</span><span class="o">]</span>
@@ -16671,6 +16763,87 @@ python<span class="w"> </span>tests/test_v03.py<span class="w">          </span>
 <blockquote>
 <p>Runs a full solve that takes a while; run the script locally to see its output.</p>
 </blockquote>
+<h2 id="chemistry-rsqs">Chemistry RSQs<a class="headerlink" href="#chemistry-rsqs" title="Permanent link">&para;</a></h2>
+<p><code>examples/ex_chemistry.py</code>: A tour of the chemistry relation pack: stoichiometry, gas laws, solutions,</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">anvil</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Stoichiometry&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Moles in 18 g of water (M=18 g/mol): </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">moles_from_mass</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="mf">0.018</span><span class="p">,</span><span class="w"> </span><span class="n">M</span><span class="o">=</span><span class="mf">0.018</span><span class="p">)[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Percent yield (8.2 of 10)          : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">percent_yield</span><span class="p">(</span><span class="n">actual</span><span class="o">=</span><span class="mf">8.2</span><span class="p">,</span><span class="w"> </span><span class="n">theoretical</span><span class="o">=</span><span class="mi">10</span><span class="p">)[</span><span class="s1">&#39;percent_yield&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> %&quot;</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">molarity</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="mf">0.002</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Molarity (0.5 mol in 2 L)          : </span><span class="si">{</span><span class="n">mol</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">mol</span><span class="p">[</span><span class="s1">&#39;c_molar&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> mol/L)&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Gas laws&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Moles of gas (1 atm, 22.4 L, 273 K): </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">moles_ideal_gas</span><span class="p">(</span><span class="n">P</span><span class="o">=</span><span class="mi">101325</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="o">=</span><span class="mf">0.0224140</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">=</span><span class="mf">273.15</span><span class="p">)[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Combined gas law (double pressure) : &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">combined_gas_law</span><span class="p">(</span><span class="n">P1</span><span class="o">=</span><span class="mf">1e5</span><span class="p">,</span><span class="w"> </span><span class="n">V1</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span><span class="w"> </span><span class="n">T1</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="n">P2</span><span class="o">=</span><span class="mf">2e5</span><span class="p">,</span><span class="w"> </span><span class="n">T2</span><span class="o">=</span><span class="mi">300</span><span class="p">)[</span><span class="s1">&#39;V2&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Solutions and colligative properties&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Dilution (2 M, 10 mL to 0.5 M)     : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">dilution</span><span class="p">(</span><span class="n">M1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">V1</span><span class="o">=</span><span class="mf">0.010</span><span class="p">,</span><span class="w"> </span><span class="n">M2</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)[</span><span class="s1">&#39;V2&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Beer-Lambert absorbance            : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">beer_lambert_absorbance</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Freezing-point drop (0.5 m NaCl)   : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">freezing_point_depression</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Kf</span><span class="o">=</span><span class="mf">1.86</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)[</span><span class="s1">&#39;dTf&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Osmotic pressure (1000 mol/m^3)    : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">osmotic_pressure</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">M</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">=</span><span class="mf">298.15</span><span class="p">)[</span><span class="s1">&#39;Pi&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Thermodynamics, kinetics, equilibrium&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Gibbs free energy (dH-TdS)         : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">gibbs_free_energy</span><span class="p">(</span><span class="n">dH</span><span class="o">=-</span><span class="mf">1e5</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">=</span><span class="mf">298.15</span><span class="p">,</span><span class="w"> </span><span class="n">dS</span><span class="o">=-</span><span class="mi">100</span><span class="p">)[</span><span class="s1">&#39;dG&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Gibbs from K=100                   : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">gibbs_from_equilibrium_constant</span><span class="p">(</span><span class="n">K</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">=</span><span class="mf">298.15</span><span class="p">)[</span><span class="s1">&#39;dG&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Arrhenius k (Ea=100 kJ/mol, 300 K) : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">arrhenius_rate_constant</span><span class="p">(</span><span class="n">A</span><span class="o">=</span><span class="mf">1e13</span><span class="p">,</span><span class="w"> </span><span class="n">Ea</span><span class="o">=</span><span class="mf">1e5</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">)[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  First-order half-life (k=6.93e-3)  : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">first_order_half_life</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mf">0.00693</span><span class="p">)[</span><span class="s1">&#39;t_half&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Electrochemistry and acid-base&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Nernst potential (Q=1e-3, n=2)     : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">nernst_cell_potential</span><span class="p">(</span><span class="n">E0</span><span class="o">=</span><span class="mf">1.10</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">=</span><span class="mf">298.15</span><span class="p">,</span><span class="w"> </span><span class="n">Q_rxn</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)[</span><span class="s1">&#39;E&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  pH of neutral water (1e-7 M)       : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">ph_from_concentration</span><span class="p">(</span><span class="n">H_conc</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)[</span><span class="s1">&#39;pH&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Buffer pH (pKa 4.76, 10:1 base)    : </span><span class="si">{</span><span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">henderson_hasselbalch</span><span class="p">(</span><span class="n">pKa</span><span class="o">=</span><span class="mf">4.76</span><span class="p">,</span><span class="w"> </span><span class="n">conc_base</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="n">conc_acid</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)[</span><span class="s1">&#39;pH&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Output:</strong></p>
+<div class="codehilite"><pre><span></span><code>============================================================
+  Stoichiometry
+============================================================
+  Moles in 18 g of water (M=18 g/mol): 1.0000 mol
+  Percent yield (8.2 of 10)          : 82.0 %
+  Molarity (0.5 mol in 2 L)          : 250.00 mol/m^3 (0.250 mol/L)
+
+============================================================
+  Gas laws
+============================================================
+  Moles of gas (1 atm, 22.4 L, 273 K): 1.0000 mol
+  Combined gas law (double pressure) : 5.0000e-04 m^3
+
+============================================================
+  Solutions and colligative properties
+============================================================
+  Dilution (2 M, 10 mL to 0.5 M)     : 0.040000 m^3
+  Beer-Lambert absorbance            : 1.000
+  Freezing-point drop (0.5 m NaCl)   : 1.8600 K
+  Osmotic pressure (1000 mol/m^3)    : 2.4790e+06 Pa
+
+============================================================
+  Thermodynamics, kinetics, equilibrium
+============================================================
+  Gibbs free energy (dH-TdS)         : -70185.00 J/mol
+  Gibbs from K=100                   : -11416.02 J/mol
+  Arrhenius k (Ea=100 kJ/mol, 300 K) : 3.8797e-05 s^-1
+  First-order half-life (k=6.93e-3)  : 100.02 s
+
+============================================================
+  Electrochemistry and acid-base
+============================================================
+  Nernst potential (Q=1e-3, n=2)     : 1.1887 V
+  pH of neutral water (1e-7 M)       : 7.00
+... (1 more lines)
+</code></pre></div>
+
 <h2 id="example-coolprop-adapter-real-fluid-properties-in-anvil-real-only">Example: CoolProp Adapter -- Real-Fluid Properties in Anvil (real-only)<a class="headerlink" href="#example-coolprop-adapter-real-fluid-properties-in-anvil-real-only" title="Permanent link">&para;</a></h2>
 <p><code>examples/ex_coolprop_adapter.py</code>: the CoolProp adapter (rho, h, cp, mu, a) for several fluids and</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">anvil</span>
@@ -20344,7 +20517,7 @@ Parallel sweep of chamber pressure P0:
 
 <span class="c1">--- What&#39;s in the registry? ---</span>
 
-<span class="w">  </span><span class="n">Relations</span><span class="w"> </span><span class="p">(</span><span class="mi">153</span><span class="p">)</span><span class="err">:</span>
+<span class="w">  </span><span class="n">Relations</span><span class="w"> </span><span class="p">(</span><span class="mi">171</span><span class="p">)</span><span class="err">:</span>
 <span class="w">    </span><span class="n">hx_duty</span><span class="w">                       </span>
 <span class="w">    </span><span class="n">hx_eff_ntu</span><span class="w">                    </span>
 <span class="w">    </span><span class="n">drag_force</span><span class="w">                      </span><span class="o">[</span><span class="n">aero</span><span class="o">]</span><span class="w">  </span><span class="p">(</span><span class="n">builtin</span><span class="p">)</span>
@@ -20372,7 +20545,7 @@ Parallel sweep of chamber pressure P0:
 <span class="w">    </span><span class="n">area_mach_subsonic</span><span class="w">              </span><span class="o">[</span><span class="n">aero.compressible</span><span class="o">]</span><span class="w">  </span><span class="p">(</span><span class="n">builtin</span><span class="p">)</span>
 <span class="w">      </span><span class="n">Subsonic</span><span class="w"> </span><span class="n">Mach</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">area</span><span class="w"> </span><span class="n">ratio</span><span class="w"> </span><span class="p">(</span><span class="n">A</span><span class="o">/</span><span class="n">A</span><span class="o">*</span><span class="p">)</span>
 <span class="w">    </span><span class="n">area_mach_supersonic</span><span class="w">            </span><span class="o">[</span><span class="n">aero.compressible</span><span class="o">]</span><span class="w">  </span><span class="p">(</span><span class="n">builtin</span><span class="p">)</span>
-<span class="p">...</span><span class="w"> </span><span class="p">(</span><span class="mi">505</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">lines</span><span class="p">)</span>
+<span class="p">...</span><span class="w"> </span><span class="p">(</span><span class="mi">541</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">lines</span><span class="p">)</span>
 </code></pre></div>
 
 <h2 id="pressure-tank-blowdown-through-a-hole-half-life-drain-time-for-a-gas">Pressure-tank blowdown through a hole -- "half-life" drain time for a gas.<a class="headerlink" href="#pressure-tank-blowdown-through-a-hole-half-life-drain-time-for-a-gas" title="Permanent link">&para;</a></h2>
@@ -21135,6 +21308,218 @@ distance when the object sits at the focal point (<code>d_o = f</code>) instead 
   <code>m/s</code>, <code>Hz</code>) except for dimensionless results (<code>gamma</code>, refraction angles, <code>shift_factor</code>).</li>
 <li>Run <code>examples/ex_physics.py</code> for a full tour with computed values.</li>
 </ul></section>
+<section id="page-25" class="wiki-page" style="display:none"><h1 id="chemistry">Chemistry<a class="headerlink" href="#chemistry" title="Permanent link">&para;</a></h1>
+<p>A pack of general-chemistry relations spanning stoichiometry, gas laws, solutions and colligative
+properties, thermodynamics, kinetics, equilibrium, electrochemistry and acid-base. Each is a native
+RSQ reachable at <code>anvil.R.&lt;name&gt;</code> or by domain at <code>anvil.R.chemistry.&lt;subdomain&gt;.&lt;name&gt;</code>.</p>
+<p>Authored with an LLM using the workflow in <code>docs/RSQ_AUTHORING_PROMPT.md</code> and validated against
+textbook values before seeding.</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">anvil</span>
+
+<span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">ph_from_concentration</span><span class="p">(</span><span class="n">H_conc</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>              <span class="c1"># {&quot;pH&quot;: 7.0}</span>
+<span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">moles_ideal_gas</span><span class="p">(</span><span class="n">P</span><span class="o">=</span><span class="mi">101325</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="mf">0.0224</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mf">273.15</span><span class="p">)</span>  <span class="c1"># ~1 mol at STP</span>
+<span class="n">anvil</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">gibbs_free_energy</span><span class="p">(</span><span class="n">dH</span><span class="o">=-</span><span class="mf">1e5</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mf">298.15</span><span class="p">,</span> <span class="n">dS</span><span class="o">=-</span><span class="mi">100</span><span class="p">)</span>   <span class="c1"># {&quot;dG&quot;: -70185 J/mol}</span>
+</code></pre></div>
+
+<h2 id="unit-convention">Unit convention<a class="headerlink" href="#unit-convention" title="Permanent link">&para;</a></h2>
+<p>Outputs use SI. In particular <strong>dimensioned concentration is <code>mol/m^3</code></strong>, so a <code>0.25 M</code> solution is
+<code>250 mol/m^3</code>. <code>molarity</code> additionally returns a <code>c_molar</code> convenience value in mol/L. Where a
+concentration only enters a ratio or a logarithm (pH, Henderson-Hasselbalch, dilution) it is a
+unit-agnostic plain-float input, and the assumed unit is noted in the relation description.</p>
+<h2 id="stoichiometry-chemistrystoichiometry">Stoichiometry (<code>chemistry.stoichiometry</code>)<a class="headerlink" href="#stoichiometry-chemistrystoichiometry" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>moles_from_mass</code></td>
+<td>m, M</td>
+<td>n</td>
+<td><code>n = m / M</code></td>
+</tr>
+<tr>
+<td><code>percent_yield</code></td>
+<td>actual, theoretical</td>
+<td>percent_yield</td>
+<td><code>100 actual / theoretical</code></td>
+</tr>
+<tr>
+<td><code>molarity</code></td>
+<td>n, V</td>
+<td>c, c_molar</td>
+<td><code>c = n / V</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="gas-laws-chemistrygas">Gas laws (<code>chemistry.gas</code>)<a class="headerlink" href="#gas-laws-chemistrygas" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>moles_ideal_gas</code></td>
+<td>P, V, T</td>
+<td>n</td>
+<td><code>n = P V / (R T)</code></td>
+</tr>
+<tr>
+<td><code>combined_gas_law</code></td>
+<td>P1, V1, T1, P2, T2</td>
+<td>V2</td>
+<td><code>P1 V1 / T1 = P2 V2 / T2</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="solutions-chemistrysolution-chemistrysolutioncolligative">Solutions (<code>chemistry.solution</code>, <code>chemistry.solution.colligative</code>)<a class="headerlink" href="#solutions-chemistrysolution-chemistrysolutioncolligative" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dilution</code></td>
+<td>M1, V1, M2</td>
+<td>V2</td>
+<td><code>M1 V1 = M2 V2</code></td>
+</tr>
+<tr>
+<td><code>beer_lambert_absorbance</code></td>
+<td>eps, l, c</td>
+<td>A</td>
+<td><code>A = eps l c</code></td>
+</tr>
+<tr>
+<td><code>freezing_point_depression</code></td>
+<td>i, Kf, m</td>
+<td>dTf</td>
+<td><code>dTf = i Kf m</code></td>
+</tr>
+<tr>
+<td><code>osmotic_pressure</code></td>
+<td>i, M, T</td>
+<td>Pi</td>
+<td><code>Pi = i M R T</code></td>
+</tr>
+<tr>
+<td><code>raoult_vapor_pressure</code></td>
+<td>x_solvent, P_pure</td>
+<td>P</td>
+<td><code>P = x P_pure</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="thermodynamics-and-equilibrium-chemistrythermo-chemistryequilibrium">Thermodynamics and equilibrium (<code>chemistry.thermo</code>, <code>chemistry.equilibrium</code>)<a class="headerlink" href="#thermodynamics-and-equilibrium-chemistrythermo-chemistryequilibrium" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gibbs_free_energy</code></td>
+<td>dH, T, dS</td>
+<td>dG</td>
+<td><code>dG = dH - T dS</code></td>
+</tr>
+<tr>
+<td><code>gibbs_from_equilibrium_constant</code></td>
+<td>K, T</td>
+<td>dG</td>
+<td><code>dG = -R T ln K</code></td>
+</tr>
+<tr>
+<td><code>equilibrium_constant_from_gibbs</code></td>
+<td>dG, T</td>
+<td>K</td>
+<td><code>K = exp(-dG / R T)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="kinetics-chemistrykinetics">Kinetics (<code>chemistry.kinetics</code>)<a class="headerlink" href="#kinetics-chemistrykinetics" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>arrhenius_rate_constant</code></td>
+<td>A, Ea, T</td>
+<td>k</td>
+<td><code>k = A exp(-Ea / R T)</code></td>
+</tr>
+<tr>
+<td><code>first_order_half_life</code></td>
+<td>k</td>
+<td>t_half</td>
+<td><code>t = ln 2 / k</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="electrochemistry-and-acid-base-chemistryelectro-chemistryacidbase">Electrochemistry and acid-base (<code>chemistry.electro</code>, <code>chemistry.acidbase</code>)<a class="headerlink" href="#electrochemistry-and-acid-base-chemistryelectro-chemistryacidbase" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nernst_cell_potential</code></td>
+<td>E0, n, T, Q_rxn</td>
+<td>E</td>
+<td><code>E = E0 - (R T / n F) ln Q</code></td>
+</tr>
+<tr>
+<td><code>ph_from_concentration</code></td>
+<td>H_conc</td>
+<td>pH</td>
+<td><code>pH = -log10[H+]</code></td>
+</tr>
+<tr>
+<td><code>henderson_hasselbalch</code></td>
+<td>pKa, conc_base, conc_acid</td>
+<td>pH</td>
+<td><code>pH = pKa + log10([A-]/[HA])</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Constants (<code>R</code>, Faraday <code>F</code>) are baked in as SI literals, so no constant inputs are needed.</li>
+<li>Log and reciprocal relations guard their domain: <code>gibbs_from_equilibrium_constant</code> returns NaN for
+  <code>K &lt;= 0</code>, <code>nernst_cell_potential</code> for <code>Q &lt;= 0</code>, and the rate/half-life relations return infinity at
+  the zero-rate limit instead of raising.</li>
+<li>Run <code>examples/ex_chemistry.py</code> for a full tour with computed values.</li>
+</ul></section>
   </div>
 </div>
 
@@ -21148,7 +21533,7 @@ distance when the object sits at the focal point (<code>d_o = f</code>) instead 
 
 <script>
 // ── Page data ─────────────────────────────────────────────────────────────────
-const PAGES = [["index", "Overview"], ["01", "Quick Start"], ["02", "Quantity (Q)"], ["03", "Unit Engine"], ["04", "Relation"], ["05", "System"], ["06", "Solvers"], ["07", "Registry"], ["08", "Project Registry"], ["09", "Built-in RSQs"], ["10", "Adapters"], ["11", "Sweep & Sensitivity"], ["12", "Visualization"], ["13", "Databases"], ["14", "Limits & Gotchas"], ["15", "Advanced"], ["16", "Decomposition"], ["17", "Abel Transform"], ["18", "CFD Solver"], ["19", "Signal Processing"], ["20", "Web Workbench"], ["21", "Contributing"], ["22", "Examples"], ["23", "Propulsion Cycles"], ["24", "Physics"]];
+const PAGES = [["index", "Overview"], ["01", "Quick Start"], ["02", "Quantity (Q)"], ["03", "Unit Engine"], ["04", "Relation"], ["05", "System"], ["06", "Solvers"], ["07", "Registry"], ["08", "Project Registry"], ["09", "Built-in RSQs"], ["10", "Adapters"], ["11", "Sweep & Sensitivity"], ["12", "Visualization"], ["13", "Databases"], ["14", "Limits & Gotchas"], ["15", "Advanced"], ["16", "Decomposition"], ["17", "Abel Transform"], ["18", "CFD Solver"], ["19", "Signal Processing"], ["20", "Web Workbench"], ["21", "Contributing"], ["22", "Examples"], ["23", "Propulsion Cycles"], ["24", "Physics"], ["25", "Chemistry"]];
 let currentIdx = 0;
 
 // ── Show a page ───────────────────────────────────────────────────────────────

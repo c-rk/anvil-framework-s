@@ -56,6 +56,7 @@ PAGES = [
     ("22",       "Examples",               "wiki/22_examples.md"),
     ("23",       "Propulsion Cycles",      "wiki/23_propulsion.md"),
     ("24",       "Physics",                "wiki/24_physics.md"),
+    ("25",       "Chemistry",              "wiki/25_chemistry.md"),
 ]
 
 # ── Markdown → HTML conversion ────────────────────────────────────────────────
@@ -96,6 +97,7 @@ SECTION_GROUPS = [
     ("Reference",        ["13", "14", "15", "16", "17", "18", "19"]),
     ("Propulsion",       ["23"]),
     ("Physics",          ["24"]),
+    ("Chemistry",        ["25"]),
     ("Workbench & Dev",  ["20", "21"]),
 ]
 

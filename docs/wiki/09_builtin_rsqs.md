@@ -1,6 +1,6 @@
 # Built-in RSQs
 
-148 RSQs (139 relations, 4 quantity sets, 5 systems) across 24 domains, auto-seeded into `~/.anvil/registry.db` on first import. Access via `anvil.R.*`, `anvil.S.*`, `anvil.QDB.*`, or `sys.use("name")`. Fundamental-physics relations have their own page: [Physics](24_physics.md).
+166 RSQs (157 relations, 4 quantity sets, 5 systems) across 33 domains, auto-seeded into `~/.anvil/registry.db` on first import. Access via `anvil.R.*`, `anvil.S.*`, `anvil.QDB.*`, or `sys.use("name")`. Domain-specific packs have their own pages: [Physics](24_physics.md) and [Chemistry](25_chemistry.md).
 
 All inputs are dimensionless scalars or SI floats unless noted. All outputs are SI units unless returned as `Q(value, "unit")`.
 
@@ -1313,6 +1313,24 @@ stress analysis, and thermodynamic cycles.
 | `mass_energy_equivalence` | physics.relativity | Rest energy E = m c^2 |
 | `de_broglie_wavelength` | physics.quantum | de Broglie wavelength h/p |
 | `wien_peak_wavelength` | physics.quantum | Blackbody peak wavelength (Wien displacement) |
+| `moles_from_mass` | chemistry.stoichiometry | Moles from mass and molar mass n = m/M |
+| `percent_yield` | chemistry.stoichiometry | Percent yield from actual and theoretical amount |
+| `molarity` | chemistry.stoichiometry | Molar concentration c = n/V (mol/m^3) |
+| `moles_ideal_gas` | chemistry.gas | Moles of ideal gas n = PV/RT |
+| `combined_gas_law` | chemistry.gas | Final volume from combined gas law |
+| `dilution` | chemistry.solution | Dilution M1 V1 = M2 V2 |
+| `beer_lambert_absorbance` | chemistry.solution | Beer-Lambert absorbance A = eps l c |
+| `freezing_point_depression` | chemistry.solution.colligative | Freezing point depression i Kf m |
+| `osmotic_pressure` | chemistry.solution.colligative | Osmotic pressure Pi = i M R T |
+| `raoult_vapor_pressure` | chemistry.solution.colligative | Raoult law solution vapor pressure |
+| `gibbs_free_energy` | chemistry.thermo | Gibbs free energy dG = dH - T dS |
+| `gibbs_from_equilibrium_constant` | chemistry.thermo | Gibbs energy from K, dG = -RT ln K |
+| `arrhenius_rate_constant` | chemistry.kinetics | Arrhenius rate constant k = A exp(-Ea/RT) |
+| `first_order_half_life` | chemistry.kinetics | First-order half-life ln2/k |
+| `equilibrium_constant_from_gibbs` | chemistry.equilibrium | Equilibrium constant K = exp(-dG/RT) |
+| `nernst_cell_potential` | chemistry.electro | Nernst cell potential |
+| `ph_from_concentration` | chemistry.acidbase | pH from hydronium concentration |
+| `henderson_hasselbalch` | chemistry.acidbase | Buffer pH from Henderson-Hasselbalch |
 
 ---
 

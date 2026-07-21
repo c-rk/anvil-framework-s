@@ -2296,15 +2296,15 @@ print("=" * 60)
 ============================================================
 
 [1] Opening project store for 'hx_correlations'...
-  Project 'hx_correlations' opened  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_u782vmjv\.anvil\project_hx_correlations.db)
-  Repr: <Project 'hx_correlations': 0 RSQs at C:\Users\rc\AppData\Local\Temp\anvil_ex12_u782vmjv>
+  Project 'hx_correlations' opened  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_ft5adu2u\.anvil\project_hx_correlations.db)
+  Repr: <Project 'hx_correlations': 0 RSQs at C:\Users\rc\AppData\Local\Temp\anvil_ex12_ft5adu2u>
 
 [2] Registering draft correlations...
   [hx_correlations] Registered 'ntu_crossflow' (R) in domain 'heat_transfer'.
   [hx_correlations] Registered 'shell_tube_ntu' (R) in domain 'heat_transfer'.
   [hx_correlations] Registered 'log_mean_temp' (R) in domain 'heat_transfer'.
 
-  Project: hx_correlations  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_u782vmjv)
+  Project: hx_correlations  (C:\Users\rc\AppData\Local\Temp\anvil_ex12_ft5adu2u)
 
   Relations (3):
     log_mean_temp                   [heat_transfer]
@@ -5692,6 +5692,93 @@ print("""
 ```
 
 > Runs a full solve that takes a while; run the script locally to see its output.
+
+
+## Chemistry RSQs
+
+`examples/ex_chemistry.py`: A tour of the chemistry relation pack: stoichiometry, gas laws, solutions,
+
+```python
+import anvil
+
+print("=" * 60)
+print("  Stoichiometry")
+print("=" * 60)
+print(f"  Moles in 18 g of water (M=18 g/mol): {anvil.R.moles_from_mass(m=0.018, M=0.018)['n']}")
+print(f"  Percent yield (8.2 of 10)          : {anvil.R.percent_yield(actual=8.2, theoretical=10)['percent_yield']:.1f} %")
+mol = anvil.R.molarity(n=0.5, V=0.002)
+print(f"  Molarity (0.5 mol in 2 L)          : {mol['c']} ({mol['c_molar']:.3f} mol/L)")
+
+print("\n" + "=" * 60)
+print("  Gas laws")
+print("=" * 60)
+print(f"  Moles of gas (1 atm, 22.4 L, 273 K): {anvil.R.moles_ideal_gas(P=101325, V=0.0224140, T=273.15)['n']}")
+print(f"  Combined gas law (double pressure) : "
+      f"{anvil.R.combined_gas_law(P1=1e5, V1=1e-3, T1=300, P2=2e5, T2=300)['V2']}")
+
+print("\n" + "=" * 60)
+print("  Solutions and colligative properties")
+print("=" * 60)
+print(f"  Dilution (2 M, 10 mL to 0.5 M)     : {anvil.R.dilution(M1=2, V1=0.010, M2=0.5)['V2']}")
+print(f"  Beer-Lambert absorbance            : {anvil.R.beer_lambert_absorbance(eps=100, l=0.01, c=1.0)['A']:.3f}")
+print(f"  Freezing-point drop (0.5 m NaCl)   : {anvil.R.freezing_point_depression(i=2, Kf=1.86, m=0.5)['dTf']}")
+print(f"  Osmotic pressure (1000 mol/m^3)    : {anvil.R.osmotic_pressure(i=1, M=1000, T=298.15)['Pi']}")
+
+print("\n" + "=" * 60)
+print("  Thermodynamics, kinetics, equilibrium")
+print("=" * 60)
+print(f"  Gibbs free energy (dH-TdS)         : {anvil.R.gibbs_free_energy(dH=-1e5, T=298.15, dS=-100)['dG']}")
+print(f"  Gibbs from K=100                   : {anvil.R.gibbs_from_equilibrium_constant(K=100, T=298.15)['dG']}")
+print(f"  Arrhenius k (Ea=100 kJ/mol, 300 K) : {anvil.R.arrhenius_rate_constant(A=1e13, Ea=1e5, T=300)['k']}")
+print(f"  First-order half-life (k=6.93e-3)  : {anvil.R.first_order_half_life(k=0.00693)['t_half']}")
+
+print("\n" + "=" * 60)
+print("  Electrochemistry and acid-base")
+print("=" * 60)
+print(f"  Nernst potential (Q=1e-3, n=2)     : {anvil.R.nernst_cell_potential(E0=1.10, n=2, T=298.15, Q_rxn=1e-3)['E']}")
+print(f"  pH of neutral water (1e-7 M)       : {anvil.R.ph_from_concentration(H_conc=1e-7)['pH']:.2f}")
+print(f"  Buffer pH (pKa 4.76, 10:1 base)    : {anvil.R.henderson_hasselbalch(pKa=4.76, conc_base=1.0, conc_acid=0.1)['pH']:.2f}")
+```
+
+**Output:**
+
+```
+============================================================
+  Stoichiometry
+============================================================
+  Moles in 18 g of water (M=18 g/mol): 1.0000 mol
+  Percent yield (8.2 of 10)          : 82.0 %
+  Molarity (0.5 mol in 2 L)          : 250.00 mol/m^3 (0.250 mol/L)
+
+============================================================
+  Gas laws
+============================================================
+  Moles of gas (1 atm, 22.4 L, 273 K): 1.0000 mol
+  Combined gas law (double pressure) : 5.0000e-04 m^3
+
+============================================================
+  Solutions and colligative properties
+============================================================
+  Dilution (2 M, 10 mL to 0.5 M)     : 0.040000 m^3
+  Beer-Lambert absorbance            : 1.000
+  Freezing-point drop (0.5 m NaCl)   : 1.8600 K
+  Osmotic pressure (1000 mol/m^3)    : 2.4790e+06 Pa
+
+============================================================
+  Thermodynamics, kinetics, equilibrium
+============================================================
+  Gibbs free energy (dH-TdS)         : -70185.00 J/mol
+  Gibbs from K=100                   : -11416.02 J/mol
+  Arrhenius k (Ea=100 kJ/mol, 300 K) : 3.8797e-05 s^-1
+  First-order half-life (k=6.93e-3)  : 100.02 s
+
+============================================================
+  Electrochemistry and acid-base
+============================================================
+  Nernst potential (Q=1e-3, n=2)     : 1.1887 V
+  pH of neutral water (1e-7 M)       : 7.00
+... (1 more lines)
+```
 
 
 ## Example: CoolProp Adapter -- Real-Fluid Properties in Anvil (real-only)
@@ -9462,7 +9549,7 @@ print("=" * 60)
 
 --- What's in the registry? ---
 
-  Relations (153):
+  Relations (171):
     hx_duty                       
     hx_eff_ntu                    
     drag_force                      [aero]  (builtin)
@@ -9490,7 +9577,7 @@ print("=" * 60)
     area_mach_subsonic              [aero.compressible]  (builtin)
       Subsonic Mach from area ratio (A/A*)
     area_mach_supersonic            [aero.compressible]  (builtin)
-... (505 more lines)
+... (541 more lines)
 ```
 
 
